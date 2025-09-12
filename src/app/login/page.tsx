@@ -29,24 +29,24 @@ export default function LoginPage() {
         <img
           src="/Polygon_Bolder.png"
           alt=""
-          className=" absolute bottom-[-80] left-[30px]"
+          className="absolute bottom-[-80] left-[30px]"
         />
         <img
           src="/Rectangle_Bolder.png"
           alt=""
           className="absolute bottom-[80px] left-100"
         />
+        <img
+          src="/Ellipse.png"
+          alt=""
+          className="absolute bottom-10 right-30"
+        />
+        <img
+          src="/Polygon_Bolder.png"
+          alt=""
+          className="absolute bottom-55 right-10"
+        />
         {/*<img
-          src=""
-          alt=""
-          className=""
-        />
-        <img
-          src=""
-          alt=""
-          className=""
-        />
-        <img
           src=""
           alt=""
           className=""
