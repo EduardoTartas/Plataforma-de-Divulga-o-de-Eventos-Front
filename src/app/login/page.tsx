@@ -7,15 +7,55 @@ export default function LoginPage() {
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="bg-[#101010] relative hidden lg:block overflow-hidden">
         <img
-          src="/"
+          src="/ifro_events.png"
           alt="Image"
-          className="absolute inset-0 w-fit h-full object-contain"
+          className="absolute left-39 top-70 z-1"
         />
+        <img
+          src="ifro.png"
+          alt=""
+          className="absolute left-104 bottom-185 z-20"
+        />
+        <img
+          src="/Rectangle.png"
+          alt=""
+          className="absolute bottom-220 left-20"
+        />
+        <img
+          src="/Ellipse_Bolder.png"
+          alt=""
+          className="absolute bottom-160 left-[-60px] h-39 w-39"
+        />
+        <img
+          src="/Polygon_Bolder.png"
+          alt=""
+          className=" absolute bottom-[-80] left-[30px]"
+        />
+        <img
+          src="/Rectangle_Bolder.png"
+          alt=""
+          className="absolute bottom-[80px] left-100"
+        />
+        {/*<img
+          src=""
+          alt=""
+          className=""
+        />
+        <img
+          src=""
+          alt=""
+          className=""
+        />
+        <img
+          src=""
+          alt=""
+          className=""
+        /> */}
       </div>
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
         </div>
-        <div className="flex flex-1 items-center justify-center">
+        <div className="flex flex-1 items-center justify-center pr-[200px]">
           <div className="w-full max-w-xs">
             <LoginForm />
           </div>
