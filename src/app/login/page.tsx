@@ -8,49 +8,44 @@ export default function LoginPage() {
       <div className="bg-[#101010] relative hidden lg:block overflow-hidden">
         <img
           src="/ifro_events.png"
-          alt="Image"
           className="absolute left-39 top-70 z-1"
         />
         <img
           src="ifro.png"
-          alt=""
           className="absolute left-104 bottom-185 z-20"
         />
         <img
           src="/Rectangle.png"
-          alt=""
           className="absolute bottom-220 left-20"
         />
         <img
           src="/Ellipse_Bolder.png"
-          alt=""
           className="absolute bottom-160 left-[-60px] h-39 w-39"
         />
         <img
           src="/Polygon_Bolder.png"
-          alt=""
           className="absolute bottom-[-80] left-[30px]"
         />
         <img
           src="/Rectangle_Bolder.png"
-          alt=""
           className="absolute bottom-[80px] left-100"
         />
         <img
           src="/Ellipse.png"
-          alt=""
           className="absolute bottom-10 right-30"
         />
         <img
           src="/Polygon_Bolder.png"
-          alt=""
-          className="absolute bottom-55 right-10"
+          className="absolute bottom-55 right-[-70]"
         />
-        {/*<img
-          src=""
-          alt=""
-          className=""
-        /> */}
+        <img 
+        src="/Ellipse_Bolder.png" 
+        className="absolute right-0 top-30" 
+        />
+        <img 
+        src="Polygon_Bolder.png" 
+        className="absolute right-70 h-[120px] w-[120px] rotate-[-70deg]" 
+        />
       </div>
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
