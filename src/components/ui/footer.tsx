@@ -7,7 +7,7 @@ interface FooterProps {
 
 export default function Footer() {
     return (
-        <footer className="flex flex-row items-center border-2 h-[81px] pl-[35px] pr-[35px] relative">
+        <footer className="flex flex-row items-center border-2 h-[81px] pl-[35px] pr-[35px] relative bg-white">
             <img src="/ifro.svg" className="select-none" draggable='false'/>
             <p className="absolute left-20 text-[#4B5563]">Instituto Federal de Rondônia</p>
             <p className="absolute right-35 text-[#4B5563]">Plataforma de Divulgação de Eventos - Fábrica de Software III - ADS 2024/4 © Todos os direitos reservados.</p>
