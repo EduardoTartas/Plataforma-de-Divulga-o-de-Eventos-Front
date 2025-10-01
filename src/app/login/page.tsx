@@ -1,25 +1,38 @@
-import { LoginForm } from "@/components/login-form"
-import Footer from "@/components/ui/footer"
-
-  import Header from "@/components/ui/header"
-
+import { LoginForm } from "@/components/login-form";
+import Footer from "@/components/ui/footer";
 
 export default function Page() {
   return (
-  
-    <div className=" fixed flex min-h-svh w-full flex-col justify-between p-6 md:p-10">
-      
-      <div className="fixed top-0 left-0 w-full h-16">
-        <Header logo={"/ifro-events-icon.sv"} />
-           </div>
-      <div className="flex flex-1 items-center justify-center">
-        <div className="w-full max-w-sm">
-          <LoginForm />
-        </div>
-      </div>
+    
+    <div className="flex flex-col min-h-screen w-full bg-gray-50 dark:bg-gray-900 overflow-hidden">
+
+      {/* Header */}
+      <HeaderWrapper />
 
       {}
-     
+      <main className="flex flex-1 items-center justify-center px-6 md:px-10">
+        <div className="w-full max-w-md">
+          <LoginForm />
+        </div>
+      </main>
+
+      {}
+      <FooterWrapper />
+
     </div>
-  )
+  );
+}
+
+
+function HeaderWrapper() {
+  return <></>;
+}
+
+
+function FooterWrapper() {
+  return (
+    <div className="fixed bottom-0 left-0 w-full z-10">
+      <Footer />
+    </div>
+  );
 }
