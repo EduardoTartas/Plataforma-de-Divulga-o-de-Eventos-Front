@@ -21,20 +21,20 @@ export function LoginForm({
       )}
       {...props}
     >
+
+      {/* Card */}
+      <Card className="w-[550px] shadow-2xl bg-white dark:bg-gray-400 rounded-2xl">
+        <CardHeader className="text-center pt-12 pb-">
+          <CardTitle className="text-3xl font-extrabold text-gray-800 dark:text-gray-100">
+            
       {/* Logo */}
       <div className="mb-12 flex justify-center">
         <img
           src="/ifro-events-icon.svg"
           alt="IFRO EVENTS"
-          className="w-3000 h-64 object-contain" 
+          className="w-3000 h-45" 
         />
       </div>
-
-      {/* Card */}
-      <Card className="w-[650px] shadow-2xl bg-white dark:bg-gray-900 rounded-2xl">
-        <CardHeader className="text-center pt-12 pb-">
-          <CardTitle className="text-6xl font-extrabold text-gray-800 dark:text-gray-100">
-            Entrar
           </CardTitle>
         </CardHeader>
         

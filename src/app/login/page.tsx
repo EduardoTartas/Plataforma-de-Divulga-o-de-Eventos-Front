@@ -10,7 +10,7 @@ export default function Page() {
       <HeaderWrapper />
 
       {}
-      <main className="flex flex-1 items-center justify-center px-6 md:px-10">
+      <main className="flex flex-1 items-center justify-center px-6 md:px-9">
         <div className="w-full max-w-md">
           <LoginForm />
         </div>
