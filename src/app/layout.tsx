@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Footer from "@/components/ui/footer";
+import QueryProvider from "../providers/queryProvider";
 // import Header from "@/components/ui/header";
 import "./globals.css";
 
@@ -11,6 +12,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -26,12 +32,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen flex flex-col">
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-      </body>
+      <QueryProvider>
+        <body className={`min-h-screen flex flex-col ${geistSans.variable} ${geistMono.variable} ${inter.variable}`}>
+          <main className="flex-grow">{children}</main>
+          <Footer />
+        </body>
+      </QueryProvider>
     </html>
   );
 }
