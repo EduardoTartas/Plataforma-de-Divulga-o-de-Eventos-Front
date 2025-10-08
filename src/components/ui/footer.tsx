@@ -7,22 +7,22 @@ interface FooterProps {
 
 export default function Footer() {
     return (
-        <footer className="flex flex-row items-center border-2 h-[81px] pl-[35px] pr-[35px] relative bg-white">
-            <img src="/ifro.svg" className="select-none" draggable='false'/>
-            <p className="absolute left-20 text-[#4B5563]">Instituto Federal de Rondônia</p>
-            <p className="absolute right-35 text-[#4B5563]">Plataforma de Divulgação de Eventos - Fábrica de Software III - ADS 2024/4 © Todos os direitos reservados.</p>
-            <svg id="logo-fslab-detailed" width="82" height="40" xmlns="http://www.w3.org/2000/svg" aria-label="Logo FSLab" className="absolute right-10 select-none">
-                <rect id="background-shape" x="0" y="0" width="100%" height="100%" rx="8" />
-                <g>
-                    <text id="f" className="char" x="10" y="25" fill="#efffff" fontWeight="bolder">F</text>
-                    <text id="s" className="char" x="20" y="25" fill="#ffffff" fontWeight="bolder">S</text>
-                    <text id="l" className="char" x="30" y="25" fill="#ffffff">L</text>
-                    <text id="a" className="char" x="38" y="25" fill="#ffffff">a</text>
-                    <text id="b" className="char" x="46" y="25" fill="#ffffff">b</text>
-                    <text id="angle" className="char" x="56" y="25" fill="#9bd800">〉</text>
-                    <text id="underscore" className="char" x="62" y="25" fill="#9bd800">_</text>
-                </g>
-            </svg>
+        <footer className="flex flex-row items-center justify-between border-t-2 border-gray-200 h-[60px] px-8 bg-white font-inter">
+
+            <div className="flex items-center gap-3">
+                <img src="/ifro.svg" className="select-none h-8" draggable='false'/>
+                <p className="text-[#4B5563] text-sm font-medium">Instituto Federal de Rondônia</p>
+            </div>
+            
+            <div className="flex-1 flex justify-center px-4">
+                <p className="text-[#6B7280] text-xs text-center max-w-2xl leading-relaxed">
+                    Plataforma de Divulgação de Eventos - Fábrica de Software III - ADS 2024/4 © Todos os direitos reservados.
+                </p>
+            </div>
+
+            <div className="flex items-center">
+                <img src="/logo_fslab.svg" alt="Logo FSLab" className="select-none h-9 w-auto" draggable='false'/>
+            </div>
         </footer>
     )
 }
