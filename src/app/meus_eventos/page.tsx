@@ -139,7 +139,7 @@ export default function MeusEventosPage() {
             <Header logo="/ifro-events-icon.svg"/>
             
             {/* Banner Hero */}
-            <div className="relative overflow-hidden" style={{ backgroundColor: '#4338CA' }}>
+            <div className="relative overflow-hidden bg-indigo-700">
                 <div className="container mx-auto px-6 py-12 lg:py-16 relative z-10">
                     <div className="relative z-10 max-w-3xl">
                         <h1 className="text-3xl lg:text-4xl font-bold text-white font-inter mb-4">
@@ -160,19 +160,51 @@ export default function MeusEventosPage() {
                     </div>
                 </div>
                 
-                {/* Imagem das mãos na frente do banner */}
-                <div className="absolute top-0 right-20 w-full h-full flex justify-end items-center z-20 pointer-events-none">
+                {/* Imagem das mãos alinhada à esquerda - oculta em telas menores que 1546px */}
+                <div className="hands-image absolute bottom-0 right-0 z-20 pointer-events-none">
                     <img 
-                        src="/maos.png" 
+                        src="/teste.png" 
                         alt="Ilustração de mãos" 
-                        className="h-full object-contain opacity-100"
-                        style={{ width: '900px', height: '387px', maxHeight: '100%' }}
+                        className="object-contain"
+                        style={{ width: '650px', height: 'auto', maxHeight: '140%' }}
                     />
                 </div>
                 
+                <style jsx>{`
+                    @media (max-width: 1545px) {
+                        .hands-image {
+                            display: none !important;
+                        }
+                    }
+                `}</style>
+                
                 {/* Elementos decorativos */}
+                {/* Círculos grandes */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-white/10 to-transparent rounded-full transform translate-x-48 -translate-y-48"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-white/5 to-transparent rounded-full transform -translate-x-32 translate-y-32"></div>
+                
+                {/* Círculos médios */}
+                <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-br from-green-400/20 to-transparent rounded-full"></div>
+                <div className="absolute bottom-20 right-32 w-40 h-40 bg-gradient-to-tl from-purple-300/15 to-transparent rounded-full"></div>
+                
+                {/* Círculos pequenos */}
+                <div className="absolute top-32 right-20 w-16 h-16 bg-white/10 rounded-full"></div>
+                <div className="absolute top-1/2 left-10 w-12 h-12 bg-gradient-to-r from-blue-300/20 to-transparent rounded-full"></div>
+                <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-bl from-yellow-300/15 to-transparent rounded-full"></div>
+                
+                {/* Formas geométricas */}
+                <div className="absolute top-16 right-1/3 w-8 h-8 bg-white/15 rounded-md transform rotate-45"></div>
+                <div className="absolute bottom-16 right-1/4 w-6 h-6 bg-green-300/20 rounded-sm transform rotate-12"></div>
+                <div className="absolute top-1/3 right-16 w-10 h-10 border-2 border-white/20 rounded-full"></div>
+                
+                {/* Pontos decorativos */}
+                <div className="absolute top-24 left-1/3 w-3 h-3 bg-white/30 rounded-full"></div>
+                <div className="absolute top-40 right-1/2 w-2 h-2 bg-purple-300/40 rounded-full"></div>
+                <div className="absolute bottom-24 left-1/2 w-4 h-4 bg-blue-300/25 rounded-full"></div>
+                
+                {/* Linhas decorativas */}
+                <div className="absolute top-12 left-1/2 w-24 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                <div className="absolute bottom-12 right-1/3 w-32 h-px bg-gradient-to-l from-transparent via-green-300/30 to-transparent transform rotate-12"></div>
             </div>
 
             <div className="container mx-auto px-6 py-8">
