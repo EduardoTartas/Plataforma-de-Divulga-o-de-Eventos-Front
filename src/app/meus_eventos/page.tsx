@@ -161,22 +161,13 @@ export default function MeusEventosPage() {
                 </div>
                 
                 {/* Imagem das mãos alinhada à esquerda - oculta em telas menores que 1546px */}
-                <div className="hands-image absolute bottom-0 right-0 z-20 pointer-events-none">
+                <div className="absolute bottom-0 right-0 z-20 pointer-events-none hidden min-[1546px]:block">
                     <img 
                         src="/teste.png" 
                         alt="Ilustração de mãos" 
-                        className="object-contain"
-                        style={{ width: '650px', height: 'auto', maxHeight: '140%' }}
+                        className="object-contain w-[650px] h-auto max-h-[140%]"
                     />
                 </div>
-                
-                <style jsx>{`
-                    @media (max-width: 1545px) {
-                        .hands-image {
-                            display: none !important;
-                        }
-                    }
-                `}</style>
                 
                 {/* Elementos decorativos */}
                 {/* Círculos grandes */}
@@ -201,16 +192,12 @@ export default function MeusEventosPage() {
                 <div className="absolute top-24 left-1/3 w-3 h-3 bg-white/30 rounded-full"></div>
                 <div className="absolute top-40 right-1/2 w-2 h-2 bg-purple-300/40 rounded-full"></div>
                 <div className="absolute bottom-24 left-1/2 w-4 h-4 bg-blue-300/25 rounded-full"></div>
-                
-                {/* Linhas decorativas */}
-                <div className="absolute top-12 left-1/2 w-24 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                <div className="absolute bottom-12 right-1/3 w-32 h-px bg-gradient-to-l from-transparent via-green-300/30 to-transparent transform rotate-12"></div>
             </div>
 
             <div className="container mx-auto px-6 py-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 font-inter">Meus Eventos</h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {eventos.map((evento) => (
                         <EventCard 
                             key={evento._id}
