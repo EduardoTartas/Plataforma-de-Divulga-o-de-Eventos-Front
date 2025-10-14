@@ -18,7 +18,7 @@ export default function LoginPage() {
             <input id="remember" type="checkbox" />
             <label htmlFor="remember" className="text-[#374151]">Lembrar de mim</label>
           </div>
-          <Link href="#" className="text-[#4F46E5] hover:text-[#4338CA]">Esqueceu a senha?</Link>
+          <Link href="/recuperar_senha" className="text-[#4F46E5] hover:text-[#4338CA]">Esqueceu a senha?</Link>
         </div>
         <button className="bg-[#4F46E5] w-[352px] h-[42px] rounded-[8px] text-white hover:bg-[#4338CA] cursor-pointer">Entrar</button>
         <p className="text-[#4B5563]">Não tem uma conta? <Link href="/cadastro" className="text-[#4F46E5] hover:text-[#4338CA]">Criar conta</Link></p>
