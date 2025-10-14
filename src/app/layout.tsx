@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body  className="min-h-screen flex flex-col">
         <Header />
-      <main className="flex-grow bg-white">
+      <main className="flex-grow bg-[#f9fafb]">
           {children}
         </main>
         <Footer />

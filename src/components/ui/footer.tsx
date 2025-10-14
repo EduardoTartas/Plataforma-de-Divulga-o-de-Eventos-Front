@@ -7,7 +7,7 @@ interface FooterProps {
 
 export default function Footer() {
   return (
-    <footer className="fixed bottom-0 left-0 w-full flex items-center border- h-[81px] pl-[35px] pr-[35px] bg-white z-10">
+    <footer className="fixed bottom-0 left-0 w-full flex items-center border- h-[81px] pl-[35px] pr-[35px] bg-white z-10 border-1 border-t border-gray-300">
       <img src="/ifro.svg" className="select-none" draggable="false" />
       <p className="absolute left-20 text-[#4B5563]">
         Instituto Federal de Rondônia
