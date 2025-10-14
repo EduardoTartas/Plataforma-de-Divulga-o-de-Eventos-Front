@@ -1,5 +1,5 @@
 export default function Header() {
-    const logado = true;
+    const logado = false;
     return (
         <header className="h-[64px] w-[screen] bg-white flex flex-row relative border-1 border-b border-gray-300">
             <img src="/ifro-events-icon.svg" className="absolute z-1 left-30 top-0.5 selection:bg-none cursor-pointer" draggable='false' />
