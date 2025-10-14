@@ -26,59 +26,16 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
     });
   };
 
-  // Função para determinar o status do evento baseado na data e status
-  const getEventStatus = () => {
-    const now = new Date();
-    const dataInicio = new Date(evento.dataInicio);
-    const dataFim = new Date(evento.dataFim);
-
-    // Se o status do evento foi definido como inativo (0), sempre será inativo
-    if (evento.status === 0) {
-      return {
-        text: 'Inativo',
-        color: 'bg-red-100 text-red-800 border-red-200'
-      };
-    }
-
-    // Se o evento já passou (data fim menor que agora)
-    if (dataFim < now) {
-      return {
-        text: 'Inativo',
-        color: 'bg-red-100 text-red-800 border-red-200'
-      };
-    }
-
-    // Se o evento está acontecendo agora (entre data início e data fim)
-    if (dataInicio <= now && now <= dataFim) {
-      return {
-        text: 'Ativo',
-        color: 'bg-green-100 text-green-800 border-green-200'
-      };
-    }
-
-    // Se o evento está ativo mas ainda vai acontecer (data início maior que agora)
-    if (evento.status === 1 && dataInicio > now) {
-      return {
-        text: 'Em breve',
-        color: 'bg-blue-100 text-blue-800 border-blue-200'
-      };
-    }
-
-    // Status padrão
-    return {
-      text: 'Rascunho',
-      color: 'bg-gray-100 text-gray-800 border-gray-200'
-    };
-  };
-
-  const statusInfo = getEventStatus();
+  const statusInfo = evento.status === 1 
+    ? { text: 'Ativo', color: 'bg-green-100 text-green-600 border-green-300' }
+    : { text: 'Inativo', color: 'bg-gray-100 text-gray-600 border-gray-300' };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col">
       {/* Imagem do evento */}
-      <div className="relative h-48 bg-gray-100">
+      <div className="relative h-36 bg-gray-100">
         <img 
-          src={evento.midia && evento.midia.length > 0 ? evento.midia[0] : "/img_principal.png"} 
+          src={evento.midia && evento.midia.length > 0 ? evento.midia[0] : "/Group 4.png"} 
           alt={evento.titulo}
           className="w-full h-full object-cover"
         />
@@ -92,7 +49,7 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
       </div>
 
       {/* Conteúdo do card */}
-      <div className="p-4">
+      <div className="p-4 flex-1 flex flex-col">
         {/* Título */}
         <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 font-inter">
           {evento.titulo}
@@ -109,22 +66,20 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
         </div>
 
         {/* Local */}
-        <div className="flex items-center text-sm text-gray-600 mb-4">
+        <div className="flex items-center text-sm text-gray-600 mb-3">
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span className="line-clamp-1">{evento.local}</span>
         </div>
+        
 
-        {/* Ações */}
-        <div className="flex justify-end items-center space-x-3">
+        {/* Ações*/}
+        <div className="flex justify-between items-center mt-auto">
           {/* Toggle Status */}
           {onToggleStatus && (
             <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-600 font-medium">
-                {evento.status === 1 ? 'Ativo' : 'Inativo'}
-              </span>
               <button
                 onClick={() => onToggleStatus(evento._id, evento.status)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${

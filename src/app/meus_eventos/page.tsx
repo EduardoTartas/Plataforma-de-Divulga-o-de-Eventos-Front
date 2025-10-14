@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Header from "@/components/ui/header";
-import EventCard from "@/components/ui/event-card";
+import CardContainer from "@/components/ui/card-container";
 import { Evento } from "@/types/eventos";
 
 export default function MeusEventosPage() {
@@ -161,7 +161,7 @@ export default function MeusEventosPage() {
                 </div>
                 
                 {/* Imagem das mãos alinhada à esquerda - oculta em telas menores que 1546px */}
-                <div className="absolute bottom-0 right-0 z-20 pointer-events-none hidden min-[1546px]:block">
+                <div className="absolute bottom-0 right-20 z-20 pointer-events-none hidden min-[1546px]:block">
                     <img 
                         src="/teste.png" 
                         alt="Ilustração de mãos" 
@@ -194,19 +194,15 @@ export default function MeusEventosPage() {
                 <div className="absolute bottom-24 left-1/2 w-4 h-4 bg-blue-300/25 rounded-full"></div>
             </div>
 
-            <div className="container mx-auto px-6 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 font-inter">Meus Eventos</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {eventos.map((evento) => (
-                        <EventCard 
-                            key={evento._id}
-                            evento={evento}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            onToggleStatus={handleToggleStatus}
-                        />
-                    ))}
+            <div className="bg-[#F9FAFB] min-h-screen">
+                <div className="container mx-auto px-6 py-8">
+                    <CardContainer
+                        eventos={eventos}
+                        titulo="Meus Eventos"
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onToggleStatus={handleToggleStatus}
+                    />
                 </div>
             </div>
         </>
