@@ -1,131 +1,91 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/ui/header";
 import CardContainer from "@/components/ui/card-container";
-import { Evento } from "@/types/eventos";
+import AlertModal from "@/components/ui/alertModal";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
+import { useEventos, useToggleEventStatus, useDeleteEvent } from "@/hooks/useEventos";
+
+const ITEMS_PER_PAGE = 8; // 2 fileiras x 4 cards = 8 eventos por página
 
 export default function MeusEventosPage() {
-    // Criar datas dinâmicas para os testes
-    const agora = new Date();
-    const umaHoraAtras = new Date(agora.getTime() - 60 * 60 * 1000); // 1 hora atrás
-    const umaHoraDepois = new Date(agora.getTime() + 60 * 60 * 1000); // 1 hora depois
-    const amanha = new Date(agora.getTime() + 24 * 60 * 60 * 1000); // amanhã
-    const ontem = new Date(agora.getTime() - 24 * 60 * 60 * 1000); // ontem
-
-    // Dados falsos para visualização dos diferentes status
-    const eventoEmBreve: Evento = {
-        _id: "fake-id-123",
-        titulo: "Workshop de Programação Web",
-        descricao: "Workshop sobre desenvolvimento web moderno com React e Next.js",
-        local: "Laboratório de Informática 3",
-        dataInicio: amanha.toISOString(),
-        dataFim: new Date(amanha.getTime() + 4 * 60 * 60 * 1000).toISOString(), // 4 horas depois
-        tags: ["tecnologia", "programação", "web"],
-        categoria: "workshop",
-        cor: 1,
-        animacao: 0,
-        status: 1, // Ativo (mas ainda vai acontecer = Em breve)
-        midia: [],
-        permissoes: [],
-        organizador: {
-            _id: "org-123",
-            nome: "Eduardo Tartas"
-        },
-        updatedAt: "2025-10-07T23:35:32.558Z",
-        createdAt: "2025-10-07T23:35:32.558Z"
-    };
-
-    const eventoAtivo: Evento = {
-        _id: "fake-id-456",
-        titulo: "Seminário de IA - Acontecendo Agora!",
-        descricao: "Seminário sobre Inteligência Artificial em andamento",
-        local: "Auditório Principal",
-        dataInicio: umaHoraAtras.toISOString(), // Começou 1 hora atrás
-        dataFim: umaHoraDepois.toISOString(), // Termina em 1 hora
-        tags: ["inteligencia artificial", "tecnologia"],
-        categoria: "seminario",
-        cor: 2,
-        animacao: 1,
-        status: 1, // Ativo (e está acontecendo agora = Ativo)
-        midia: [],
-        permissoes: [],
-        organizador: {
-            _id: "org-456",
-            nome: "Prof. Maria Silva"
-        },
-        updatedAt: "2025-10-07T23:35:32.558Z",
-        createdAt: "2025-10-07T23:35:32.558Z"
-    };
-
-    const eventoInativo: Evento = {
-        _id: "fake-id-789",
-        titulo: "Feira de Ciências 2024",
-        descricao: "Feira de ciências que já aconteceu",
-        local: "Pátio Central",
-        dataInicio: new Date(ontem.getTime() - 8 * 60 * 60 * 1000).toISOString(), // Ontem 8h antes
-        dataFim: new Date(ontem.getTime() - 4 * 60 * 60 * 1000).toISOString(), // Ontem 4h antes
-        tags: ["ciencias", "feira", "projetos"],
-        categoria: "feira",
-        cor: 3,
-        animacao: 0,
-        status: 1, // Ativo mas data já passou = Inativo
-        midia: [],
-        permissoes: [],
-        organizador: {
-            _id: "org-789",
-            nome: "Coordenação Acadêmica"
-        },
-        updatedAt: "2024-09-15T23:35:32.558Z",
-        createdAt: "2024-09-15T23:35:32.558Z"
-    };
-
-    const eventoDesativado: Evento = {
-        _id: "fake-id-000",
-        titulo: "Evento Cancelado",
-        descricao: "Este evento foi cancelado pela organização",
-        local: "Sala 101",
-        dataInicio: amanha.toISOString(),
-        dataFim: new Date(amanha.getTime() + 6 * 60 * 60 * 1000).toISOString(),
-        tags: ["cancelado"],
-        categoria: "palestra",
-        cor: 0,
-        animacao: 0,
-        status: 0, // Inativo por decisão = Inativo
-        midia: [],
-        permissoes: [],
-        organizador: {
-            _id: "org-000",
-            nome: "Administração"
-        },
-        updatedAt: "2025-10-07T23:35:32.558Z",
-        createdAt: "2025-10-07T23:35:32.558Z"
-    };
-
-    const eventosIniciais = [eventoEmBreve, eventoAtivo, eventoInativo, eventoDesativado];
+    const [currentPage, setCurrentPage] = useState(1);
+    const queryClient = useQueryClient();
     
-    // Estado para gerenciar os eventos
-    const [eventos, setEventos] = useState<Evento[]>(eventosIniciais);
+    // Estado para controlar o modal de confirmação de exclusão
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        eventId: "",
+        eventTitle: "",
+    });
+
+    // Buscar eventos usando React Query
+    const { data, isLoading, isError, error } = useEventos({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+    });
+
+    // Hooks para ações
+    const toggleStatus = useToggleEventStatus();
+    const deleteEvent = useDeleteEvent();
+
+    // Valores derivados dos dados
+    const eventos = data?.data?.docs || [];
+    const totalPages = data?.data?.totalPages || 0;
+    const totalDocs = data?.data?.totalDocs || 0;
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     const handleEdit = (eventId: string) => {
         console.log('Editar evento:', eventId);
+        // TODO: Navegar para página de edição
+        // router.push(`/editar_eventos?id=${eventId}`);
     };
 
     const handleDelete = (eventId: string) => {
-        console.log('Excluir evento:', eventId);
-        // Aqui você implementaria a lógica de exclusão
-        // setEventos(eventos.filter(evento => evento._id !== eventId));
+        // Encontrar o evento para pegar o título
+        const evento = eventos.find(e => e._id === eventId);
+        
+        // Abrir o modal de confirmação
+        setDeleteModal({
+            isOpen: true,
+            eventId,
+            eventTitle: evento?.titulo || "este evento",
+        });
     };
 
-    const handleToggleStatus = (eventId: string, currentStatus: number) => {
+    const confirmDelete = async () => {
+        try {
+            await deleteEvent(deleteModal.eventId);
+            // Invalidar e refazer a query para atualizar a lista
+            queryClient.invalidateQueries({ queryKey: ["eventos"] });
+            alert("Evento excluído com sucesso!");
+        } catch (error) {
+            console.error("Erro ao excluir evento:", error);
+            alert("Erro ao excluir evento. Tente novamente.");
+        }
+    };
+
+    const handleToggleStatus = async (eventId: string, currentStatus: number) => {
         const newStatus = currentStatus === 1 ? 0 : 1;
-        console.log(`Alterando status do evento ${eventId} de ${currentStatus} para ${newStatus}`);
-        
-        setEventos(eventos.map(evento => 
-            evento._id === eventId 
-                ? { ...evento, status: newStatus }
-                : evento
-        ));
+
+        try {
+            await toggleStatus(eventId, newStatus);
+            // Invalidar e refazer a query para atualizar a lista
+            queryClient.invalidateQueries({ queryKey: ["eventos"] });
+        } catch (error) {
+            console.error("Erro ao alterar status:", error);
+            alert("Erro ao alterar status do evento. Tente novamente.");
+        }
     };
 
     const handleCriarEvento = () => {
@@ -194,17 +154,150 @@ export default function MeusEventosPage() {
                 <div className="absolute bottom-24 left-1/2 w-4 h-4 bg-blue-300/25 rounded-full"></div>
             </div>
 
-            <div className="bg-[#F9FAFB] min-h-screen">
+            <div className="bg-[#F9FAFB] min-h-[calc(100vh-400px)]">
                 <div className="container mx-auto px-6 py-8">
-                    <CardContainer
-                        eventos={eventos}
-                        titulo="Meus Eventos"
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        onToggleStatus={handleToggleStatus}
-                    />
+                    {/* Loading State */}
+                    {isLoading && (
+                        <div className="flex items-center justify-center py-12 min-h-[400px]">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                            <span className="ml-3 text-gray-600">Carregando eventos...</span>
+                        </div>
+                    )}
+
+                    {/* Error State */}
+                    {isError && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center min-h-[400px] flex flex-col items-center justify-center">
+                            <h3 className="text-lg font-semibold text-red-800 mb-2">
+                                Erro ao carregar eventos
+                            </h3>
+                            <p className="text-red-600">
+                                {error instanceof Error ? error.message : "Ocorreu um erro desconhecido"}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Content */}
+                    {!isLoading && !isError && (
+                        <>
+                            <CardContainer
+                                eventos={eventos}
+                                titulo="Meus Eventos"
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onToggleStatus={handleToggleStatus}
+                            />
+                    
+                    {/* Paginação */}
+                    {totalPages > 1 && (
+                        <div className="flex flex-col items-center space-y-4 mt-8">
+                            {/* Informação de paginação */}
+                            <div className="text-sm text-gray-600">
+                                Página {currentPage} de {totalPages} ({totalDocs} eventos no total)
+                            </div>
+
+                            <Pagination>
+                                <PaginationContent>
+                                    {/* Botão Anterior */}
+                                    <PaginationItem>
+                                        <button
+                                            onClick={() => {
+                                                if (currentPage > 1) handlePageChange(currentPage - 1);
+                                            }}
+                                            disabled={currentPage === 1}
+                                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                                                currentPage === 1 
+                                                    ? 'pointer-events-none opacity-50 cursor-not-allowed' 
+                                                    : 'cursor-pointer'
+                                            } bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
+                                        >
+                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                            Anterior
+                                        </button>
+                                    </PaginationItem>
+
+                                    {/* Números das páginas */}
+                                    {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
+                                        let pageNum;
+                                        if (totalPages <= 5) {
+                                            pageNum = index + 1;
+                                        } else if (currentPage <= 3) {
+                                            pageNum = index + 1;
+                                        } else if (currentPage >= totalPages - 2) {
+                                            pageNum = totalPages - 4 + index;
+                                        } else {
+                                            pageNum = currentPage - 2 + index;
+                                        }
+
+                                        return (
+                                            <PaginationItem key={pageNum}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(pageNum);
+                                                    }}
+                                                    isActive={currentPage === pageNum}
+                                                    className={`cursor-pointer ${
+                                                        currentPage === pageNum
+                                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600'
+                                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    {pageNum}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        );
+                                    })}
+
+                                    {/* Botão Próximo */}
+                                    <PaginationItem>
+                                        <button
+                                            onClick={() => {
+                                                if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                                            }}
+                                            disabled={currentPage === totalPages}
+                                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                                                currentPage === totalPages 
+                                                    ? 'pointer-events-none opacity-50 cursor-not-allowed' 
+                                                    : 'cursor-pointer'
+                                            } bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
+                                        >
+                                            Próximo
+                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
+                    )}
+                        </>
+                    )}
                 </div>
             </div>
+
+            {/* Modal de confirmação de exclusão */}
+            <AlertModal
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" })}
+                title="Confirmar Exclusão"
+                message={`Tem certeza que deseja excluir o evento "${deleteModal.eventTitle}"? Esta ação não pode ser desfeita.`}
+                icon="/alert-icon.svg"
+                type="alerta"
+                button1={{
+                    text: "Excluir",
+                    action: confirmDelete,
+                    className: "bg-red-600 hover:bg-red-700 text-white",
+                }}
+                button2={{
+                    text: "Cancelar",
+                    action: () => {},
+                    className: "bg-gray-200 hover:bg-gray-300 text-gray-800",
+                }}
+            />
         </>
     );
 }
