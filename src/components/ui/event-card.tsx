@@ -35,7 +35,7 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
       {/* Imagem do evento */}
       <div className="relative h-32 bg-gray-100 flex-shrink-0">
         <img 
-          src={evento.midia && evento.midia.length > 0 ? evento.midia[0] : "/Group 4.png"} 
+          src={evento.midia && evento.midia.length > 0 ? evento.midia[0].midiLink : "/Group 4.png"} 
           alt={evento.titulo}
           className="w-full h-full object-cover"
         />
