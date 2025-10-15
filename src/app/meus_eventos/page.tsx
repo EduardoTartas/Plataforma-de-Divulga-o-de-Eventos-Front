@@ -33,8 +33,8 @@ export default function MeusEventosPage() {
     });
 
     // Hooks para ações
-    const toggleStatus = useToggleEventStatus();
-    const deleteEvent = useDeleteEvent();
+    const { toggleStatus, isPending: toggleStatusIsPending } = useToggleEventStatus();
+    const { deleteEvent, isPending: deleteEventIsPending } = useDeleteEvent();
 
     // Valores derivados dos dados
     const eventos = data?.data?.docs || [];
@@ -66,12 +66,9 @@ export default function MeusEventosPage() {
     const confirmDelete = async () => {
         try {
             await deleteEvent(deleteModal.eventId);
-            // Invalidar e refazer a query para atualizar a lista
-            queryClient.invalidateQueries({ queryKey: ["eventos"] });
-            alert("Evento excluído com sucesso!");
+            // Toast de sucesso é exibido automaticamente pelo hook
         } catch (error) {
-            console.error("Erro ao excluir evento:", error);
-            alert("Erro ao excluir evento. Tente novamente.");
+            // Toast de erro é exibido automaticamente pelo hook
         }
     };
 
@@ -79,12 +76,10 @@ export default function MeusEventosPage() {
         const newStatus = currentStatus === 1 ? 0 : 1;
 
         try {
-            await toggleStatus(eventId, newStatus);
-            // Invalidar e refazer a query para atualizar a lista
-            queryClient.invalidateQueries({ queryKey: ["eventos"] });
+            await toggleStatus({ eventId, newStatus });
+            // Toast de sucesso é exibido automaticamente pelo hook
         } catch (error) {
-            console.error("Erro ao alterar status:", error);
-            alert("Erro ao alterar status do evento. Tente novamente.");
+            // Toast de erro é exibido automaticamente pelo hook
         }
     };
 
@@ -95,7 +90,7 @@ export default function MeusEventosPage() {
     };
 
     return (
-        <>
+        <div className="font-inter">
             <Header logo="/ifro-events-icon.svg"/>
             
             {/* Banner Hero */}
@@ -285,7 +280,7 @@ export default function MeusEventosPage() {
                 onClose={() => setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" })}
                 title="Confirmar Exclusão"
                 message={`Tem certeza que deseja excluir o evento "${deleteModal.eventTitle}"? Esta ação não pode ser desfeita.`}
-                icon="/alert-icon.svg"
+                icon="/alertR.svg"
                 type="alerta"
                 button1={{
                     text: "Excluir",
@@ -298,6 +293,6 @@ export default function MeusEventosPage() {
                     className: "bg-gray-200 hover:bg-gray-300 text-gray-800",
                 }}
             />
-        </>
+        </div>
     );
 }

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Footer from "@/components/ui/footer";
 import QueryProvider from "../providers/queryProvider";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import Header from "@/components/ui/header";
 import "./globals.css";
 
@@ -36,6 +38,18 @@ export default function RootLayout({
         <body className={`min-h-screen flex flex-col ${geistSans.variable} ${geistMono.variable} ${inter.variable}`}>
           <main className="flex-grow">{children}</main>
           <Footer />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
         </body>
       </QueryProvider>
     </html>
