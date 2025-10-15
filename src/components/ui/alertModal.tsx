@@ -56,7 +56,7 @@ export default function AlertModal({ title, message, icon, type, button1, button
         <dialog 
             ref={modalRef} 
             onCancel={onClose} 
-            className="w-full max-w-lg rounded-xl p-0 shadow-2xl backdrop:bg-gray-900/60 backdrop:blur-sm"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg rounded-xl p-0 shadow-2xl backdrop:bg-gray-900/60 backdrop:blur-sm m-0"
         >
             <div className="relative">
                 <img src={icon} className="absolute top-6 left-2 w-[45px] r-[45px]" draggable="false" />
