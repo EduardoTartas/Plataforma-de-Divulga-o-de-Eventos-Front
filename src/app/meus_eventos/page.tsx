@@ -98,8 +98,7 @@ export default function MeusEventosPage() {
 
     return (
         <div className="font-inter">
-            <Header logo="/ifro-events-icon.svg"/>
-            
+
             {/* Banner Hero */}
             <div className="relative overflow-hidden bg-indigo-700">
                 <div className="container mx-auto px-6 py-12 lg:py-16 relative z-10">
