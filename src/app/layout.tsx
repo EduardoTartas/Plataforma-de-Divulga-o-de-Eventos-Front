@@ -33,13 +33,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <QueryProvider>
-        <body className={`min-h-screen flex flex-col ${geistSans.variable} ${geistMono.variable} ${inter.variable}`}>
+      <body 
+        className={`min-h-screen flex flex-col ${geistSans.variable} ${geistMono.variable} ${inter.variable}`}
+        suppressHydrationWarning
+      >
+        <QueryProvider>
           <main className="flex-grow">{children}</main>
           <Footer />
           <ToastProvider />
-        </body>
-      </QueryProvider>
+        </QueryProvider>
+      </body>
     </html>
   );
 }
