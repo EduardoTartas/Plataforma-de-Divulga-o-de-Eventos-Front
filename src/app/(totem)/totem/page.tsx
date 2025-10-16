@@ -114,26 +114,26 @@ export default function EventosPage() {
                 <div className="bg-indigo-950/80 h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px]">
 
                     <div className="flex-grow">
-                        <p className="text-sm font-semibold text-gray-300 mb-4">IFRO EVENTS</p>
-                        <h1 className="text-4xl font-bold mb-8">
+                        <p className="text-sm font-semibold text-gray-300 mb-4 font-inter">IFRO EVENTS</p>
+                        <h1 className="text-4xl font-bold mb-8 font-inter">
                             {eventoAtual.titulo}
                         </h1>
 
                         <div className="flex flex-col space-y-4 text-gray-200">
                             <div className="flex flex-row gap-2">
-                                <img src="/calendar.svg" /><p>{eventoAtual.data}</p>
+                                <img src="/calendar.svg" /><p className="font-inter">{eventoAtual.data}</p>
                             </div>
                             <div className="flex flex-row gap-2">
-                                <img src="/watch.svg" /><p>{eventoAtual.horario}</p>
+                                <img src="/watch.svg" /><p className="font-inter">{eventoAtual.horario}</p>
                             </div>
                             <div className="flex flex-row gap-2">
-                                <img src="/gps.svg" /><p> {eventoAtual.local}</p>
+                                <img src="/gps.svg" /><p className="font-inter">{eventoAtual.local}</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="mt-8 mb-16 bg-white/10 rounded-[8px] p-2">
-                        <p className="text-gray-300">
+                        <p className="text-gray-300 font-inter">
                             {eventoAtual.descricao}
                         </p>
                     </div>
