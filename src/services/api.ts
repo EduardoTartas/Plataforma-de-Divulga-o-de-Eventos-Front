@@ -17,6 +17,13 @@ export async function fetchData<T>(
     }
 
     const response = await fetch(`${API_URL}${url}`, options);
-    let json = await response.json()
-    return json
+    
+    // Verificar se a resposta foi bem-sucedida
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido' }));
+        throw new Error(errorData.message || `Erro ${response.status}: ${response.statusText}`);
+    }
+    
+    const json = await response.json();
+    return json;
 }
