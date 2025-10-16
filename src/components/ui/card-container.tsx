@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import EventCard from "./event-card";
 import { Evento } from "@/types/eventos";
@@ -20,6 +20,8 @@ interface CardContainerProps {
   onEdit?: (eventId: string) => void;
   onDelete?: (eventId: string) => void;
   onToggleStatus?: (eventId: string, currentStatus: number) => void;
+  onFilterChange?: (filters: { search: string; status: string; category: string }) => void;
+  initialFilters?: { search: string; status: string; category: string };
 }
 
 export default function CardContainer({
@@ -28,40 +30,57 @@ export default function CardContainer({
   onEdit,
   onDelete,
   onToggleStatus,
+  onFilterChange,
+  initialFilters = { search: "", status: "all", category: "all" },
 }: CardContainerProps) {
-  const [searchText, setSearchText] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchText, setSearchText] = useState(initialFilters.search);
+  const [statusFilter, setStatusFilter] = useState(initialFilters.status);
+  const [categoryFilter, setCategoryFilter] = useState(initialFilters.category);
 
-  // Filtrar eventos baseado nos critérios de busca
-  const filteredEventos = eventos.filter((evento) => {
-    // Filtro de texto
-    const matchesSearch =
-      searchText === "" ||
-      evento.titulo.toLowerCase().includes(searchText.toLowerCase()) ||
-      evento.descricao.toLowerCase().includes(searchText.toLowerCase());
+  // Debounce para a busca
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onFilterChange) {
+        onFilterChange({
+          search: searchText,
+          status: statusFilter,
+          category: categoryFilter,
+        });
+      }
+    }, 500); // 500ms de delay
 
-    // Filtro de status
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "active" && evento.status === 1) ||
-      (statusFilter === "inactive" && evento.status === 0);
+    return () => clearTimeout(timer);
+  }, [searchText]); 
 
-    // Filtro de categoria
-    const matchesCategory =
-      categoryFilter === "all" || evento.categoria === categoryFilter;
+  // Aplicar filtros imediatamente para status e categoria (sem debounce)
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value);
+    setTimeout(() => {
+      if (onFilterChange) {
+        onFilterChange({
+          search: searchText,
+          status: value,
+          category: categoryFilter,
+        });
+      }
+    }, 0);
+  };
 
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
-
-  // Extrair categorias únicas
-  const categorias = Array.from(
-    new Set(eventos.map((evento) => evento.categoria))
-  );
+  const handleCategoryChange = (value: string) => {
+    setCategoryFilter(value);
+    setTimeout(() => {
+      if (onFilterChange) {
+        onFilterChange({
+          search: searchText,
+          status: statusFilter,
+          category: value,
+        });
+      }
+    }, 0);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // A busca já é feita em tempo real pelo filteredEventos
   };
 
   return (
@@ -86,7 +105,7 @@ export default function CardContainer({
 
           {/* Filtro de status */}
           <div className="w-full md:w-48">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
@@ -100,17 +119,17 @@ export default function CardContainer({
 
           {/* Filtro de categoria */}
           <div className="w-full md:w-52">
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <Select value={categoryFilter} onValueChange={handleCategoryChange}>
               <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500">
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
               <SelectContent className="bg-white">
                 <SelectItem value="all" className="text-gray-900">Todas as categorias</SelectItem>
-                {categorias.map((categoria) => (
-                  <SelectItem key={categoria} value={categoria} className="text-gray-900">
-                    {categoria}
-                  </SelectItem>
-                ))}
+                <SelectItem value="palestra" className="text-gray-900">Palestra</SelectItem>
+                <SelectItem value="seminario" className="text-gray-900">Seminário</SelectItem>
+                <SelectItem value="workshop" className="text-gray-900">Workshop</SelectItem>
+                <SelectItem value="curso" className="text-gray-900">Curso</SelectItem>
+                <SelectItem value="conferencia" className="text-gray-900">Conferência</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -119,9 +138,9 @@ export default function CardContainer({
       </form>
 
       {/* Grid de cards */}
-      {filteredEventos.length > 0 ? (
+      {eventos.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredEventos.map((evento) => (
+          {eventos.map((evento) => (
             <EventCard
               key={evento._id}
               evento={evento}

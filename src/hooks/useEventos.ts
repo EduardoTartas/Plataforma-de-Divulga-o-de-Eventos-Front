@@ -4,25 +4,49 @@ import { EventosApiResponse } from "@/types/eventos";
 import { toast } from "react-toastify";
 
 // Token  chumbado
-const TEMP_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZWZmOGI1MTA0YWJkM2Q0MzVhNTZjZSIsImlhdCI6MTc2MDU3MjEzNSwiZXhwIjoxNzYwNTczMDM1fQ.TK6wS-nTSur-Y7Y2B11RxxzIl2YBbDMeHKnKGrK5olM";
+const TEMP_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZWZmOGI1MTA0YWJkM2Q0MzVhNTZjZSIsImlhdCI6MTc2MDU3NDA0NCwiZXhwIjoxNzYwNTc0OTQ0fQ.wvh74opNBZl_cyxjQvmwRaWppDdCH8cJrqRHf49XMRo";
 
 interface UseEventosParams {
   page: number;
   limit: number;
   enabled?: boolean;
+  filters?: {
+    search?: string;
+    status?: string;
+    category?: string;
+  };
 }
 
-export function useEventos({ page, limit, enabled = true }: UseEventosParams) {
+export function useEventos({ page, limit, enabled = true, filters }: UseEventosParams) {
   const {
     data: eventosData,
     isLoading: eventosIsLoading,
     isError: eventosIsError,
     error: eventosError,
   } = useQuery<EventosApiResponse, Error>({
-    queryKey: ["eventos", page, limit],
+    queryKey: ["eventos", page, limit, filters],
     queryFn: async () => {
+      // Construir query params
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limite: limit.toString(),
+        ordenarPor: "-createdAt",
+      });
+
+      // Adicionar filtros se existirem
+      if (filters?.search && filters.search.trim() !== "") {
+        params.append("titulo", filters.search.trim());
+      }
+      if (filters?.status && filters.status !== "all") {
+        const statusValue = filters.status === "active" ? "1" : "0";
+        params.append("status", statusValue);
+      }
+      if (filters?.category && filters.category !== "all") {
+        params.append("categoria", filters.category);
+      }
+
       return fetchData<EventosApiResponse>(
-        `/eventos/?page=${page}&limite=${limit}&ordenarPor=-createdAt`,
+        `/eventos/?${params.toString()}`,
         "GET",
         TEMP_TOKEN
       );
@@ -104,7 +128,6 @@ export function useDeleteEvent() {
     onSuccess: () => {
       // Invalidar a query de eventos para atualizar a lista automaticamente
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
-      
       // Notificação de sucesso
       toast.success("Evento excluído com sucesso!", {
         position: "top-right",

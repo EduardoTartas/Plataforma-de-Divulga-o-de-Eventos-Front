@@ -13,11 +13,18 @@ import {
 } from "@/components/ui/pagination";
 import { useEventos, useToggleEventStatus, useDeleteEvent } from "@/hooks/useEventos";
 
-const ITEMS_PER_PAGE = 8; // 2 fileiras x 4 cards = 8 eventos por página
+const ITEMS_PER_PAGE = 8;
 
 export default function MeusEventosPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const queryClient = useQueryClient();
+    
+    // Estado para controlar filtros
+    const [filters, setFilters] = useState({
+        search: "",
+        status: "all",
+        category: "all",
+    });
     
     // Estado para controlar o modal de confirmação de exclusão
     const [deleteModal, setDeleteModal] = useState({
@@ -30,6 +37,7 @@ export default function MeusEventosPage() {
     const { data, isLoading, isError, error } = useEventos({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
+        filters,
     });
 
     // Hooks para ações
@@ -45,6 +53,11 @@ export default function MeusEventosPage() {
         setCurrentPage(page);
     };
 
+    const handleFilterChange = (newFilters: { search: string; status: string; category: string }) => {
+        setFilters(newFilters);
+        setCurrentPage(1);
+    };
+
     const handleEdit = (eventId: string) => {
         console.log('Editar evento:', eventId);
         // TODO: Navegar para página de edição
@@ -52,7 +65,6 @@ export default function MeusEventosPage() {
     };
 
     const handleDelete = (eventId: string) => {
-        // Encontrar o evento para pegar o título
         const evento = eventos.find(e => e._id === eventId);
         
         // Abrir o modal de confirmação
@@ -66,10 +78,7 @@ export default function MeusEventosPage() {
     const confirmDelete = async () => {
         try {
             await deleteEvent(deleteModal.eventId);
-            // Toast de sucesso é exibido automaticamente pelo hook
-        } catch (error) {
-            // Toast de erro é exibido automaticamente pelo hook
-        }
+        } catch (error) {}
     };
 
     const handleToggleStatus = async (eventId: string, currentStatus: number) => {
@@ -77,9 +86,7 @@ export default function MeusEventosPage() {
 
         try {
             await toggleStatus({ eventId, newStatus });
-            // Toast de sucesso é exibido automaticamente pelo hook
         } catch (error) {
-            // Toast de erro é exibido automaticamente pelo hook
         }
     };
 
@@ -180,6 +187,8 @@ export default function MeusEventosPage() {
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                                 onToggleStatus={handleToggleStatus}
+                                onFilterChange={handleFilterChange}
+                                initialFilters={filters}
                             />
                     
                     {/* Paginação */}
