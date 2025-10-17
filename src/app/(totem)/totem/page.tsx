@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react";
+import { useEventos } from "@/hooks/useEventos";
 
 export default function EventosPage() {
     const eventos = [

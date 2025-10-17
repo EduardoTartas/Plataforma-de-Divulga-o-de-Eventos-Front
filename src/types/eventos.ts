@@ -54,3 +54,28 @@ export interface EventosApiResponse {
   data: EventosData;
   errors: any[];
 }
+
+export interface EventoMidia {
+  midiTipo: string;
+  midiLink: string;
+}
+
+export interface EventoTotem {
+  _id: string;
+  titulo: string;
+  descricao: string;
+  local: string;
+  dataInicio: string;
+  dataFim: string;
+  midia: EventoMidia[];
+  cor: number;
+  animacao: number;
+}
+
+export interface EventosTotemApiResponse {
+  error: boolean;
+  code: number;
+  message: string;
+  data: EventoTotem[];
+  errors: any[];
+}
