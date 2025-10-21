@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useEventosTotem } from "@/hooks/useEventosTotem";
 import { formatarDataEvento, formatarHorarioEvento, extrairImagensEvento } from "@/lib/utils";
 
+import 'animate.css';
+
 export default function EventosPage() {
     // Busca os eventos reais da API
     const { data: eventosApi, isLoading, isError } = useEventosTotem();
@@ -23,14 +25,14 @@ export default function EventosPage() {
 
     // Estado que controla qual evento está sendo exibido
     const [eventoAtualIndex, setEventoAtualIndex] = useState(0);
-    
+
     // Estado que controla qual imagem do evento atual está sendo exibida
     const [imagemAtualIndex, setImagemAtualIndex] = useState(0);
 
     // useRef para guardar os índices atuais (resolve problema de closure)
     const eventoIndexRef = useRef(eventoAtualIndex);
     const imagemIndexRef = useRef(imagemAtualIndex);
-    
+
     // Atualiza as refs sempre que os estados mudarem
     useEffect(() => {
         eventoIndexRef.current = eventoAtualIndex;
@@ -46,7 +48,7 @@ export default function EventosPage() {
             const eventoAtual = eventoIndexRef.current;
             const imagemAtual = imagemIndexRef.current;
             const evento = eventos[eventoAtual];
-            
+
             // Verifica se o evento tem imagens
             if (!evento.imagens || evento.imagens.length === 0) {
                 // Se não tem imagens, pula para o próximo evento
@@ -55,9 +57,9 @@ export default function EventosPage() {
                 setImagemAtualIndex(0);
                 return;
             }
-            
+
             const proximaImagem = imagemAtual + 1;
-            
+
             if (proximaImagem < evento.imagens.length) {
                 setImagemAtualIndex(proximaImagem);
             } else {
@@ -69,6 +71,18 @@ export default function EventosPage() {
 
         return () => clearInterval(intervalo);
     }, [eventos]);
+
+    // Animações disponíveis
+    const ANIMACOES_MAP = {
+        1: 'animate__fadeIn',
+        2: 'animate__fadeInUp',
+        3: 'animate__fadeInDown',
+        4: 'animate__slideInLeft',
+        5: 'animate__slideInRight',
+        6: 'animate__zoomIn',
+        7: 'animate__flipInX',
+        8: 'animate__bounceIn',
+    }
 
     // Tela de loading
     if (isLoading) {
@@ -114,14 +128,14 @@ export default function EventosPage() {
         <>
             {/* Imagem de Fundo */}
             <img
-                className="fixed inset-0 object-cover w-full h-full -z-10"
+                className="fixed inset-0 object-cover w-full h-full -z-10 animate__animated animate__zoomIn"
                 src={imagemAtual}
                 alt="Imagem de fundo do evento"
                 draggable='false'
             />
 
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
-            <main className="h-screen w-screen bg-black/60 flex justify-end">
+            <main className="h-screen w-screen bg-black/15 flex justify-end">
 
                 {/* Barra Lateral de Informações */}
                 <div className="bg-indigo-950/80 h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px]">
