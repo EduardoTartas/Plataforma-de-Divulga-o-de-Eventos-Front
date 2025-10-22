@@ -100,7 +100,7 @@ export default function EventosPage() {
         } else {
             const eventoAtual = eventos[eventoAtualIndex];
             const animacaoEvento = ANIMACOES_MAP[eventoAtual.animacao] || 'animate__fadeIn';
-            return `fixed inset-0 object-cover w-full h-full -z-10 animate__animated ${animacaoEvento}`;
+            return `animate__animated ${animacaoEvento}`;  // ← SÓ ANIMAÇÃO!
         }
     }
 
@@ -149,7 +149,7 @@ export default function EventosPage() {
             {/* Imagem de Fundo */}
             <img
                 key={`${eventoAtualIndex}-${imagemAtualIndex}`}
-                className={obterAnimacao()}
+                className={`fixed inset-0 object-cover w-full h-full -z-10 ${obterAnimacao()}`}
                 src={imagemAtual}
                 alt="Imagem de fundo do evento"
                 draggable='false'
