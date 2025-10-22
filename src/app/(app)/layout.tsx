@@ -6,7 +6,7 @@ import ToastProvider from "@/components/ToastProvider";
 // import Header from "@/components/ui/header";
 import "../globals.css";
 import Header from "@/components/ui/header";
-
+import LayoutWrapper from "@/components/LayoutWrapper";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,18 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body 
-        className={`min-h-screen flex flex-col ${geistSans.variable} ${geistMono.variable} ${inter.variable}`}
-        suppressHydrationWarning
-      >
-        <Header />
-        <QueryProvider>
-          <main className="flex-grow">{children}</main>
-          <Footer />
-          <ToastProvider />
-        </QueryProvider>
-      </body>
-    </html>
+    <QueryProvider>
+      <ToastProvider />
+      <LayoutWrapper>
+        {children}
+      </LayoutWrapper>
+    </QueryProvider>
   );
 }
