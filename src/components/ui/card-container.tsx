@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import EventCard from "./event-card";
 import { Evento } from "@/types/eventos";
@@ -36,10 +36,18 @@ export default function CardContainer({
   const [searchText, setSearchText] = useState(initialFilters.search);
   const [statusFilter, setStatusFilter] = useState(initialFilters.status);
   const [categoryFilter, setCategoryFilter] = useState(initialFilters.category);
+  const isFirstRender = useRef(true);
 
   // Debounce para a busca
   useEffect(() => {
+    const isFirst = isFirstRender.current;
     const timer = setTimeout(() => {
+      if (isFirst) {
+        // Não disparar o onFilterChange na primeira montagem; apenas marcar que já passou
+        isFirstRender.current = false;
+        return;
+      }
+
       if (onFilterChange) {
         onFilterChange({
           search: searchText,
@@ -47,7 +55,7 @@ export default function CardContainer({
           category: categoryFilter,
         });
       }
-    }, 500); // 500ms de delay
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchText]); 
