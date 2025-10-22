@@ -67,13 +67,13 @@ export default function EventosPage() {
                 setEventoAtualIndex(proximoEvento);
                 setImagemAtualIndex(0);
             }
-        }, 3000);
+        }, 5000);
 
         return () => clearInterval(intervalo);
     }, [eventos]);
 
     // Animações disponíveis
-    const ANIMACOES_MAP = {
+    const ANIMACOES_MAP: Record<number, string> = {
         1: 'animate__fadeIn',
         2: 'animate__fadeInUp',
         3: 'animate__fadeInDown',
@@ -82,6 +82,26 @@ export default function EventosPage() {
         6: 'animate__zoomIn',
         7: 'animate__flipInX',
         8: 'animate__bounceIn',
+        9: 'animate__backInDown',
+        10: 'animate__backInUp',
+    };
+
+    const [eventoAnteriorIndex, setEventoAnteriorIndex] = useState(0);
+    const mudouDeEvento = eventoAnteriorIndex !== eventoAtualIndex;
+
+    useEffect(() => {
+        // Este código roda toda vez que eventoAtualIndex muda
+        setEventoAnteriorIndex(eventoAtualIndex);
+    }, [eventoAtualIndex]);
+
+    function obterAnimacao() {
+        if (mudouDeEvento) {
+            return 'animate__animated animate__fadeIn';
+        } else {
+            const eventoAtual = eventos[eventoAtualIndex];
+            const animacaoEvento = ANIMACOES_MAP[eventoAtual.animacao] || 'animate__fadeIn';
+            return `fixed inset-0 object-cover w-full h-full -z-10 animate__animated ${animacaoEvento}`;
+        }
     }
 
     // Tela de loading
@@ -128,7 +148,8 @@ export default function EventosPage() {
         <>
             {/* Imagem de Fundo */}
             <img
-                className="fixed inset-0 object-cover w-full h-full -z-10 animate__animated animate__zoomIn"
+                key={`${eventoAtualIndex}-${imagemAtualIndex}`}
+                className={obterAnimacao()}
                 src={imagemAtual}
                 alt="Imagem de fundo do evento"
                 draggable='false'
