@@ -15,7 +15,7 @@ Sistema de gestão de eventos que permite:
 
 ### Core
 - **Next.js 15.5** - Framework React com App Router
-- **React 19** - Biblioteca JavaScript para interfaces
+- **React 19** - Biblioteca Node.Js para interfaces
 - **TypeScript 5** - Superset JavaScript com tipagem estática
 
 ### Estilização
