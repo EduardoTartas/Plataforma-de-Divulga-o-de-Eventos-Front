@@ -81,4 +81,4 @@ export interface EventosTotemApiResponse {
   message: string;
   data: EventoTotem[];
   errors: any[];
-}
+} 
