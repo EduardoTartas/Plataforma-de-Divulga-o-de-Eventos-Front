@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IFRO Events - Plataforma de Divulgação de Eventos
 
-## Getting Started
+Plataforma web para divulgação e gerenciamento de eventos do IFRO (Instituto Federal de Rondônia). O sistema conta com uma interface administrativa para cadastro e gerenciamento de eventos, além de um modo totem para exibição pública em telas de divulgação.
 
-First, run the development server:
+## 🎯 Natureza do Projeto
+
+Sistema de gestão de eventos que permite:
+- Cadastro e edição de eventos
+- Visualização de eventos em formato totem (slideshow)
+- Personalização de cores e animações por evento
+- Upload de imagens e QR codes
+- Categorização e tags para organização
+
+## 🚀 Stack Tecnológica
+
+### Core
+- **Next.js 15.5** - Framework React com App Router
+- **React 19** - Biblioteca JavaScript para interfaces
+- **TypeScript 5** - Superset JavaScript com tipagem estática
+
+### Estilização
+- **Tailwind CSS 4** - Framework CSS utility-first
+- **Animate.css** - Biblioteca de animações CSS
+
+### UI Components
+- **Radix UI** - Componentes acessíveis e não estilizados
+- **Lucide React** - Ícones
+
+### Gerenciamento de Estado
+- **TanStack Query (React Query)** - Gerenciamento de estado assíncrono e cache
+- **React Toastify** - Notificações toast
+
+### Ferramentas de Desenvolvimento
+- **ESLint** - Linter para JavaScript/TypeScript
+- **PostCSS & Autoprefixer** - Processamento de CSS
+
+## 📦 Instalação
 
 ```bash
+# Instalar dependências
+npm install
+
+# Executar em desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build para produção
+npm run build
+
+# Executar build de produção
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🖥️ Rotas Principais
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/login` - Autenticação de usuários
+- `/cadastro` - Cadastro de novos usuários
+- `/criar_eventos` - Criar novo evento
+- `/editar_eventos` - Editar evento existente
+- `/meus_eventos` - Gerenciar eventos do usuário
+- `/totem` - Modo totem para exibição pública
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Desenvolvido por:** Alunos do curso de Análise e Desenvolvimento de Sistemas  
+**Instituição:** IFRO - Instituto Federal de Rondônia | Campus Vilhena
