@@ -4,7 +4,7 @@ import { EventosApiResponse } from "@/types/eventos";
 import { toast } from "react-toastify";
 
 // Token  chumbado
-const TEMP_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZWZmOGI1MTA0YWJkM2Q0MzVhNTZjZSIsImlhdCI6MTc2MDU3NDA0NCwiZXhwIjoxNzYwNTc0OTQ0fQ.wvh74opNBZl_cyxjQvmwRaWppDdCH8cJrqRHf49XMRo";
+const TEMP_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjZjZmQ3ODE0NGU5YTY3NGFlN2ZkNyIsImlhdCI6MTc2MTAwNzAxMywiZXhwIjoxNzYxMDA3OTEzfQ.JtiUr5WTSRVysyLotmr55lSRDQoirgX3G6cTgsofh_g";
 
 interface UseEventosParams {
   page: number;

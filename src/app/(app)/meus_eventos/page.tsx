@@ -60,7 +60,6 @@ export default function MeusEventosPage() {
 
     const handleEdit = (eventId: string) => {
         console.log('Editar evento:', eventId);
-        // TODO: Navegar para página de edição
         // router.push(`/editar_eventos?id=${eventId}`);
     };
 
@@ -92,7 +91,6 @@ export default function MeusEventosPage() {
 
     const handleCriarEvento = () => {
         console.log('Navegar para criar evento');
-        // Aqui você adicionaria a navegação para a página de criar evento
         // router.push('/criar_eventos');
     };
 
@@ -111,7 +109,7 @@ export default function MeusEventosPage() {
                         </p>
                         <button
                             onClick={handleCriarEvento}
-                            className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold font-inter rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                            className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold font-inter rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl cursor-pointer"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -203,6 +201,7 @@ export default function MeusEventosPage() {
                                     {/* Botão Anterior */}
                                     <PaginationItem>
                                         <button
+                                            type="button"
                                             onClick={() => {
                                                 if (currentPage > 1) handlePageChange(currentPage - 1);
                                             }}
@@ -235,21 +234,18 @@ export default function MeusEventosPage() {
 
                                         return (
                                             <PaginationItem key={pageNum}>
-                                                <PaginationLink
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handlePageChange(pageNum);
-                                                    }}
-                                                    isActive={currentPage === pageNum}
-                                                    className={`cursor-pointer ${
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handlePageChange(pageNum)}
+                                                    aria-current={currentPage === pageNum ? 'page' : undefined}
+                                                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                                                         currentPage === pageNum
                                                             ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600'
                                                             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                                                     }`}
                                                 >
                                                     {pageNum}
-                                                </PaginationLink>
+                                                </button>
                                             </PaginationItem>
                                         );
                                     })}
@@ -257,6 +253,7 @@ export default function MeusEventosPage() {
                                     {/* Botão Próximo */}
                                     <PaginationItem>
                                         <button
+                                            type="button"
                                             onClick={() => {
                                                 if (currentPage < totalPages) handlePageChange(currentPage + 1);
                                             }}
