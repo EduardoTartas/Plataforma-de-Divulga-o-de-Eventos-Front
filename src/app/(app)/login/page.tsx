@@ -2,27 +2,84 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <>
-      <div className="h-[425px] w-[416px] rounded-[8px] translate-x-115 translate-y-9 bg-white flex flex-col items-center gap-6 shadow-md overflow-hidden">
-        <h1 className="text-[#1F2937] font-bold text-[20.4px] translate-y-5">Entrar</h1>
-        <div className="flex flex-col pt-4">
-          <label htmlFor="email" className="text-[#374151]">E-mail</label>
-          <input id="email" type="email" className="w-[352px] h-[42px] text-[#374151] border-1 pl-1.5 focus:outline-none focus:ring-2 focus:ring-[#4F46E5] border-[#D1D5DB] rounded-[8px] placeholder:text-[#CCCCCC]" placeholder="seu@email.com" />
+    <div className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4 py-8">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">Entrar</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Acesse sua conta para continuar
+          </p>
         </div>
-        <div className="flex flex-col">
-          <label htmlFor="password" className="text-[#374151]">Senha</label>
-          <input id="password" type="password" className="w-[352px] h-[42px] text-[#374151] border-1 pl-1.5 focus:outline-none focus:ring-2 focus:ring-[#4F46E5] border-[#D1D5DB] rounded-[8px] placeholder:text-[#CCCCCC]" placeholder="!suaSenha123" />
-        </div>
-        <div className="flex flex-row gap-18">
-          <div className="flex flex-row gap-2">
-            <input id="remember" type="checkbox" />
-            <label htmlFor="remember" className="text-[#374151]">Lembrar de mim</label>
+
+        <form className="space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              E-mail
+            </label>
+            <input
+              id="email"
+              type="email"
+              className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                       placeholder:text-gray-400 transition-all"
+              placeholder="seu@email.com"
+            />
           </div>
-          <Link href="/recuperar_senha" className="text-[#4F46E5] hover:text-[#4338CA]">Esqueceu a senha?</Link>
-        </div>
-        <button className="bg-[#4F46E5] w-[352px] h-[42px] rounded-[8px] text-white hover:bg-[#4338CA] cursor-pointer">Entrar</button>
-        <p className="text-[#4B5563]">Não tem uma conta? <Link href="/cadastro" className="text-[#4F46E5] hover:text-[#4338CA]">Criar conta</Link></p>
+
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Senha
+            </label>
+            <input
+              id="password"
+              type="password"
+              className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                       placeholder:text-gray-400 transition-all"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <input
+                id="remember"
+                type="checkbox"
+                className="w-4 h-4 text-indigo-600 border-gray-300 rounded 
+                         focus:ring-2 focus:ring-indigo-500"
+              />
+              <label htmlFor="remember" className="text-sm text-gray-700">
+                Lembrar de mim
+              </label>
+            </div>
+            <Link
+              href="/recuperar_senha"
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+            >
+              Esqueceu a senha?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
+                     hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
+                     focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            Entrar
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-600">
+          Não tem uma conta?{" "}
+          <Link
+            href="/cadastro"
+            className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+          >
+            Criar conta
+          </Link>
+        </p>
       </div>
-    </>
+    </div>
   );
 }

@@ -4,12 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import { useEventosTotem } from "@/hooks/useEventosTotem";
 import { formatarDataEvento, formatarHorarioEvento, extrairImagensEvento } from "@/lib/utils";
 
+import 'animate.css';
+import { EventoTotem } from "@/types/eventos";
+
 export default function EventosPage() {
     // Busca os eventos reais da API
     const { data: eventosApi, isLoading, isError } = useEventosTotem();
 
     // Transforma os eventos da API para o formato usado pelo componente
-    const eventos = eventosApi.map(evento => ({
+    const eventos: EventoTotem[] | any = eventosApi.map(evento => ({
         id: evento._id,
         titulo: evento.titulo,
         data: formatarDataEvento(evento.dataInicio),
@@ -18,19 +21,22 @@ export default function EventosPage() {
         descricao: evento.descricao,
         imagens: extrairImagensEvento(evento.midia),
         cor: evento.cor,
-        animacao: evento.animacao
+        animacao: evento.animacao,
+        categoria: evento.categoria,
+        tags: evento.tags,
+        link: evento.link
     }));
 
     // Estado que controla qual evento está sendo exibido
     const [eventoAtualIndex, setEventoAtualIndex] = useState(0);
-    
+
     // Estado que controla qual imagem do evento atual está sendo exibida
     const [imagemAtualIndex, setImagemAtualIndex] = useState(0);
 
     // useRef para guardar os índices atuais (resolve problema de closure)
     const eventoIndexRef = useRef(eventoAtualIndex);
     const imagemIndexRef = useRef(imagemAtualIndex);
-    
+
     // Atualiza as refs sempre que os estados mudarem
     useEffect(() => {
         eventoIndexRef.current = eventoAtualIndex;
@@ -46,7 +52,7 @@ export default function EventosPage() {
             const eventoAtual = eventoIndexRef.current;
             const imagemAtual = imagemIndexRef.current;
             const evento = eventos[eventoAtual];
-            
+
             // Verifica se o evento tem imagens
             if (!evento.imagens || evento.imagens.length === 0) {
                 // Se não tem imagens, pula para o próximo evento
@@ -55,9 +61,9 @@ export default function EventosPage() {
                 setImagemAtualIndex(0);
                 return;
             }
-            
+
             const proximaImagem = imagemAtual + 1;
-            
+
             if (proximaImagem < evento.imagens.length) {
                 setImagemAtualIndex(proximaImagem);
             } else {
@@ -65,10 +71,60 @@ export default function EventosPage() {
                 setEventoAtualIndex(proximoEvento);
                 setImagemAtualIndex(0);
             }
-        }, 3000);
+        }, 5000);
 
         return () => clearInterval(intervalo);
     }, [eventos]);
+
+    // Animações disponíveis
+    const ANIMACOES_MAP: Record<number, string> = {
+        1: 'animate__fadeIn',
+        2: 'animate__fadeInUp',
+        3: 'animate__fadeInDown',
+        4: 'animate__slideInLeft',
+        5: 'animate__slideInRight',
+        6: 'animate__zoomIn',
+        7: 'animate__flipInX',
+        8: 'animate__bounceIn',
+        9: 'animate__backInDown',
+        10: 'animate__backInUp',
+    };
+
+    const CORES_MAP: Record<number, string> = {
+        1: 'bg-gray-900/90',      // #d2d4d7
+        2: 'bg-pink-900/90',      // #f98dbe
+        3: 'bg-purple-900/90',    // #b596ff
+        4: 'bg-blue-900/90',      // #76adff
+        5: 'bg-green-900/90',     // #77d86b
+        6: 'bg-yellow-900/90',    // #f2ca77
+        7: 'bg-orange-900/90',    // #fba67a
+        8: 'bg-red-900/90',       // #ff766d
+        9: 'bg-transparent'
+    }
+
+    const [eventoAnteriorIndex, setEventoAnteriorIndex] = useState(0);
+    const mudouDeEvento = eventoAnteriorIndex !== eventoAtualIndex;
+
+    useEffect(() => {
+        // Este código roda toda vez que eventoAtualIndex muda
+        setEventoAnteriorIndex(eventoAtualIndex);
+    }, [eventoAtualIndex]);
+
+    function obterAnimacao() {
+        if (mudouDeEvento) {
+            return 'animate__animated animate__fadeIn';
+        } else {
+            const eventoAtual = eventos[eventoAtualIndex];
+            const animacaoEvento = ANIMACOES_MAP[eventoAtual.animacao] || 'animate__fadeIn';
+            return `animate__animated ${animacaoEvento}`;
+        }
+    }
+
+    function obterClasseCorFundo() {
+        const eventoAtual = eventos[eventoAtualIndex];
+        const corFundoEvento = CORES_MAP[eventoAtual.cor] || 'bg-gray-300';
+        return corFundoEvento;
+    }
 
     // Tela de loading
     if (isLoading) {
@@ -114,17 +170,18 @@ export default function EventosPage() {
         <>
             {/* Imagem de Fundo */}
             <img
-                className="fixed inset-0 object-cover w-full h-full -z-10"
+                key={`${eventoAtualIndex}-${imagemAtualIndex}`}
+                className={`fixed inset-0 object-cover w-full h-full -z-10 ${obterAnimacao()}`}
                 src={imagemAtual}
                 alt="Imagem de fundo do evento"
                 draggable='false'
             />
 
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
-            <main className="h-screen w-screen bg-black/60 flex justify-end">
+            <main className="h-screen w-screen bg-black/15 flex justify-end">
 
                 {/* Barra Lateral de Informações */}
-                <div className="bg-indigo-950/80 h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px]">
+                <div className={`h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px] ${obterClasseCorFundo()}`}>
 
                     <div className="flex-grow">
                         <p className="text-sm font-semibold text-gray-300 mb-4 font-inter">IFRO EVENTS</p>
@@ -145,8 +202,22 @@ export default function EventosPage() {
                                 <img src="/gps.svg" alt="Localização" />
                                 <p className="font-inter">{eventoAtual.local}</p>
                             </div>
+                            <div className="flex flex-row gap-2">
+                                <img src="/category.svg" alt="Localização" />
+                                <p className="font-inter">{eventoAtual.categoria.toUpperCase()}</p>
+                            </div>
+                            <div className="flex flex-row gap-2">
+                                <img src="/tags.svg" alt="Localização" />
+                                <p className="font-inter ">{eventoAtual.tags.join(' - ').toLowerCase()}</p>
+                            </div>
                         </div>
                     </div>
+
+                    {eventoAtual.link && (
+                        <div className="bg-white/10 rounded-[8px] h-70 w-70 p-4 flex translate-x-15 items-center justify-center mb-8">
+                            <img src={eventoAtual.link} className="h-full w-full object-contain" alt="QR-Code" />
+                        </div>
+                    )}
 
                     <div className="mt-8 mb-16 bg-white/10 rounded-[8px] p-2">
                         <p className="text-gray-300 font-inter">
