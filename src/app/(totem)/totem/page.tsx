@@ -91,16 +91,15 @@ export default function EventosPage() {
     };
 
     const CORES_MAP: Record<number, string> = {
-        1: 'bg-gray-700/90',      // #d2d4d7
-        2: 'bg-pink-400/90',      // #f98dbe
-        3: 'bg-purple-400/90',    // #d27cfe
-        4: 'bg-purple-300/90',    // #b596ff
-        5: 'bg-blue-400/90',      // #76adff
-        6: 'bg-green-400/90',     // #77d86b
-        7: 'bg-yellow-300/90',    // #f2ca77
-        8: 'bg-orange-300/90',    // #fba67a
-        9: 'bg-red-400/90',       // #ff766d
-        10: 'bg-transparent'
+        1: 'bg-gray-900/90',      // #d2d4d7
+        2: 'bg-pink-900/90',      // #f98dbe
+        3: 'bg-purple-900/90',    // #b596ff
+        4: 'bg-blue-900/90',      // #76adff
+        5: 'bg-green-900/90',     // #77d86b
+        6: 'bg-yellow-900/90',    // #f2ca77
+        7: 'bg-orange-900/90',    // #fba67a
+        8: 'bg-red-900/90',       // #ff766d
+        9: 'bg-transparent'
     }
 
     const [eventoAnteriorIndex, setEventoAnteriorIndex] = useState(0);
@@ -215,7 +214,7 @@ export default function EventosPage() {
                     </div>
 
                     {eventoAtual.link && (
-                        <div className="bg-white/10 rounded-[8px] h-70 w-70 p-4 flex items-center justify-center mb-8">
+                        <div className="bg-white/10 rounded-[8px] h-70 w-70 p-4 flex translate-x-15 items-center justify-center mb-8">
                             <img src={eventoAtual.link} className="h-full w-full object-contain" alt="QR-Code" />
                         </div>
                     )}
