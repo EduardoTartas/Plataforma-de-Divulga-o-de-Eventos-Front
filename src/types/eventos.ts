@@ -70,6 +70,9 @@ export interface EventoTotem {
   midia: EventoMidia[];
   cor: number;
   animacao: number;
+  categoria: string;
+  tags: string[];
+  link?: string;
 }
 
 export interface EventosTotemApiResponse {

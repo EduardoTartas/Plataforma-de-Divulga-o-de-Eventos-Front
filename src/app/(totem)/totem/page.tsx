@@ -5,13 +5,14 @@ import { useEventosTotem } from "@/hooks/useEventosTotem";
 import { formatarDataEvento, formatarHorarioEvento, extrairImagensEvento } from "@/lib/utils";
 
 import 'animate.css';
+import { EventoTotem } from "@/types/eventos";
 
 export default function EventosPage() {
     // Busca os eventos reais da API
     const { data: eventosApi, isLoading, isError } = useEventosTotem();
 
     // Transforma os eventos da API para o formato usado pelo componente
-    const eventos = eventosApi.map(evento => ({
+    const eventos: EventoTotem[] | any = eventosApi.map(evento => ({
         id: evento._id,
         titulo: evento.titulo,
         data: formatarDataEvento(evento.dataInicio),
@@ -20,7 +21,10 @@ export default function EventosPage() {
         descricao: evento.descricao,
         imagens: extrairImagensEvento(evento.midia),
         cor: evento.cor,
-        animacao: evento.animacao
+        animacao: evento.animacao,
+        categoria: evento.categoria,
+        tags: evento.tags,
+        link: evento.link
     }));
 
     // Estado que controla qual evento está sendo exibido
@@ -86,6 +90,19 @@ export default function EventosPage() {
         10: 'animate__backInUp',
     };
 
+    const CORES_MAP: Record<number, string> = {
+        1: 'bg-gray-700/90',      // #d2d4d7
+        2: 'bg-pink-400/90',      // #f98dbe
+        3: 'bg-purple-400/90',    // #d27cfe
+        4: 'bg-purple-300/90',    // #b596ff
+        5: 'bg-blue-400/90',      // #76adff
+        6: 'bg-green-400/90',     // #77d86b
+        7: 'bg-yellow-300/90',    // #f2ca77
+        8: 'bg-orange-300/90',    // #fba67a
+        9: 'bg-red-400/90',       // #ff766d
+        10: 'bg-transparent'
+    }
+
     const [eventoAnteriorIndex, setEventoAnteriorIndex] = useState(0);
     const mudouDeEvento = eventoAnteriorIndex !== eventoAtualIndex;
 
@@ -100,8 +117,14 @@ export default function EventosPage() {
         } else {
             const eventoAtual = eventos[eventoAtualIndex];
             const animacaoEvento = ANIMACOES_MAP[eventoAtual.animacao] || 'animate__fadeIn';
-            return `animate__animated ${animacaoEvento}`;  // ← SÓ ANIMAÇÃO!
+            return `animate__animated ${animacaoEvento}`;
         }
+    }
+
+    function obterClasseCorFundo() {
+        const eventoAtual = eventos[eventoAtualIndex];
+        const corFundoEvento = CORES_MAP[eventoAtual.cor] || 'bg-gray-300';
+        return corFundoEvento;
     }
 
     // Tela de loading
@@ -159,7 +182,7 @@ export default function EventosPage() {
             <main className="h-screen w-screen bg-black/15 flex justify-end">
 
                 {/* Barra Lateral de Informações */}
-                <div className="bg-indigo-950/80 h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px]">
+                <div className={`h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px] ${obterClasseCorFundo()}`}>
 
                     <div className="flex-grow">
                         <p className="text-sm font-semibold text-gray-300 mb-4 font-inter">IFRO EVENTS</p>
@@ -180,8 +203,22 @@ export default function EventosPage() {
                                 <img src="/gps.svg" alt="Localização" />
                                 <p className="font-inter">{eventoAtual.local}</p>
                             </div>
+                            <div className="flex flex-row gap-2">
+                                <img src="/category.svg" alt="Localização" />
+                                <p className="font-inter">{eventoAtual.categoria.toUpperCase()}</p>
+                            </div>
+                            <div className="flex flex-row gap-2">
+                                <img src="/tags.svg" alt="Localização" />
+                                <p className="font-inter ">{eventoAtual.tags.join(' - ').toLowerCase()}</p>
+                            </div>
                         </div>
                     </div>
+
+                    {eventoAtual.link && (
+                        <div className="bg-white/10 rounded-[8px] h-70 w-70 p-4 flex items-center justify-center mb-8">
+                            <img src={eventoAtual.link} className="h-full w-full object-contain" alt="QR-Code" />
+                        </div>
+                    )}
 
                     <div className="mt-8 mb-16 bg-white/10 rounded-[8px] p-2">
                         <p className="text-gray-300 font-inter">
