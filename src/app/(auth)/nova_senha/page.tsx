@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-export default function RecuperarSenhaPage() {
+export default function NovaSenhaPage() {
     return (
-        <div className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4 py-8">
-            <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
+        <div className="w-full max-w-md">
+            <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
                 <Link
                     href="/login"
                     className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
@@ -20,28 +20,42 @@ export default function RecuperarSenhaPage() {
                             clipRule="evenodd"
                         />
                     </svg>
-                    <span>Voltar para login</span>
+                    <span>Voltar</span>
                 </Link>
 
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Recuperar Senha</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Definir Nova Senha</h1>
                     <p className="mt-3 text-sm text-gray-600">
-                        Enviaremos um link de verificação para o seu e-mail para redefinir sua senha.
+                        Escolha uma senha forte para proteger sua conta
                     </p>
                 </div>
 
                 <form className="space-y-4">
                     <div className="space-y-1.5">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                            E-mail
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                            Nova Senha
                         </label>
                         <input
-                            id="email"
-                            type="email"
+                            id="password"
+                            type="password"
                             className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
                                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                      placeholder:text-gray-400 transition-all"
-                            placeholder="seu@email.com"
+                            placeholder="••••••••"
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                            Confirmar Senha
+                        </label>
+                        <input
+                            id="confirmPassword"
+                            type="password"
+                            className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
+                                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                                     placeholder:text-gray-400 transition-all"
+                            placeholder="••••••••"
                         />
                     </div>
 
@@ -51,7 +65,7 @@ export default function RecuperarSenhaPage() {
                                  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
                                  focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
                     >
-                        Enviar Código
+                        Redefinir Senha
                     </button>
                 </form>
             </div>
