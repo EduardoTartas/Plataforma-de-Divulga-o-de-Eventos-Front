@@ -76,6 +76,11 @@ export default function EventosPage() {
         return () => clearInterval(intervalo);
     }, [eventos]);
 
+    // QR Code
+    useEffect(() => {
+        
+    })
+
     // Animações disponíveis
     const ANIMACOES_MAP: Record<number, string> = {
         1: 'animate__fadeIn',
