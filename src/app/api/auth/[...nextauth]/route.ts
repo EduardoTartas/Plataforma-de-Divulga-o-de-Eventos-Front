@@ -68,8 +68,8 @@ export const authOptions: NextAuthOptions = {
             senha: data.user.senha ?? "",
             status: data.user.status ?? "",
             updatedAt: data.user.updatedAt ?? "",
-            accesstoken: data.accesstoken ?? "",
-            refreshtoken: data.refreshtoken ?? "",
+            accesstoken: data.user.accesstoken ?? "",
+            refreshtoken: data.user.refreshtoken ?? "",
           };
         }
 
@@ -121,7 +121,7 @@ export const authOptions: NextAuthOptions = {
 
       // Se o refresh falhou, forçar logout no cliente
       if (token?.error === "RefreshAccessTokenError" && typeof window !== "undefined") {
-        window.location.href = "/logout";
+        window.location.href = "/login";
       }
 
       return session;
