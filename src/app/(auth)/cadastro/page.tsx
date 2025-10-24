@@ -2,8 +2,9 @@ import Link from "next/link";
 
 export default function CadastroPage() {
     return (
-        <div className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4 py-8">
-            <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
+        <div className="w-full max-w-md">
+            <div className="bg-white rounded-lg shadow-xl pb-6 pl-6 pr-6 space-y-4">
+                <img src="/ifro-events-icon.svg" alt="Ifro Events" className="mx-auto h-24 w-24" />
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-900">Criar Conta</h1>
                     <p className="mt-2 text-sm text-gray-600">
