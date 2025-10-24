@@ -81,4 +81,14 @@ export interface EventosTotemApiResponse {
   message: string;
   data: EventoTotem[];
   errors: any[];
-} 
+}
+
+export interface QrCodeResponse {
+  statusCode: number,
+  message: string,
+  data: {
+    evento: string,
+    linkInscricao: string,
+    qrcode: string
+  }
+}

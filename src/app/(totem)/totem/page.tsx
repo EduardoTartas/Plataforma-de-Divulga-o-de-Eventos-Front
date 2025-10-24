@@ -5,7 +5,9 @@ import { useEventosTotem } from "@/hooks/useEventosTotem";
 import { formatarDataEvento, formatarHorarioEvento, extrairImagensEvento } from "@/lib/utils";
 
 import 'animate.css';
-import { EventoTotem } from "@/types/eventos";
+import { EventoTotem, QrCodeResponse } from "@/types/eventos";
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5015';
 
 export default function EventosPage() {
     // Busca os eventos reais da API
@@ -76,11 +78,6 @@ export default function EventosPage() {
         return () => clearInterval(intervalo);
     }, [eventos]);
 
-    // QR Code
-    useEffect(() => {
-        
-    })
-
     // Animações disponíveis
     const ANIMACOES_MAP: Record<number, string> = {
         1: 'animate__fadeIn',
@@ -110,10 +107,63 @@ export default function EventosPage() {
     const [eventoAnteriorIndex, setEventoAnteriorIndex] = useState(0);
     const mudouDeEvento = eventoAnteriorIndex !== eventoAtualIndex;
 
+    // Estado para armazenar o QR code do evento atual
+    const [qrCodeAtual, setQrCodeAtual] = useState<string | null>(null);
+    const [carregandoQrCode, setCarregandoQrCode] = useState(false);
+
+    // Estado para rastrear o ID do último evento para o qual buscamos QR code
+    const [ultimoEventoIdBuscado, setUltimoEventoIdBuscado] = useState<string | null>(null);
+
+    // useEffect separado para atualizar o eventoAnteriorIndex
     useEffect(() => {
-        // Este código roda toda vez que eventoAtualIndex muda
-        setEventoAnteriorIndex(eventoAtualIndex);
-    }, [eventoAtualIndex]);
+        if (mudouDeEvento) {
+            setEventoAnteriorIndex(eventoAtualIndex);
+        }
+    }, [eventoAtualIndex, mudouDeEvento]);
+
+    // useEffect para buscar QR code quando o evento atual mudar
+    useEffect(() => {
+        // Só executa se houver eventos carregados
+        if (eventos.length === 0) return;
+
+        const eventoAtual = eventos[eventoAtualIndex];
+
+        // Verifica se já buscamos o QR code para este evento
+        if (ultimoEventoIdBuscado === eventoAtual.id) {
+            return;
+        }
+
+        // Marca que estamos buscando para este evento
+        setUltimoEventoIdBuscado(eventoAtual.id);
+
+        // Se o evento não tem link, limpa o QR code
+        if (!eventoAtual.link) {
+            setQrCodeAtual(null);
+            return;
+        }
+
+        // Função assíncrona para buscar o QR code
+        async function buscarQrCode() {
+            try {
+                setCarregandoQrCode(true);
+                const resposta = await fetch(`${apiUrl}/eventos/${eventoAtual.id}/qrcode`);
+
+                if (!resposta.ok) {
+                    throw new Error('Erro ao buscar QR code');
+                }
+
+                const dados: QrCodeResponse = await resposta.json();
+                setQrCodeAtual(dados.data.qrcode);
+            } catch (erro) {
+                console.error('Erro ao buscar QR code:', erro);
+                setQrCodeAtual(null);
+            } finally {
+                setCarregandoQrCode(false);
+            }
+        }
+
+        buscarQrCode();
+    }, [eventoAtualIndex, eventos, ultimoEventoIdBuscado]);
 
     function obterAnimacao() {
         if (mudouDeEvento) {
@@ -220,7 +270,13 @@ export default function EventosPage() {
 
                     {eventoAtual.link && (
                         <div className="bg-white/10 rounded-[8px] h-70 w-70 p-4 flex translate-x-15 items-center justify-center mb-8">
-                            <img src={eventoAtual.link} className="h-full w-full object-contain" alt="QR-Code" />
+                            {carregandoQrCode ? (
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                            ) : qrCodeAtual ? (
+                                <img src={qrCodeAtual} className="h-full w-full object-contain" alt="QR-Code" />
+                            ) : (
+                                <p className="text-white text-center font-inter">QR Code não disponível</p>
+                            )}
                         </div>
                     )}
 
