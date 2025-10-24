@@ -33,7 +33,6 @@ async function refreshAccessToken(token: JWT) {
 }
 
 
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
