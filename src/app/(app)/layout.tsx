@@ -7,8 +7,11 @@ import { useEffect } from "react";
 import Footer from "@/components/ui/footer";
 import Header from "@/components/ui/header";
 
-
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -21,19 +24,22 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   // Enquanto o estado da sessão estiver carregando, você pode mostrar um loader
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Carregando...
+      <div className="bg-linear-to-br from-indigo-50 to-blue-100 flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <span className="ml-3 text-gray-600">Carregando ...</span>
       </div>
     );
   }
 
   // Se está autenticado, renderiza os filhos
   if (status === "authenticated") {
-    return <>
-    <Header />
-      {children}
-    <Footer />
-    </>;
+    return (
+      <>
+        <Header />
+        {children}
+        <Footer />
+      </>
+    );
   }
 
   // Evita renderizar algo antes da verificação
