@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { signIn, useSession } from "next-auth/react"
-import { toast } from "react-toastify";
+import { useSession } from "next-auth/react"
+import useLogin from "@/hooks/useLogin";
 
 
 export default function LoginPage() {
@@ -19,7 +19,7 @@ const { data: session, status } = useSession()
     }
   }, [status, router]);
   
-  const [loading, setLoading] = useState(false);
+  const { login, isLoading } = useLogin();
 
   const [email, setEmail] = useState("eduardo@gmail.com")
 
@@ -28,30 +28,9 @@ const { data: session, status } = useSession()
   );
   
   const handleSubmit = async (e: React.FormEvent) => {
-    
     e.preventDefault();
-    setLoading(true);
-    
-    const res = await signIn("credentials", {
-      email,
-      senha,
-      redirect: false,
-    });
-
-    if (res?.ok) {
-      toast.success('Login realizado com sucesso', { autoClose: 1000 });
-      setLoading(false);
-      router.push("/meus_eventos");
-    } else {  
-      toast.error('Credenciais inválidas');
-      setLoading(false);
-    }
+    await login({ email, senha, callbackUrl: "/meus_eventos" });
   };
-
-
-
-
-
 
   return (
     <div className="w-full max-w-md">
@@ -119,13 +98,13 @@ const { data: session, status } = useSession()
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className={`w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                      hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
-                     focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
-            aria-busy={loading}
+                     focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            aria-busy={isLoading}
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
