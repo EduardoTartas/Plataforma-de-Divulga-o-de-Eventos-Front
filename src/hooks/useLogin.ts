@@ -34,7 +34,18 @@ export default function useLogin() {
         return { ok: true };
       }
 
-      const message = (res as any)?.error || "Credenciais inválidas";
+      const resAny = res as any;
+      let message = resAny?.error || "Erro ao efetuar login";
+
+      // Se a API / fluxo do auth retornar status 201, consideramos credenciais inválidas
+      if (typeof resAny?.status === "number" && resAny.status === 401) {
+        message = "Credenciais inválidas";
+      }
+      
+      if (typeof message === "string" && message.startsWith("Error:")) {
+        message = message.replace(/^Error:\s*/i, "");
+      }
+
       setError(message);
       toast.error(message);
       return { ok: false, error: message };
