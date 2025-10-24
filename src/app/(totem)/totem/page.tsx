@@ -17,7 +17,8 @@ export default function EventosPage() {
     const eventos: EventoTotem[] | any = eventosApi.map(evento => ({
         id: evento._id,
         titulo: evento.titulo,
-        data: formatarDataEvento(evento.dataInicio),
+        dataInicio: formatarDataEvento(evento.dataInicio),
+        dataFim: formatarDataEvento(evento.dataFim),
         horario: formatarHorarioEvento(evento.dataInicio, evento.dataFim),
         local: evento.local,
         descricao: evento.descricao,
@@ -247,7 +248,7 @@ export default function EventosPage() {
                         <div className="flex flex-col space-y-4 text-gray-200">
                             <div className="flex flex-row gap-2">
                                 <img src="/calendar.svg" alt="Calendário" />
-                                <p className="font-inter">{eventoAtual.data}</p>
+                                <p className="font-inter">{eventoAtual.dataInicio} - {eventoAtual.dataFim}</p>
                             </div>
                             <div className="flex flex-row gap-2">
                                 <img src="/watch.svg" alt="Relógio" />
