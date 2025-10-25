@@ -8,10 +8,11 @@ import type { JWT } from "next-auth/jwt";
  */
 async function refreshAccessToken(token: JWT) {
   try {
+    console.log('[Auth] refreshAccessToken called for token id:', token?.id);
     const res = await fetch(`${process.env.API_URL_SERVER_SIDED}/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshtoken: token.refreshtoken }),
+      body: JSON.stringify({ refresh_token: token.refreshtoken }),
     });
 
     if (!res.ok) throw new Error("Falha ao renovar token");
@@ -19,12 +20,23 @@ async function refreshAccessToken(token: JWT) {
     const json = await res.json();
     const data = json.data;
 
+    // Backend may return tokens under data.user (example) or data.usuario
+    const userData = (data && (data.user ?? data.usuario)) || data || null;
+
+    if (!userData) {
+      throw new Error('Formato de resposta inesperado ao renovar token');
+    }
+
+    const oldRT = token?.refreshtoken;
+    const newRT = userData.refreshtoken ?? oldRT;
+
     return {
       ...token,
-      accesstoken: data.accesstoken,
-      refreshtoken: data.refreshtoken ?? token.refreshtoken,
-      accessTokenExpires: Date.now() + 60 * 60 * 1000, // ✅ 1 hora (ou data.expires_in se existir)
-      user: data.usuario ?? token.user, // opcional, caso queira atualizar dados do usuário
+      accesstoken: userData.accesstoken ?? token.accesstoken,
+      // substitui o refresh token se a API retornou um novo
+      refreshtoken: newRT,
+      accessTokenExpires: Date.now() + 10 * 60 * 1000, // ✅ 10 minutos
+      user: userData ?? token.user,
     };
   } catch (err) {
     console.error("Erro ao renovar token:", err);
@@ -82,6 +94,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        console.log('[Auth] jwt initial token set for user id:', user.id, 'expires in (ms):', 10 * 60 * 1000);
         return {
           id: user.id,
           _id: user._id,
@@ -91,16 +104,18 @@ export const authOptions: NextAuthOptions = {
           updatedAt: user.updatedAt,
           accesstoken: user.accesstoken,
           refreshtoken: user.refreshtoken,
-          accessTokenExpires: Date.now() + 60 * 60 * 1000, // 1 hora
+          accessTokenExpires: Date.now() + 10 * 60 * 1000, // 10 minutos
         };
       }
 
       // 2️⃣ Token ainda válido
       if (Date.now() < Number(token.accessTokenExpires ?? 0)) {
+        // token válido — nothing to do
         return token;
       }
 
       // 3️⃣ Token expirou → tenta renovar
+      console.log('[Auth] access token expired for token id:', token?.id, 'attempting refresh');
       return await refreshAccessToken(token);
     },
 

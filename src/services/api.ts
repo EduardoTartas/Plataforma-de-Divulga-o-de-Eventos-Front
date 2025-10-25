@@ -51,7 +51,7 @@ export async function fetchData<T>(
   if (!response.ok) {
     if (response.status === 498) {
       if (typeof window !== "undefined") {
-        window.location.href = "/logout";
+        window.location.href = "/login";
         return {} as T;
       }
     }
