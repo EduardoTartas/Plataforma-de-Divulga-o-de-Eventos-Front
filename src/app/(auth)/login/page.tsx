@@ -26,10 +26,11 @@ const { data: session, status } = useSession()
   const [senha, setSenha] = useState(
     process.env.NEXT_PUBLIC_AMBIENTE != "production" ? "ABab@123456" : ""
   );
+  const [remember, setRemember] = useState(true);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email, senha, callbackUrl: "/meus_eventos" });
+    await login({ email, senha, callbackUrl: "/meus_eventos", remember });
   };
 
   return (
@@ -83,6 +84,8 @@ const { data: session, status } = useSession()
                 type="checkbox"
                 className="w-4 h-4 text-indigo-600 border-gray-300 rounded 
                          focus:ring-2 focus:ring-indigo-500"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
               />
               <label htmlFor="remember" className="text-sm text-gray-700">
                 Lembrar de mim

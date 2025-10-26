@@ -9,6 +9,7 @@ interface LoginParams {
   email: string;
   senha: string;
   callbackUrl?: string;
+  remember?: boolean;
 }
 
 export default function useLogin() {
@@ -17,6 +18,8 @@ export default function useLogin() {
   const [error, setError] = useState<string | null>(null);
 
   async function login({ email, senha, callbackUrl = "/meus_eventos" }: LoginParams) {
+    // if remember is not provided, default to false
+    const rememberFlag = (arguments[0] as any)?.remember ?? false;
     setIsLoading(true);
     setError(null);
 
@@ -29,6 +32,17 @@ export default function useLogin() {
 
       if (res?.ok) {
         toast.success("Login realizado com sucesso", { autoClose: 1000 });
+        try {
+          if (rememberFlag) {
+            document.cookie = `remember_me=1; path=/; max-age=${60 * 60 * 24 * 30}; samesite=strict`;
+          } else {
+            // marca que o login atual deve durar apenas até fechar a aba/janela
+            sessionStorage.setItem("keep_until_close", "1");
+            // também removemos qualquer cookie persistente anterior
+            document.cookie = `remember_me=; path=/; max-age=0`;
+          }
+        } catch (e) {
+        }
         // navegar para a rota desejada
         router.push(callbackUrl);
         return { ok: true };
