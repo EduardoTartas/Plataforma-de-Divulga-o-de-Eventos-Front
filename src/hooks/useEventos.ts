@@ -3,9 +3,6 @@ import { fetchData } from "@/services/api";
 import { EventosApiResponse } from "@/types/eventos";
 import { toast } from "react-toastify";
 
-// Token  chumbado
-const TEMP_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjZjZmQ3ODE0NGU5YTY3NGFlN2ZkNyIsImlhdCI6MTc2MTAwNzAxMywiZXhwIjoxNzYxMDA3OTEzfQ.JtiUr5WTSRVysyLotmr55lSRDQoirgX3G6cTgsofh_g";
-
 interface UseEventosParams {
   page: number;
   limit: number;
@@ -45,12 +42,9 @@ export function useEventos({ page, limit, enabled = true, filters }: UseEventosP
         params.append("categoria", filters.category);
       }
 
-      return fetchData<EventosApiResponse>(
-        `/eventos/?${params.toString()}`,
-        "GET",
-        TEMP_TOKEN
-      );
+      return fetchData<EventosApiResponse>(`/eventos/?${params.toString()}`, "GET");
     },
+
     enabled,
     staleTime: 1000 * 60 * 5, // 5 minutos
     refetchOnWindowFocus: false,
@@ -74,18 +68,13 @@ export function useToggleEventStatus() {
     error: toggleStatusError,
   } = useMutation({
     mutationFn: async ({ eventId, newStatus }: { eventId: string; newStatus: number }) => {
-      return fetchData(
-        `/eventos/${eventId}`,
-        "PATCH",
-        TEMP_TOKEN,
-        { status: newStatus }
-      );
+
+      return fetchData(`/eventos/${eventId}`, "PATCH", undefined, { status: newStatus });
     },
     onSuccess: (_, variables) => {
-      // Invalidar a query de eventos para atualizar a lista automaticamente
+  
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
       
-      // Notificação de sucesso
       const statusText = variables.newStatus === 1 ? "ativado" : "desativado";
       toast.success(`Evento ${statusText} com sucesso!`, {
         position: "top-right",
@@ -111,7 +100,6 @@ export function useToggleEventStatus() {
 
 export function useDeleteEvent() {
   const queryClient = useQueryClient();
-
   const {
     mutateAsync: deleteEventMutate,
     isPending: deleteEventIsPending,
@@ -119,14 +107,10 @@ export function useDeleteEvent() {
     error: deleteEventError,
   } = useMutation({
     mutationFn: async (eventId: string) => {
-      return fetchData(
-        `/eventos/${eventId}`,
-        "DELETE",
-        TEMP_TOKEN
-      );
+      return fetchData(`/eventos/${eventId}`, "DELETE");
     },
     onSuccess: () => {
-      // Invalidar a query de eventos para atualizar a lista automaticamente
+      
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
       // Notificação de sucesso
       toast.success("Evento excluído com sucesso!", {

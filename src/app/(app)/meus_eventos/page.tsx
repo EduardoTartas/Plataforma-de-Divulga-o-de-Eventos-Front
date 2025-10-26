@@ -12,6 +12,8 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import { useEventos, useToggleEventStatus, useDeleteEvent } from "@/hooks/useEventos";
+import { ThreeDot } from "react-loading-indicators";
+
 
 const ITEMS_PER_PAGE = 8;
 
@@ -157,9 +159,9 @@ export default function MeusEventosPage() {
                 <div className="container mx-auto px-6 py-8">
                     {/* Loading State */}
                     {isLoading && (
-                        <div className="flex items-center justify-center py-12 min-h-[400px]">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-                            <span className="ml-3 text-gray-600">Carregando eventos...</span>
+                        <div className="flex flex-col items-center justify-center py-12 min-h-[400px]">
+                            <ThreeDot variant="bounce" color="#4338CA" size="medium" text="" textColor="" />
+                            <span className="mt-3 text-gray-600">Carregando eventos...</span>
                         </div>
                     )}
 

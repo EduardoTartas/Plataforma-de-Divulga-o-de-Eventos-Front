@@ -1,6 +1,38 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import useLogin from "@/hooks/useLogin";
+
 
 export default function LoginPage() {
+
+const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  // Se já está autenticado, redireciona para a página de listagem dos planos do usuário
+  useEffect(() => {
+    if (session?.user) {
+      router.push("/meus_eventos");
+    }
+  }, [status, router]);
+  
+  const { login, isLoading } = useLogin();
+
+  const [email, setEmail] = useState("eduardo@gmail.com")
+
+  const [senha, setSenha] = useState(
+    process.env.NEXT_PUBLIC_AMBIENTE != "production" ? "ABab@123456" : ""
+  );
+  const [remember, setRemember] = useState(true);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await login({ email, senha, callbackUrl: "/meus_eventos", remember });
+  };
+
   return (
     <div className="w-full max-w-md">
       <div className="bg-white rounded-lg shadow-xl pb-6 pl-6 pr-6 space-y-4">
@@ -12,7 +44,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1.5">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               E-mail
@@ -24,6 +56,8 @@ export default function LoginPage() {
                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                        placeholder:text-gray-400 transition-all"
               placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -38,6 +72,8 @@ export default function LoginPage() {
                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                        placeholder:text-gray-400 transition-all"
               placeholder="••••••••"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
             />
           </div>
 
@@ -48,6 +84,8 @@ export default function LoginPage() {
                 type="checkbox"
                 className="w-4 h-4 text-indigo-600 border-gray-300 rounded 
                          focus:ring-2 focus:ring-indigo-500"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
               />
               <label htmlFor="remember" className="text-sm text-gray-700">
                 Lembrar de mim
@@ -63,11 +101,13 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
+            disabled={isLoading}
+            className={`w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                      hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
-                     focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
+                     focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            aria-busy={isLoading}
           >
-            Entrar
+            {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
