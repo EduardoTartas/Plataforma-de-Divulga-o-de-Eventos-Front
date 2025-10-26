@@ -233,55 +233,55 @@ export default function EventosPage() {
             />
 
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
-            <main className="h-screen w-screen bg-black/15 flex justify-end">
+            <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end">
 
                 {/* Barra Lateral de Informações */}
-                <div className={`h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px] ${obterClasseCorFundo()}`}>
+                <div className={`h-full w-full max-w-lg p-[3vh] flex flex-col gap-[2vh] rounded-tl-[16px] rounded-bl-[16px] ${obterClasseCorFundo()}`}>
 
-                    <div className="flex-grow">
-                        <p className="text-sm font-semibold text-gray-300 mb-4 font-inter">IFRO EVENTS</p>
-                        <h1 className="text-4xl font-bold mb-8 font-inter">
+                    <div className="flex-shrink-0">
+                        <p className="text-[1.6vh] font-semibold text-gray-300 mb-[1vh] font-inter">IFRO EVENTS</p>
+                        <h1 className="text-[4vh] font-bold leading-tight font-inter line-clamp-2">
                             {eventoAtual.titulo}
                         </h1>
 
-                        <div className="flex flex-col space-y-4 text-gray-200">
+                        <div className="flex flex-col gap-[1.5vh] text-gray-200 text-[1.8vh] mt-[2vh]">
                             <div className="flex flex-row gap-2">
-                                <img src="/calendar.svg" alt="Calendário" />
+                                <img src="/calendar.svg" alt="Calendário" className="w-[2vh] h-[2vh]" />
                                 <p className="font-inter">{eventoAtual.data}</p>
                             </div>
                             <div className="flex flex-row gap-2">
-                                <img src="/watch.svg" alt="Relógio" />
+                                <img src="/watch.svg" alt="Relógio" className="w-[2vh] h-[2vh]" />
                                 <p className="font-inter">{eventoAtual.horario}</p>
                             </div>
                             <div className="flex flex-row gap-2">
-                                <img src="/gps.svg" alt="Localização" />
+                                <img src="/gps.svg" alt="Localização" className="w-[2vh] h-[2vh]" />
                                 <p className="font-inter">{eventoAtual.local}</p>
                             </div>
                             <div className="flex flex-row gap-2">
-                                <img src="/category.svg" alt="Localização" />
+                                <img src="/category.svg" alt="Localização" className="w-[2vh] h-[2vh]" />
                                 <p className="font-inter">{eventoAtual.categoria.toUpperCase()}</p>
                             </div>
                             <div className="flex flex-row gap-2">
-                                <img src="/tags.svg" alt="Localização" />
+                                <img src="/tags.svg" alt="Localização" className="w-[2vh] h-[2vh]" />
                                 <p className="font-inter ">{eventoAtual.tags.join(' - ').toLowerCase()}</p>
                             </div>
                         </div>
                     </div>
 
                     {eventoAtual.link && (
-                        <div className="bg-white/10 rounded-[8px] h-70 w-70 p-4 flex translate-x-15 items-center justify-center mb-8">
+                        <div className="bg-white/10 rounded-[8px] w-[20vh] h-[20vh] p-4 flex items-center justify-center flex-shrink-0">
                             {carregandoQrCode ? (
-                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                                <div className="animate-spin rounded-full w-[8vh] h-[8vh] border-t-2 border-b-2 border-white"></div>
                             ) : qrCodeAtual ? (
                                 <img src={qrCodeAtual} className="h-full w-full object-contain" alt="QR-Code" />
                             ) : (
-                                <p className="text-white text-center font-inter">QR Code não disponível</p>
+                                <p className="text-white text-center font-inter text-[1.6vh]">QR Code não disponível</p>
                             )}
                         </div>
                     )}
 
-                    <div className="mt-8 mb-16 bg-white/10 rounded-[8px] p-2">
-                        <p className="text-gray-300 font-inter">
+                    <div className="flex-1 min-h-0 bg-white/10 rounded-[8px] p-[1.5vh] overflow-hidden">
+                        <p className="text-gray-300 font-inter text-[1.8vh] leading-relaxed line-clamp-[10]">
                             {eventoAtual.descricao}
                         </p>
                     </div>
