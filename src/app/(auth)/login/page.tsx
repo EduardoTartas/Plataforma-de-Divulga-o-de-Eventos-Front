@@ -21,10 +21,10 @@ const { data: session, status } = useSession()
   
   const { login, isLoading } = useLogin();
 
-  const [email, setEmail] = useState("eduardo@gmail.com")
+  const [email, setEmail] = useState("admin@admin.com")
 
   const [senha, setSenha] = useState(
-    process.env.NEXT_PUBLIC_AMBIENTE != "production" ? "ABab@123456" : ""
+    process.env.NEXT_PUBLIC_AMBIENTE != "production" ? "admin" : ""
   );
   const [remember, setRemember] = useState(true);
   
