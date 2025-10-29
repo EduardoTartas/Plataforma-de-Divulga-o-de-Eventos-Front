@@ -268,8 +268,15 @@ export default function EventosPage() {
                         </div>
                     </div>
 
+                    <div className="flex-1 max-h-[30vh] min-h-0 bg-white/10 rounded-[8px] p-[1.5vh] overflow-hidden">
+                        <p className="text-gray-300 font-inter text-[2.8vh] leading-relaxed line-clamp-[10]">
+                            {eventoAtual.descricao}
+                        </p>
+                    </div>
+                    
+
                     {eventoAtual.link && (
-                        <div className="bg-white/10 rounded-[8px] w-[20vh] h-[20vh] p-4 flex items-center justify-center flex-shrink-0">
+                        <div className="bg-white/10 rounded-[8px] w-[20vh] h-[20vh] p-4 flex items-center translate-y-10 translate-x-80 flex-shrink-0">
                             {carregandoQrCode ? (
                                 <div className="animate-spin rounded-full w-[8vh] h-[8vh] border-t-2 border-b-2 border-white"></div>
                             ) : qrCodeAtual ? (
@@ -279,12 +286,6 @@ export default function EventosPage() {
                             )}
                         </div>
                     )}
-
-                    <div className="flex-1 min-h-0 bg-white/10 rounded-[8px] p-[1.5vh] overflow-hidden">
-                        <p className="text-gray-300 font-inter text-[1.8vh] leading-relaxed line-clamp-[10]">
-                            {eventoAtual.descricao}
-                        </p>
-                    </div>
                 </div>
             </main>
         </>
