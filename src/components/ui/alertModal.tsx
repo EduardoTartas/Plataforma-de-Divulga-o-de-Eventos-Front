@@ -52,20 +52,22 @@ export default function AlertModal({ title, message, icon, type, button1, button
         <dialog
             ref={modalRef}
             onCancel={onClose}
+            data-test="alert-modal"
+            data-testid="alert-modal"
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-xl p-0 shadow-2xl backdrop:bg-gray-900/60 backdrop:blur-sm m-0"
         >
             <div className="bg-white rounded-xl overflow-hidden flex flex-col">
                 {/*icon*/}
                 <div className="flex items-start gap-4 p-6">
-                    <div className="shrink-0">
-                        <img src={icon} className="w-12 h-12 mt-1" draggable="false" alt="ícone" />
+                    <div className="shrink-0" data-test="alert-icon-wrapper" data-testid="alert-icon-wrapper">
+                        <img src={icon} className="w-12 h-12 mt-1" draggable="false" alt="ícone" data-test="alert-icon" data-testid="alert-icon" />
                     </div>
 
                     {/*texto*/}
                     <div className="flex-1">
-                        <h2 className="text-lg font-semibold text-gray-900 text-left">{title}</h2>
+                        <h2 className="text-lg font-semibold text-gray-900 text-left" data-test="alert-title" data-testid="alert-title">{title}</h2>
                         <div className="mt-3">
-                            <p className="text-sm text-gray-700 leading-relaxed text-left">{message}</p>
+                            <p className="text-sm text-gray-700 leading-relaxed text-left" data-test="alert-message" data-testid="alert-message">{message}</p>
                         </div>
                     </div>
                 </div>
@@ -73,13 +75,17 @@ export default function AlertModal({ title, message, icon, type, button1, button
                 {/*botão*/}
                 <div className="flex justify-end gap-2 px-6 pb-6">
                     {button2 && (
-                        <Button onClick={handleSecondaryAction} className={button2?.className}>
-                            {button2?.text}
-                        </Button>
+                        <div data-test="alert-secondary-button" data-testid="alert-secondary-button">
+                            <Button onClick={handleSecondaryAction} className={button2?.className}>
+                                {button2?.text}
+                            </Button>
+                        </div>
                     )}
-                    <Button onClick={handlePrimaryAction} className={button1.className}>
-                        {button1.text}
-                    </Button>
+                    <div data-test="alert-primary-button" data-testid="alert-primary-button">
+                        <Button onClick={handlePrimaryAction} className={button1.className}>
+                            {button1.text}
+                        </Button>
+                    </div>
                 </div>
             </div>
         </dialog>

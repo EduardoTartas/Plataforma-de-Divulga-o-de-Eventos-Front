@@ -92,15 +92,15 @@ export default function CardContainer({
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div data-test="CardContainer" data-testid="CardContainer" className="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       {/* Título */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{titulo}</h1>
+      <h1 data-test="CardContainer--title" data-testid="CardContainer--title" className="text-2xl font-bold text-gray-900 mb-6">{titulo}</h1>
 
       {/* Barra de busca e filtros */}
-      <form onSubmit={handleSearch} className="mb-6">
+      <form onSubmit={handleSearch} className="mb-6" data-test="CardContainer--filters" data-testid="CardContainer--filters">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
           {/* Campo de busca */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative" data-test="CardContainer--search" data-testid="CardContainer--search">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10" />
             <Input
               type="text"
@@ -108,36 +108,38 @@ export default function CardContainer({
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="w-full pl-10 h-10 border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500"
+              data-test="CardContainer--search-input"
+              data-testid="CardContainer--search-input"
             />
           </div>
 
           {/* Filtro de status */}
-          <div className="w-full md:w-48">
+          <div className="w-full md:w-48" data-test="CardContainer--status-filter" data-testid="CardContainer--status-filter">
             <Select value={statusFilter} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500">
+              <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500" data-test="CardContainer--status-trigger" data-testid="CardContainer--status-trigger">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="all" className="text-gray-900">Todos os status</SelectItem>
-                <SelectItem value="active" className="text-gray-900">Ativo</SelectItem>
-                <SelectItem value="inactive" className="text-gray-900">Inativo</SelectItem>
+              <SelectContent className="bg-white" data-test="CardContainer--status-content" data-testid="CardContainer--status-content">
+                <SelectItem value="all" className="text-gray-900" data-test="CardContainer--status-all" data-testid="CardContainer--status-all">Todos os status</SelectItem>
+                <SelectItem value="active" className="text-gray-900" data-test="CardContainer--status-active" data-testid="CardContainer--status-active">Ativo</SelectItem>
+                <SelectItem value="inactive" className="text-gray-900" data-test="CardContainer--status-inactive" data-testid="CardContainer--status-inactive">Inativo</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Filtro de categoria */}
-          <div className="w-full md:w-52">
+          <div className="w-full md:w-52" data-test="CardContainer--category-filter" data-testid="CardContainer--category-filter">
             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500">
+              <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500" data-test="CardContainer--category-trigger" data-testid="CardContainer--category-trigger">
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="all" className="text-gray-900">Todas as categorias</SelectItem>
-                <SelectItem value="palestra" className="text-gray-900">Palestra</SelectItem>
-                <SelectItem value="seminario" className="text-gray-900">Seminário</SelectItem>
-                <SelectItem value="workshop" className="text-gray-900">Workshop</SelectItem>
-                <SelectItem value="curso" className="text-gray-900">Curso</SelectItem>
-                <SelectItem value="conferencia" className="text-gray-900">Conferência</SelectItem>
+              <SelectContent className="bg-white" data-test="CardContainer--category-content" data-testid="CardContainer--category-content">
+                <SelectItem value="all" className="text-gray-900" data-test="CardContainer--category-all" data-testid="CardContainer--category-all">Todas as categorias</SelectItem>
+                <SelectItem value="palestra" className="text-gray-900" data-test="CardContainer--category-palestra" data-testid="CardContainer--category-palestra">Palestra</SelectItem>
+                <SelectItem value="seminario" className="text-gray-900" data-test="CardContainer--category-seminario" data-testid="CardContainer--category-seminario">Seminário</SelectItem>
+                <SelectItem value="workshop" className="text-gray-900" data-test="CardContainer--category-workshop" data-testid="CardContainer--category-workshop">Workshop</SelectItem>
+                <SelectItem value="curso" className="text-gray-900" data-test="CardContainer--category-curso" data-testid="CardContainer--category-curso">Curso</SelectItem>
+                <SelectItem value="conferencia" className="text-gray-900" data-test="CardContainer--category-conferencia" data-testid="CardContainer--category-conferencia">Conferência</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -147,7 +149,7 @@ export default function CardContainer({
 
       {/* Grid de cards */}
       {eventos.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div data-test="CardContainer--grid" data-testid="CardContainer--grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {eventos.map((evento) => (
             <EventCard
               key={evento._id}
@@ -159,7 +161,7 @@ export default function CardContainer({
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
+        <div data-test="CardContainer--empty" data-testid="CardContainer--empty" className="text-center py-12">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
             fill="none"

@@ -15,6 +15,8 @@ export function LoginForm({
 
   return (
     <div
+      data-test="LoginForm"
+      data-testid="LoginForm"
       className={cn(
         "flex flex-col items-center justify-center min-h-screen w-full bg-gray-50 dark:bg-gray-900 px-6",
         className
@@ -23,15 +25,17 @@ export function LoginForm({
     >
 
       {/* Card */}
-      <Card className="w-[550px] shadow-2xl bg-white dark:bg-gray-400 rounded-2xl">
+      <Card data-test="LoginForm--card" className="w-[550px] shadow-2xl bg-white dark:bg-gray-400 rounded-2xl">
         <CardHeader className="text-center pt-12 pb-">
           <CardTitle className="text-3xl font-extrabold text-gray-800 dark:text-gray-100">
             
       {/* Logo */}
-      <div className="mb-12 flex justify-center">
+      <div data-test="LoginForm--logo" className="mb-12 flex justify-center">
         <img
           src="/ifro-events-icon.svg"
           alt="IFRO EVENTS"
+          data-test="LoginForm--logo-img"
+          data-testid="LoginForm--logo-img"
           className="w-3000 h-45" 
         />
       </div>
@@ -39,13 +43,14 @@ export function LoginForm({
         </CardHeader>
         
         <CardContent className="p-14">
-          <form className="flex flex-col gap-10">
+          <form data-test="LoginForm--form" className="flex flex-col gap-10">
 
             {/* E-mail */}
-            <div className="flex flex-col gap-4">
+            <div data-test="LoginForm--email" className="flex flex-col gap-4">
               <Label
                 htmlFor="email"
                 className="text-2xl font-medium text-gray-700 dark:text-gray-200"
+                data-test="LoginForm--label-email"
               >
                 E-mail
               </Label>
@@ -54,15 +59,17 @@ export function LoginForm({
                 type="email"
                 placeholder="seu@email.com"
                 required
+                data-test="LoginForm--input-email"
                 className="!text-2xl py-5 rounded-lg border-2 border-gray-300 dark:border-gray-700 focus:ring-indigo-500 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-400"
               />
             </div>
 
             {/* Senha */}
-            <div className="flex flex-col gap-2 relative">
+            <div data-test="LoginForm--password" className="flex flex-col gap-2 relative">
               <Label
                 htmlFor="password"
                 className="text-2xl font-medium text-gray-700 dark:text-gray-200"
+                data-test="LoginForm--label-password"
               >
                 Senha
               </Label>
@@ -71,11 +78,13 @@ export function LoginForm({
                 type={showPassword ? "text" : "password"}
                 required
                 placeholder="Digite sua senha"
+                data-test="LoginForm--input-password"
                 className="!text-2xl py-5 rounded-lg border-2 border-gray-300 dark:border-gray-700 focus:ring-indigo-500 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-400 pr-20"
               />
               {/* Botão ver/ocultar */}
               <button
                 type="button"
+                data-test="LoginForm--toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-lg"
               >
@@ -85,6 +94,7 @@ export function LoginForm({
               {/* Esqueceu a senha */}
               <a
                 href="#"
+                data-test="LoginForm--forgot"
                 className="self-end text-blue-600 dark:text-blue-400 hover:underline text-xl mt-2"
               >
                 Esqueceu a senha?
@@ -92,15 +102,17 @@ export function LoginForm({
             </div>
 
             {/* Checkbox */}
-            <div className="flex items-center gap-5 mt-2">
+            <div data-test="LoginForm--remember" className="flex items-center gap-5 mt-2">
               <input
                 id="remember"
                 type="checkbox"
                 className="h-7 w-7 rounded border-gray-300 dark:border-gray-600 dark:checked:bg-indigo-600 focus:ring-indigo-500"
+                data-test="LoginForm--remember-checkbox"
               />
               <Label
                 htmlFor="remember"
                 className="text-xl text-gray-700 dark:text-gray-200"
+                data-test="LoginForm--label-remember"
               >
                 Lembrar-me
               </Label>
@@ -109,16 +121,18 @@ export function LoginForm({
             {/* Botão */}
             <Button
               type="submit"
+              data-test="LoginForm--submit"
               className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 py-7 text-3xl rounded-lg mt-10"
             >
               Entrar
             </Button>
 
             {/* Rodapé */}
-            <div className="text-center text-xl text-gray-700 dark:text-gray-200 mt-10">
+            <div data-test="LoginForm--footer" className="text-center text-xl text-gray-700 dark:text-gray-200 mt-10">
               Não tem uma conta?{" "}
               <a
                 href="#"
+                data-test="LoginForm--create-account"
                 className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
               >
                 Criar conta
