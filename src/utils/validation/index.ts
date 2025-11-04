@@ -13,4 +13,4 @@ export { validatePassword } from '../validation/validatePassword';
 export { validateLoginForm } from '../validation/validateLooginForm';
 export { validateRegisterForm } from '../validation/validateRegisterForm';
 export { validateRecoverPasswordForm } from '../validation/validateRecoverPasswordForm';
-export { validateNewPasswordForm } from '../validation/validateNewPasswordForm';
+

@@ -1,9 +1,4 @@
-export function validateEmail(email: string): string | null {
-  if (!email) return "O e-mail é obrigatório";
-
+export function validateEmail(email: string): boolean {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!regex.test(email)) return "Digite um e-mail válido";
-
-  return null;
+  return regex.test(email);
 }

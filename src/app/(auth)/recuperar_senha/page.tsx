@@ -1,6 +1,28 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { validateRecoverPasswordForm } from "@/utils/validation";
 
 export default function RecuperarSenhaPage() {
+    const [email, setEmail] = useState("");
+    const [errors, setErrors] = useState({ email: "" });
+
+    function handleSubmit(e: { preventDefault: () => void }) {
+        e.preventDefault();
+
+        const validation = validateRecoverPasswordForm({ email });
+
+        if (!validation.success) {
+            setErrors({ email: validation.errors.email ?? "" });
+            return;
+        }
+
+        setErrors({ email: "" });
+        console.log("➡ Email válido, enviando código:", email);
+        // Chamar API para envio do código
+    }
+
     return (
         <div className="w-full max-w-md">
             <div className="bg-white rounded-lg shadow-xl pt-4 pb-6 pl-6 pr-6 space-y-4">
@@ -22,28 +44,38 @@ export default function RecuperarSenhaPage() {
                     </svg>
                     <span>Voltar para login</span>
                 </Link>
+
                 <img src="/ifro-events-icon.svg" alt="Ifro Events" className="mx-auto h-24 w-24" />
 
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-900">Recuperar Senha</h1>
                     <p className="mt-3 text-sm text-gray-600">
-                        Enviaremos um link de verificação para o seu e-mail para redefinir sua senha.
+                        Enviaremos um link de verificação para o seu e-mail.
                     </p>
                 </div>
 
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit} noValidate>
                     <div className="space-y-1.5">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                             E-mail
                         </label>
+
                         <input
                             id="email"
-                            type="email"
-                            className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
-                                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                     placeholder:text-gray-400 transition-all"
+                            type="text"
+                            className={`w-full px-4 py-2.5 text-gray-900 border ${
+                                errors.email
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "border-gray-300 focus:ring-indigo-500"
+                            } rounded-lg focus:outline-none focus:ring-2 placeholder:text-gray-400 transition-all`}
                             placeholder="seu@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
+
+                        {errors.email && (
+                            <p className="text-red-600 text-sm font-medium">{errors.email}</p>
+                        )}
                     </div>
 
                     <button

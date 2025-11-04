@@ -5,25 +5,25 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import useLogin from "@/hooks/useLogin";
-import { validateLoginForm } from "@/utils/validation/validateLooginForm";
+import { validateLoginForm } from "@/utils/validation";
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (session?.user) {
-      router.push("/meus_eventos");
-    }
+    if (session?.user) router.push("/meus_eventos");
   }, [status, router]);
 
   const { login, isLoading } = useLogin();
 
   const [email, setEmail] = useState("admin@admin.com");
   const [senha, setSenha] = useState(
-    process.env.NEXT_PUBLIC_AMBIENTE != "production" ? "admin" : ""
+    process.env.NEXT_PUBLIC_AMBIENTE !== "production" ? "admin" : ""
   );
   const [remember, setRemember] = useState(true);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,14 +34,21 @@ export default function LoginPage() {
       const msgEmail = validation.errors.email?.[0];
       const msgSenha = validation.errors.senha?.[0];
 
-      if (msgEmail) alert(msgEmail);
-      if (msgSenha) alert(msgSenha);
+      setErrors({
+        email: msgEmail ?? "",
+        senha: msgSenha ?? "",
+      });
 
       return;
     }
 
+    setErrors({});
     await login({ email, senha, callbackUrl: "/meus_eventos", remember });
   };
+
+  function clearError(field: string) {
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  }
 
   return (
     <div className="w-full max-w-md">
@@ -62,14 +69,17 @@ export default function LoginPage() {
             </label>
             <input
               id="email"
-              type="email"
-              className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-              placeholder:text-gray-400 transition-all"
+              type="text"
+              className={`w-full px-4 py-2.5 text-gray-900 border rounded-lg focus:outline-none focus:ring-2 placeholder:text-gray-400 transition-all 
+              ${errors.email ? "border-red-600 focus:ring-red-500" : "border-gray-300 focus:ring-indigo-500"}`}
               placeholder="seu@email.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearError("email");
+              }}
             />
+            {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -79,13 +89,16 @@ export default function LoginPage() {
             <input
               id="password"
               type="password"
-              className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-              placeholder:text-gray-400 transition-all"
+              className={`w-full px-4 py-2.5 text-gray-900 border rounded-lg focus:outline-none focus:ring-2 placeholder:text-gray-400 transition-all 
+              ${errors.senha ? "border-red-600 focus:ring-red-500" : "border-gray-300 focus:ring-indigo-500"}`}
               placeholder="••••••••"
               value={senha}
-              onChange={(e) => setSenha(e.target.value)}
+              onChange={(e) => {
+                setSenha(e.target.value);
+                clearError("senha");
+              }}
             />
+            {errors.senha && <p className="text-red-600 text-sm">{errors.senha}</p>}
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -93,8 +106,7 @@ export default function LoginPage() {
               <input
                 id="remember"
                 type="checkbox"
-                className="w-4 h-4 text-indigo-600 border-gray-300 rounded 
-                focus:ring-2 focus:ring-indigo-500"
+                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
               />
