@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 
 
 export default function Header() {
@@ -23,8 +24,14 @@ export default function Header() {
             />
             {logado && (
                 <>
-                    <p
+                    <button
+                        type="button"
                         className={`absolute top-5 ${isMobile ? "right-5" : "right-57"} selection:bg-none cursor-pointer text-[#4B5563] flex items-center border-b-2 border-transparent hover:border-[#4338CA] transition-all group`}
+                        onClick={() => {
+                            setTimeout(() => {
+                                signOut({ callbackUrl: "/login" });
+                            }, 0);
+                        }}
                         onMouseEnter={() => {
                             if (!isMobile) {
                                 const el = document.getElementById("meus-eventos");
@@ -44,7 +51,7 @@ export default function Header() {
                             draggable="false"
                         />
                         <span>Sair</span>
-                    </p>
+                    </button>
                 </>
             )}
         </header>
