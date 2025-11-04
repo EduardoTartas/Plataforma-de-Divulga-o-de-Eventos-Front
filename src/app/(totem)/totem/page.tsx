@@ -36,6 +36,12 @@ export default function EventosPage() {
     // Estado que controla qual imagem do evento atual está sendo exibida
     const [imagemAtualIndex, setImagemAtualIndex] = useState(0);
 
+    // Configuração: Quantas vezes o evento deve repetir suas imagens antes de mudar para o próximo
+    const REPETICOES_POR_EVENTO = 3; // TODO: Ajustar para puxar o valor direto da API
+
+    // Estado que rastreia quantas vezes o evento atual já completou o ciclo de todas as suas imagens
+    const [repeticoesCompletadas, setRepeticoesCompletadas] = useState(0);
+
     // useRef para guardar os índices atuais (resolve problema de closure)
     const eventoIndexRef = useRef(eventoAtualIndex);
     const imagemIndexRef = useRef(imagemAtualIndex);
@@ -58,26 +64,42 @@ export default function EventosPage() {
 
             // Verifica se o evento tem imagens
             if (!evento.imagens || evento.imagens.length === 0) {
-                // Se não tem imagens, pula para o próximo evento
+                // Se não tem imagens, pula para o próximo evento e reseta o contador
                 const proximoEvento = (eventoAtual + 1) % eventos.length;
                 setEventoAtualIndex(proximoEvento);
                 setImagemAtualIndex(0);
+                setRepeticoesCompletadas(0);
                 return;
             }
 
             const proximaImagem = imagemAtual + 1;
 
+            // Se ainda tem mais imagens no evento atual
             if (proximaImagem < evento.imagens.length) {
                 setImagemAtualIndex(proximaImagem);
             } else {
-                const proximoEvento = (eventoAtual + 1) % eventos.length;
-                setEventoAtualIndex(proximoEvento);
-                setImagemAtualIndex(0);
+                // Completou um ciclo de todas as imagens do evento
+                setRepeticoesCompletadas(prev => {
+                    const novasRepeticoes = prev + 1;
+
+                    // Se já completou o número necessário de repetições, muda para o próximo evento
+                    if (novasRepeticoes >= REPETICOES_POR_EVENTO) {
+                        const proximoEvento = (eventoAtual + 1) % eventos.length;
+                        setEventoAtualIndex(proximoEvento);
+                        setImagemAtualIndex(0);
+                        return 0; // Reseta o contador para o próximo evento
+                    } else {
+                        // Ainda precisa repetir, volta para a primeira imagem
+                        setImagemAtualIndex(0);
+                        return novasRepeticoes;
+                    }
+                });
             }
+
         }, 5000);
 
         return () => clearInterval(intervalo);
-    }, [eventos]);
+    }, [eventos, REPETICOES_POR_EVENTO]);
 
     // Animações disponíveis
     const ANIMACOES_MAP: Record<number, string> = {
@@ -240,7 +262,20 @@ export default function EventosPage() {
                 <div className={`h-full w-full max-w-lg p-12 flex flex-col rounded-tl-[16px] rounded-bl-[16px] ${obterClasseCorFundo()}`}>
 
                     <div className="flex-grow">
-                        <p className="text-sm font-semibold text-gray-300 mb-4 font-inter">IFRO EVENTS</p>
+                        <div className="flex justify-between items-center mb-4">
+                            <p className="text-sm font-semibold text-gray-300 font-inter">IFRO EVENTS</p>
+                            <div className="flex gap-1">
+                                {Array.from({ length: REPETICOES_POR_EVENTO }).map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className={`h-2 w-2 rounded-full transition-all ${index <= repeticoesCompletadas
+                                                ? 'bg-white'
+                                                : 'bg-white/30'
+                                            }`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                         <h1 className="text-4xl font-bold mb-8 font-inter">
                             {eventoAtual.titulo}
                         </h1>
