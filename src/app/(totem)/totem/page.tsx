@@ -207,10 +207,10 @@ export default function EventosPage() {
     // Tela de loading
     if (isLoading) {
         return (
-            <div className="h-screen w-screen bg-gradient-to-br from-indigo-950 to-purple-900 flex items-center justify-center">
+            <div className="h-screen w-screen bg-gradient-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
-                    <p className="text-white text-xl font-inter">Carregando eventos...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+                    <p className="text-white text-base sm:text-xl md:text-2xl font-inter">Carregando eventos...</p>
                 </div>
             </div>
         );
@@ -219,10 +219,10 @@ export default function EventosPage() {
     // Tela de erro
     if (isError) {
         return (
-            <div className="h-screen w-screen bg-gradient-to-br from-red-950 to-red-800 flex items-center justify-center">
-                <div className="text-center p-8">
-                    <p className="text-white text-2xl font-inter mb-4">❌ Erro ao carregar eventos</p>
-                    <p className="text-gray-300 font-inter">Por favor, verifique a conexão com o servidor.</p>
+            <div className="h-screen w-screen bg-gradient-to-br from-red-950 to-red-800 flex items-center justify-center p-4">
+                <div className="text-center p-4 sm:p-6 md:p-8">
+                    <p className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl font-inter mb-3 sm:mb-4">❌ Erro ao carregar eventos</p>
+                    <p className="text-gray-300 font-inter text-sm sm:text-base md:text-lg">Por favor, verifique a conexão com o servidor.</p>
                 </div>
             </div>
         );
@@ -231,10 +231,10 @@ export default function EventosPage() {
     // Se não houver eventos
     if (eventos.length === 0) {
         return (
-            <div className="h-screen w-screen bg-gradient-to-br from-indigo-950 to-purple-900 flex items-center justify-center">
-                <div className="text-center p-8">
-                    <p className="text-white text-2xl font-inter mb-4">📅 Nenhum evento disponível</p>
-                    <p className="text-gray-300 font-inter">Não há eventos programados para exibição no momento.</p>
+            <div className="h-screen w-screen bg-gradient-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
+                <div className="text-center p-4 sm:p-6 md:p-8">
+                    <p className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl font-inter mb-3 sm:mb-4">📅 Nenhum evento disponível</p>
+                    <p className="text-gray-300 font-inter text-sm sm:text-base md:text-lg">Não há eventos programados para exibição no momento.</p>
                 </div>
             </div>
         );
@@ -256,69 +256,82 @@ export default function EventosPage() {
             />
 
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
-            <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end">
+            <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch">
 
                 {/* Barra Lateral de Informações */}
-                <div className={`h-full w-full max-w-lg p-[3vh] flex flex-col gap-[2vh] rounded-tl-[16px] rounded-bl-[16px] ${obterClasseCorFundo()}`}>
+                <div className={`h-auto sm:h-full w-full sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:max-w-2xl 
+                    p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 
+                    flex flex-col gap-3 sm:gap-4 md:gap-5 lg:gap-6
+                    rounded-2xl sm:rounded-tl-2xl sm:rounded-bl-2xl sm:rounded-tr-none sm:rounded-br-none
+                    mx-4 sm:mx-0 my-auto sm:my-0
+                    ${obterClasseCorFundo()}`}>
 
-                    <div className="flex-grow">
-                        <div className="flex justify-between items-center mb-4">
-                            <p className="text-sm font-semibold text-gray-300 font-inter">IFRO EVENTS</p>
+                    <div className="grow">
+                        <div className="flex justify-between items-center mb-3 sm:mb-4">
+                            <p className="text-xs sm:text-sm md:text-base font-semibold text-gray-300 font-inter">IFRO EVENTS</p>
                             <div className="flex gap-1">
                                 {Array.from({ length: REPETICOES_POR_EVENTO }).map((_, index) => (
                                     <div
                                         key={index}
-                                        className={`h-2 w-2 rounded-full transition-all ${index <= repeticoesCompletadas
-                                                ? 'bg-white'
-                                                : 'bg-white/30'
+                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full transition-all ${index <= repeticoesCompletadas
+                                            ? 'bg-white'
+                                            : 'bg-white/30'
                                             }`}
                                     />
                                 ))}
                             </div>
                         </div>
-                        <h1 className="text-4xl font-bold mb-8 font-inter">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 md:mb-8 font-inter leading-tight">
                             {eventoAtual.titulo}
                         </h1>
 
-                        <div className="flex flex-col gap-[1.5vh] text-gray-200 text-[1.8vh] mt-[2vh]">
-                            <div className="flex flex-row gap-2">
-                                <img src="/calendar.svg" alt="Calendário" />
+                        <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 text-gray-200 text-xs sm:text-sm md:text-base lg:text-lg">
+                            <div className="flex flex-row gap-2 items-center">
+                                <img src="/calendar.svg" alt="Calendário" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
                                 <p className="font-inter">{eventoAtual.dataInicio} - {eventoAtual.dataFim}</p>
                             </div>
-                            <div className="flex flex-row gap-2">
-                                <img src="/watch.svg" alt="Relógio" className="w-[2vh] h-[2vh]" />
+                            <div className="flex flex-row gap-2 items-center">
+                                <img src="/watch.svg" alt="Relógio" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
                                 <p className="font-inter">{eventoAtual.horario}</p>
                             </div>
-                            <div className="flex flex-row gap-2">
-                                <img src="/gps.svg" alt="Localização" className="w-[2vh] h-[2vh]" />
+                            <div className="flex flex-row gap-2 items-center">
+                                <img src="/gps.svg" alt="Localização" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
                                 <p className="font-inter">{eventoAtual.local}</p>
                             </div>
-                            <div className="flex flex-row gap-2">
-                                <img src="/category.svg" alt="Localização" className="w-[2vh] h-[2vh]" />
+                            <div className="flex flex-row gap-2 items-center">
+                                <img src="/category.svg" alt="Categoria" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
                                 <p className="font-inter">{eventoAtual.categoria.toUpperCase()}</p>
                             </div>
-                            <div className="flex flex-row gap-2">
-                                <img src="/tags.svg" alt="Localização" className="w-[2vh] h-[2vh]" />
-                                <p className="font-inter ">{eventoAtual.tags.join(' - ').toLowerCase()}</p>
+                            <div className="flex flex-row gap-2 items-center">
+                                <img src="/tags.svg" alt="Tags" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
+                                <p className="font-inter">{eventoAtual.tags.join(' - ').toLowerCase()}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex-1 max-h-[30vh] min-h-0 bg-white/10 rounded-[8px] p-[1.5vh] overflow-hidden">
-                        <p className="text-gray-300 font-inter text-[2.8vh] leading-relaxed line-clamp-[10]">
+
+                    {/* Descrição do Evento */}
+                    <div className="flex-1 max-h-[120px] sm:max-h-[150px] md:max-h-[180px] lg:max-h-[220px] xl:max-h-[250px] 2xl:max-h-[280px]
+                            min-h-0 bg-white/10 rounded-lg p-3 sm:p-4 md:p-5 overflow-hidden">
+                        <p className="text-gray-300 font-inter text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed line-clamp-6 sm:line-clamp-7 md:line-clamp-8 lg:line-clamp-10">
                             {eventoAtual.descricao}
                         </p>
                     </div>
-                    
 
+                    {/* QR Code */}
                     {eventoAtual.link && (
-                        <div className="bg-white/10 rounded-[8px] w-[20vh] h-[20vh] p-4 flex items-center translate-y-10 translate-x-80 flex-shrink-0">
+                        <div className="bg-white/10 rounded-lg 
+                        w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48
+                        p-3 sm:p-4 flex items-center justify-center 
+                        self-center sm:self-end 
+                        sm:absolute sm:bottom-8 sm:right-8 md:bottom-10 md:right-10 lg:bottom-12 lg:right-12
+                        shrink-0">
                             {carregandoQrCode ? (
-                                <div className="animate-spin rounded-full w-[8vh] h-[8vh] border-t-2 border-b-2 border-white"></div>
+                                <div className="animate-spin rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border-t-2 border-b-2 border-white"></div>
                             ) : qrCodeAtual ? (
                                 <img src={qrCodeAtual} className="h-full w-full object-contain" alt="QR-Code" />
                             ) : (
-                                <p className="text-white text-center font-inter text-[1.6vh]">QR Code não disponível</p>
+                                <p className="text-white text-center font-inter text-xs sm:text-sm">QR Code não disponível</p>
                             )}
                         </div>
                     )}
