@@ -256,7 +256,7 @@ export default function EventosPage() {
             />
 
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
-            <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch">
+            <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch relative">
 
                 {/* Barra Lateral de Informações */}
                 <div className={`h-auto sm:h-full w-full sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:max-w-2xl 
@@ -311,31 +311,31 @@ export default function EventosPage() {
 
 
                     {/* Descrição do Evento */}
-                    <div className="flex-1 max-h-[120px] sm:max-h-[150px] md:max-h-[180px] lg:max-h-[220px] xl:max-h-[250px] 2xl:max-h-[280px]
-                            min-h-0 bg-white/10 rounded-lg p-3 sm:p-4 md:p-5 overflow-hidden">
+                    <div className={`flex-1 max-h-[120px] sm:max-h-[150px] md:max-h-[180px] lg:max-h-[220px] xl:max-h-[250px] 2xl:max-h-[280px]
+                            min-h-0 bg-white/10 rounded-lg p-3 sm:p-4 md:p-5 overflow-hidden
+                            ${eventoAtual.link ? 'mb-28 sm:mb-32 md:mb-36 lg:mb-44 xl:mb-48 2xl:mb-52' : ''}`}>
                         <p className="text-gray-300 font-inter text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed line-clamp-6 sm:line-clamp-7 md:line-clamp-8 lg:line-clamp-10">
                             {eventoAtual.descricao}
                         </p>
                     </div>
+                </div>
 
-                    {/* QR Code */}
-                    {eventoAtual.link && (
-                        <div className="bg-white/10 rounded-lg 
+                {/* QR Code - Fixo no canto inferior direito da tela */}
+                {eventoAtual.link && (
+                    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 lg:bottom-10 lg:right-10 xl:bottom-12 xl:right-12
+                        bg-white/10 rounded-lg 
                         w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48
                         p-3 sm:p-4 flex items-center justify-center 
-                        self-center sm:self-end 
-                        sm:absolute sm:bottom-8 sm:right-8 md:bottom-10 md:right-10 lg:bottom-12 lg:right-12
-                        shrink-0">
-                            {carregandoQrCode ? (
-                                <div className="animate-spin rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border-t-2 border-b-2 border-white"></div>
-                            ) : qrCodeAtual ? (
-                                <img src={qrCodeAtual} className="h-full w-full object-contain" alt="QR-Code" />
-                            ) : (
-                                <p className="text-white text-center font-inter text-xs sm:text-sm">QR Code não disponível</p>
-                            )}
-                        </div>
-                    )}
-                </div>
+                        shrink-0 z-10">
+                        {carregandoQrCode ? (
+                            <div className="animate-spin rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border-t-2 border-b-2 border-white"></div>
+                        ) : qrCodeAtual ? (
+                            <img src={qrCodeAtual} className="h-full w-full object-contain rounded-lg" alt="QR-Code" />
+                        ) : (
+                            <p className="text-white text-center font-inter text-xs sm:text-sm">QR Code não disponível</p>
+                        )}
+                    </div>
+                )}
             </main>
         </>
     );
