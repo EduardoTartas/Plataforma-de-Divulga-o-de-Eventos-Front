@@ -77,23 +77,23 @@ Detalhamento específico será criado por funcionalidade conforme desenvolviment
 
 Serão aplicados testes em camadas para assegurar qualidade do sistema:
 
-Unitários (Jest)
+- **Unitários (Jest)**
 
 Validação de funções, services e regras de negócio
 
 Meta: 70% de cobertura
 
-Integração (Jest + Supertest)
+- **Integração (Jest + Supertest)**
 
 Testes entre controllers, services e repositórios
 
 Cobrir endpoints da API
 
-Manuais (Swagger / Postman)
+- **Manuais (Swagger / Postman)**
 
 Testes exploratórios em fluxos reais durante o desenvolvimento
 
-E2E (planejado) — Cypress
+- **E2E (planejado) — Cypress**
 
 Validação ponta a ponta dos principais fluxos
 
@@ -101,31 +101,36 @@ Desenvolvimento incremental: cada funcionalidade terá plano e testes dedicados.
 
 ###  6 - Ambiente e Ferramentas
 
-Ferramenta	Fase	Descrição
-Postman / Swagger UI	Desenvolvimento	Testes manuais de API
-Jest	Desenvolvimento	Testes unitários e de integração
-Supertest	Desenvolvimento	Testes de endpoints REST
-MongoDB Memory Server	Desenvolvimento	Isolar dados durante testes
-Cypress (planejado)	E2E	Testes ponta a ponta
+| Ferramenta          | Fase            | Descrição                                                        |
+|---------------------|-----------------|------------------------------------------------------------------|
+
+|Postman / Swagger UI |	Desenvolvimento	|Testes manuais de API
+|Jest	|Desenvolvimento|	Testes unitários e de integração
+|Supertest|	Desenvolvimento|	Testes de endpoints REST
+|MongoDB Memory Server|	Desenvolvimento|	Isolar dados durante testes
+|Cypress (planejado)|	E2E|	Testes ponta a ponta
 
 ###  7 - Classificação de Bugs
-ID	Severidade	Descrição
-1	Blocker	Impede função principal, crash ou botão essencial quebrado
-2	Grave	Problemas lógicos sérios, funcionalidade essencial falha
-3	Moderada	Critério não atendido, mas há alternativa
-4	Pequena	Ajustes mínimos de UI/texto
-9 - Definição de Pronto
+|ID|	Severidade|
+	Descrição
+   |----|-------------|                                                      |
+   ---------------------------------------------------------------------------|
+|1|	**Blocker** |Impede função principal, crash ou botão essencial quebrado
+|2|	**Grave**  |lógicos sérios, funcionalidade essencial falha
+|3|	**Moderada** | Critério não atendido, mas há alternativa
+|4|	**Pequena** | Ajustes mínimos de UI/texto
 
-Uma funcionalidade só é considerada entregue quando:
 
-Todos os testes ligados a ela forem aprovados
+## 8 - Definição de Pronto
 
-Sem bugs Blocker ou Grave
+- Uma funcionalidade só é considerada entregue quando:
 
-Interface revisada e acessível
+- Todos os testes ligados a ela forem aprovados
 
-Documentação atualizada
+- Sem bugs Blocker ou Grave
 
-Validação da equipe técnica e QA finalizada
+- Interface revisada e acessível
 
-### 8 - Definição de pronto
+- Documentação atualizada
+
+- Validação da equipe técnica e QA finalizada
