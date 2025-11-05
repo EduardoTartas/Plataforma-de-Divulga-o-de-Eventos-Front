@@ -13,11 +13,12 @@ import {
 } from "@/components/ui/pagination";
 import { useEventos, useToggleEventStatus, useDeleteEvent } from "@/hooks/useEventos";
 import { ThreeDot } from "react-loading-indicators";
-
+import { useRouter } from "next/navigation"
 
 const ITEMS_PER_PAGE = 8;
 
 export default function MeusEventosPage() {
+    const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const queryClient = useQueryClient();
     
@@ -93,7 +94,7 @@ export default function MeusEventosPage() {
 
     const handleCriarEvento = () => {
         console.log('Navegar para criar evento');
-        // router.push('/criar_eventos');
+        router.push("/criar_eventos");
     };
 
     return (
