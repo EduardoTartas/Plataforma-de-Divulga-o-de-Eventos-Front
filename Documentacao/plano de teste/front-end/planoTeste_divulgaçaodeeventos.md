@@ -1,235 +1,131 @@
-Plano de Teste
+# Plano de Teste
 
-Projeto  Plataforma de Divulgação de Eventos (React + API fake JSON Server)
-versão 1.0
+**Projeto: Plataforma de Divulgação de Eventos (React + API)**
+*Versão: 1.0*
 
-Histórico das alterações
+## Histórico das Alterações
 
 
+| Data       | Versão | Descrição                                     | Autor(a)                         |
+|------------|--------|-----------------------------------------------|----------------------------------|
+| 04/11/2025 | 1.0    | Primeira versão do Plano de Testes |   |
 
-Data       18/08/2025
-Versão     1.0
-Descrição  Primeira versão do Plano de teste
-Autor(a)
+---
 
+## 1 - Introdução
 
+O sistema visa gerenciar e divulgar eventos institucionais do IFRO, oferecendo cadastro completo de eventos, controle de status, upload e gerenciamento de mídias, e geração de QR Codes para inscrições. Também inclui páginas otimizadas para totens, ampliando a visibilidade institucional.
 
+Este documento estabelece cenários e critérios de teste para validar funcionamento, integridade dos dados e experiência do usuário.
 
+---
 
-1 - Introdução
+## 2 - Arquitetura
 
-O presente sistema tem como objetivo informatizar a divulgação e o gerenciamento de eventos institucionais do IFRO. A plataforma oferece funcionalidades que abrangem o cadastro completo de eventos por parte dos administradores, controle de status (ativo/inativo), upload e gerenciamento de mídias (como capas, vídeos e imagens de carrossel), além da geração dinâmica de QR Codes para inscrição. O sistema também contempla rotas especializadas para exibição em totens, promovendo maior visibilidade institucional. Toda a estrutura foi desenvolvida com foco na organização modular e padronização profissional da API, facilitando futuras integrações com front-ends e painel administrativo.
-Este plano de teste descreve os cenários, critérios de aceitação e verificações que serão aplicados sobre as principais funcionalidades do sistema, visando garantir o correto funcionamento das regras de negócio, a integridade dos dados e a experiência do usuário.
+- **Front-end**: React 18 (CRA), React Router DOM, CSS Modules
+- **Camadas/organização**:
 
-2 - Arquitetura da API
 
-A aplicação adota uma arquitetura modular em camadas, implementada com as tecnologias Node.js, Express, MongoDB (via Mongoose), Zod para validação de dados, JWT para autenticação e Swagger para documentação interativa da API. O objetivo é garantir uma estrutura clara, escalável e de fácil manutenção, com separação de responsabilidades e aderência a boas práticas de desenvolvimento backend.
 
-Camadas;
-Routes: Responsável por definir os endpoints da aplicação e encaminhar as requisições para os controllers correspondentes. Cada recurso do sistema possui um arquivo de rotas dedicado.
 
-Controllers: Gerenciam a entrada das requisições HTTP, realizam a validação de dados com Zod e invocam os serviços adequados. Também são responsáveis por formatar e retornar as respostas.
 
-Services: Esta camada centraliza as regras de negócio do sistema. Ela abstrai a lógica do domínio, orquestra operações e valida fluxos antes de interagir com a base de dados.
 
-Repositories: Encapsulam o acesso aos dados por meio dos modelos do Mongoose, garantindo que a manipulação do banco esteja isolada da lógica de negócio.
-Models: Definem os esquemas das coleções do MongoDB, com o uso de Mongoose, representando as entidades principais do sistema como usuários e eventos.
 
-Validations: Utiliza Zod para garantir que os dados recebidos nas requisições estejam no formato esperado, aplicando validações personalizadas e mensagens de erro claras.
+**API**: Arquitetura modular com controllers, services e repositórios
+- **testes ja presentes**:
 
-Middlewares: Implementam funcionalidades transversais, como autenticação de usuários com JWT, tratamento global de erros, e controle de permissões por tipo de perfil.
 
+### Primcipais endpoints 
 
+-
+-
+-
+-
+-
 
+---
 
-REQUISITOS FUNCIONAIS
-A tabela a seguir contém a relação dos Requisitos Funcionais elicitados, com as colunas: identificador, nome e descrição:
+Recursos adicionais: Integração com QR Code, telas para totens
 
+## 3 - Requisitos 
 
 
-IDENTIFICADOR
-NOME
-DESCRIÇÃO
+### Funcionais
 
+Identificador	Nome	Descrição
+RF-001	Realizar Login	Permite autenticação do administrador.
+RF-002	Manter Eventos	Criar, editar e excluir eventos.
+RF-003	Partilha de Permissões para Edição	Envio de link para edição de eventos.
+RF-004	Incorporar Imagens e Vídeos	Adicionar mídias aos eventos.
+RF-005	Visualizar Eventos	Usuários podem acessar eventos passados, atuais e futuros.
+RF-006	Incorporar QR Code para Inscrição	Exibir link de inscrição como QR Code nos totens.
 
-RF-001
-Realizar Login
-Permite o administrador realizar login no sistema.
+###  Não Funcionais
 
+Identificador	Nome	Descrição
+RNF-001	Interface Simples e Intuitiva	Deve ser fácil de utilizar por admins e visitantes.
+RNF-002	Layout Pré-Definido para Eventos	Disponibilizar modelos prontos de layout.
+RNF-003	Compatível com Touch e Mouse	Suporte a totens e computadores.
+RNF-004	Sistema Leve e Rápido	Resposta < 1 segundo.
+RNF-005	Identidade Visual IFRO	Manter cores e logos oficiais.
+RNF-006	Elementos Interativos	Botões, cards, modais e navegação fluida.
+5 - Casos de Teste
 
-RF-002
-Manter Eventos
-Permite o administrador criar, atualizar e remover eventos.
+Detalhamento específico será criado por funcionalidade conforme desenvolvimento.
 
+### 5 - Estratégia de Teste
 
-RF-003
-Partilha de Permissões para Edição
-Permite ao administrador compartilhar o link para edição de seus eventos cadastrados.
+Serão aplicados testes em camadas para assegurar qualidade do sistema:
 
+Unitários (Jest)
 
-RF-004
-Incorporar Imagens e Vídeos
-Permite o administrador incorporar vídeos e fotos acerca dos eventos a serem cadastrados.
+Validação de funções, services e regras de negócio
 
+Meta: 70% de cobertura
 
-RF-005
-Visualizar Eventos
-Os usuários podem visualizar eventos passados, atuais e futuros cadastrados no sistema.
+Integração (Jest + Supertest)
 
+Testes entre controllers, services e repositórios
 
-RF-006
-Incorporar QR Code de Inscrição
-Permite ao administrador inserir um link externo (ex: forms) ao cadastrar um evento, e esse link aparece em forma de QR Code no totem de visualização.
+Cobrir endpoints da API
 
+Manuais (Swagger / Postman)
 
-REQUISITOS NÃO FUNCIONAIS
-A tabela a seguir contém a relação com os Requisitos Não Funcionais identificados, contendo identificador, nome e descrição:
+Testes exploratórios em fluxos reais durante o desenvolvimento
 
+E2E (planejado) — Cypress
 
+Validação ponta a ponta dos principais fluxos
 
-IDENTIFICADOR
-NOME
-DESCRIÇÃO
+Desenvolvimento incremental: cada funcionalidade terá plano e testes dedicados.
 
+###  6 - Ambiente e Ferramentas
 
+Ferramenta	Fase	Descrição
+Postman / Swagger UI	Desenvolvimento	Testes manuais de API
+Jest	Desenvolvimento	Testes unitários e de integração
+Supertest	Desenvolvimento	Testes de endpoints REST
+MongoDB Memory Server	Desenvolvimento	Isolar dados durante testes
+Cypress (planejado)	E2E	Testes ponta a ponta
 
+###  7 - Classificação de Bugs
+ID	Severidade	Descrição
+1	Blocker	Impede função principal, crash ou botão essencial quebrado
+2	Grave	Problemas lógicos sérios, funcionalidade essencial falha
+3	Moderada	Critério não atendido, mas há alternativa
+4	Pequena	Ajustes mínimos de UI/texto
+9 - Definição de Pronto
 
-RNF-001
-Interface Simples e Intuitiva
-A interface deve ser intuitiva e clara tanto para administradores quanto para usuários.
+Uma funcionalidade só é considerada entregue quando:
 
+Todos os testes ligados a ela forem aprovados
 
-RNF-002
-Layout Pré-Definido na Criação de Eventos
-A plataforma deve oferecer layouts prontos para cadastro de eventos.
+Sem bugs Blocker ou Grave
 
+Interface revisada e acessível
 
-RNF-003
-Compatível com Telas Sensíveis ao Toque e Mouse
-O sistema deve ser compatível e adequado tanto para telas touch screen, quanto telas de computador.
+Documentação atualizada
 
+Validação da equipe técnica e QA finalizada
 
-RNF-004
-Sistema Leve e Rápido para Carregar Eventos e Interações
-O sistema deve suportar as interações com as telas sem degradação perceptível de desempenho, garantindo um tempo de resposta de no máximo 1 segundo.
-
-
-RNF-005
-Seguir a Identidade Visual do IFRO
-O design do sistema deve conter as logos de indêntidade do instituto.
-
-
-RNF-006
-Elementos Interativos
-A interface deve conter elementos interativos como, botões para visualizar fotos, inscrições e informações sobre os eventos.
-
-
-
-
-4 - Casos de Teste
-
-
-
-
-5 - Estratégia de Teste
-
-A estratégia de teste adotada neste projeto busca garantir a qualidade funcional e estrutural do sistema da plataforma por meio da aplicação de testes em múltiplos níveis, alinhados ao ciclo de desenvolvimento.
-
-Serão executados testes em todos os níveis conforme a descrição abaixo.
-
-Testes Unitários: Focados em verificar o comportamento isolado das funções, serviços e regras de negócio, o código terá uma cobertura de 70% de testes unitários, que são de responsabilidade dos desenvolvedores.
-
-Testes de Integração: Verificarão a interação entre diferentes camadas (ex: controller + service + repository) e a integração com o banco de dados, serão executados testes de integração em todos os endpoints, e esses testes serão dos desenvolvedores.
-
-Testes Manuais: Realizados pontualmente na API por meio do Swagger ou Postman, com o objetivo de validar diferentes fluxos de uso e identificar comportamentos inesperados durante o desenvolvimento. A execução desses testes é de responsabilidade dos desenvolvedores, tanto durante quanto após a implementação das funcionalidades.
-
-Os testes serão implementados de forma incremental, acompanhando o desenvolvimento das funcionalidades. Cada funcionalidade terá seu próprio plano de teste específico, com os casos detalhados, critérios de aceitação e cenários de sucesso e falha.
-
-
-
-6 -	Ambiente e Ferramentas
-
-Os testes serão feitos do ambiente de desenvolvimento, e contém as mesmas configurações do ambiente de produção.
-As seguintes ferramentas serão utilizadas no teste:
-
-
-
-Ferramenta
-Time
-Descrição
-
-
-
-
-POSTMAN, Swagger UI
-Desenvolvimento
-Ferramenta para realização de testes manuais de API
-
-
-Jest
-Desenvolvimento
-Framework utilizada para testes unitários e integração
-
-
-Supertest
-Desenvolvimento
-Framework utilizada para testes de endpoints REST
-
-
-MongoDB Memory Server
-Desenvolvimento
-Para testes com banco em memória, garantindo isolamento dos dados
-
-
-7 - Classificação de Bugs
-
-
-
-ID
-Severidade
-Descrição
-
-
-
-
-1
-Blocker
-Impede uso da funcionalidade principal, crash, botão essencial inoperante.
-
-
-2
-Grave
-Erros lógicos sérios (saldo incorreto, cadastro não funciona).
-
-
-3
-Moderada
-Critério não atendido mas há workaround (ex.: mensagem ausente).
-
-
-4
-Pequena
-Impacto mínimo na experiência (UI, textos, espaçamentos).
-
-
-
-
-
- - Classificação de Bugs
-Os Bugs serão classificados com as seguintes severidades:
-
-
-
-ID
-Nivel de Severidade
-Descrição
-
-
-
-
-
-
-
-8 - 	Definição de Pronto
-
-Será considerada pronta as funcionalidades que passarem pelas verificações e testes descritas nos casos de teste, não apresentarem bugs com a severidade acima de moderada, e passarem por uma validação da equipe.
+### 8 - Definição de pronto
