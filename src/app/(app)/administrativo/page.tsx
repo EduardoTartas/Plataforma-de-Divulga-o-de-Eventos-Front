@@ -4,12 +4,21 @@ import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from "@
 import { Usuario, UsuarioApi } from "@/types/eventos"
 import { useState, useEffect } from "react"
 import { ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
+import { Erro } from '@/types/eventos'
 import { fetchData } from "@/services/api"
 
 export default function AdministrativoPage() {
     const [usuarios, setUsuarios] = useState<Usuario[]>([])
     const [carregandoUsuarios, setCarregandoUsuarios] = useState(true)
     const [erroUsuarios, setErroUsuarios] = useState<string | null>(null)
+
+    const alterarStatus = async (id: string) => {
+        try {
+            let resposta = fetchData(`/usuarios/${id}/status`, 'PATCH')
+        } catch (error) {
+            alert(`Não foi possivel alterar o status do Usuário: ${error}`)
+        }
+    }
 
     async function buscarUsuarios() {
         try {
@@ -146,8 +155,8 @@ export default function AdministrativoPage() {
                                             </TableCell>
                                             <TableCell>
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${usuario.status === 'ativo'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-gray-100 text-gray-800'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-gray-100 text-gray-800'
                                                     }`}>
                                                     {usuario.status}
                                                 </span>
@@ -155,8 +164,9 @@ export default function AdministrativoPage() {
                                             <TableCell>
                                                 <div className="flex items-center justify-center gap-3">
                                                     <button
-                                                        className="transition-transform hover:scale-110"
+                                                        className="transition-transform hover:scale-110 cursor-pointer"
                                                         title={usuario.status === 'ativo' ? 'Desativar usuário' : 'Ativar usuário'}
+                                                        onClick={() => alterarStatus(usuario._id)}
                                                     >
                                                         {usuario.status === 'ativo' ? (
                                                             <ToggleRight className="text-green-600 w-5 h-5" />
@@ -165,7 +175,7 @@ export default function AdministrativoPage() {
                                                         )}
                                                     </button>
                                                     <button
-                                                        className="transition-transform hover:scale-110"
+                                                        className="transition-transform hover:scale-110 cursor-pointer"
                                                         title="Excluir usuário"
                                                     >
                                                         <Trash2 className="text-red-600 w-5 h-5" />
