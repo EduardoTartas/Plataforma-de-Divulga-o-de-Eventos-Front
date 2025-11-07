@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 
 declare module "next-auth" {
-  
+
   interface Session {
     user: {
       id: string;
@@ -9,6 +9,7 @@ declare module "next-auth" {
       nome: string;
       email: string;
       status: string;
+      admin: boolean;
       updatedAt: string;
       accesstoken: string;
       refreshtoken: string;
@@ -22,6 +23,7 @@ declare module "next-auth" {
     email: string;
     senha: string;
     status: string;
+    admin: boolean;
     updatedAt: string;
     accesstoken: string;
     refreshtoken: string;
@@ -36,6 +38,7 @@ declare module "next-auth/jwt" {
     nome: string;
     email: string;
     status: string;
+    admin: boolean;
     updatedAt: string;
     accesstoken: string;
     refreshtoken: string;

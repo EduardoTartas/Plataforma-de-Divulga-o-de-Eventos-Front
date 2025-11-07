@@ -37,6 +37,7 @@ async function refreshAccessToken(token: JWT) {
       refreshtoken: newRT,
       accessTokenExpires: Date.now() + 10 * 60 * 1000, // ✅ 10 minutos
       user: userData ?? token.user,
+      admin: userData.admin ?? token.admin ?? false,
     };
   } catch (err) {
     console.error("Erro ao renovar token:", err);
@@ -78,6 +79,7 @@ export const authOptions: NextAuthOptions = {
             email: data.user.email ?? "",
             senha: data.user.senha ?? "",
             status: data.user.status ?? "",
+            admin: data.user.admin ?? false,
             updatedAt: data.user.updatedAt ?? "",
             accesstoken: data.user.accesstoken ?? "",
             refreshtoken: data.user.refreshtoken ?? "",
@@ -101,6 +103,7 @@ export const authOptions: NextAuthOptions = {
           nome: user.nome,
           email: user.email,
           status: user.status,
+          admin: user.admin,
           updatedAt: user.updatedAt,
           accesstoken: user.accesstoken,
           refreshtoken: user.refreshtoken,
@@ -127,6 +130,7 @@ export const authOptions: NextAuthOptions = {
           nome: token.nome,
           email: token.email,
           status: token.status,
+          admin: token.admin,
           updatedAt: token.updatedAt,
           accesstoken: token.accesstoken,
           refreshtoken: token.refreshtoken,

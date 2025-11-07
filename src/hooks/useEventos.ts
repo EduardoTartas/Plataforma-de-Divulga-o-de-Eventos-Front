@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchData } from "@/services/api";
 import { EventosApiResponse } from "@/types/eventos";
 import { toast } from "react-toastify";
+import { useSession } from "next-auth/react";
 
 interface UseEventosParams {
   page: number;
@@ -15,6 +16,8 @@ interface UseEventosParams {
 }
 
 export function useEventos({ page, limit, enabled = true, filters }: UseEventosParams) {
+  const { data: session } = useSession()
+
   const {
     data: eventosData,
     isLoading: eventosIsLoading,
@@ -42,7 +45,12 @@ export function useEventos({ page, limit, enabled = true, filters }: UseEventosP
         params.append("categoria", filters.category);
       }
 
-      return fetchData<EventosApiResponse>(`/eventos/?${params.toString()}`, "GET");
+      if (session?.user?.admin === true) {
+        return fetchData<EventosApiResponse>(`/eventos/admin/?${params.toString()}`, "GET");
+      } else {
+        return fetchData<EventosApiResponse>(`/eventos/?${params.toString()}`, "GET");
+      }
+
     },
 
     enabled,
@@ -72,9 +80,9 @@ export function useToggleEventStatus() {
       return fetchData(`/eventos/${eventId}`, "PATCH", undefined, { status: newStatus });
     },
     onSuccess: (_, variables) => {
-  
+
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
-      
+
       const statusText = variables.newStatus === 1 ? "ativado" : "desativado";
       toast.success(`Evento ${statusText} com sucesso!`, {
         position: "top-right",
@@ -110,7 +118,7 @@ export function useDeleteEvent() {
       return fetchData(`/eventos/${eventId}`, "DELETE");
     },
     onSuccess: () => {
-      
+
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
       // Notificação de sucesso
       toast.success("Evento excluído com sucesso!", {

@@ -1,3 +1,8 @@
+// Erro da api
+export interface Erro {
+  message: string
+}
+
 // Tipo para o organizador do evento
 export interface Organizador {
   _id: string;
@@ -9,6 +14,25 @@ export interface Permissao {
   usuario: string;
   permissao: string;
   expiraEm: string;
+}
+
+// Tipos para listagem de usuários
+export interface UsuarioApi {
+  error: false,
+  code: number,
+  message: string,
+  data: Usuario,
+  errors: Erro[]
+}
+
+export interface Usuario {
+  _id: string;
+  nome: string;
+  email: string;
+  status: string;
+  admin: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Tipo para um evento individual
