@@ -18,17 +18,14 @@ export default function AdministrativoPage() {
         try {
             setAtualizandoStatus(id);
 
-            // Atualização otimista: atualiza o estado local imediatamente
             setUsuarios(usuarios.map(usuario =>
                 usuario._id === id
                     ? { ...usuario, status: novoStatus }
                     : usuario
             ));
 
-            // Faz a requisição para a API
             const resposta = await fetchData(`/usuarios/${id}/status`, 'PATCH', undefined, { status: novoStatus });
 
-            // Verifica se houve erro na resposta
             if (!resposta || (resposta as any).code !== 200) {
                 throw new Error('Erro ao atualizar status');
             }
@@ -45,7 +42,25 @@ export default function AdministrativoPage() {
         }
     }
 
-    async function buscarUsuarios() {
+    const deletarUsuario = async (id: string) => {
+        try {
+            const resposta = await fetchData(`/usuarios/${id}`, 'DELETE');
+
+            if (!resposta || (resposta as any).code !== 200) {
+                throw new Error('Erro ao deletar usuário');
+            }
+
+            // Atualiza a lista de usuários removendo o usuário deletado
+            setUsuarios(usuarios.filter(usuario => usuario._id !== id));
+        } catch (error) {
+            alert(`Não foi possivel deletar o Usuário: ${error}`);
+
+            // Reverte a mudança em caso de erro
+            buscarUsuarios();
+        }
+    }
+
+    const buscarUsuarios = async () => {
         try {
             setCarregandoUsuarios(true);
             setErroUsuarios(null);
@@ -77,7 +92,7 @@ export default function AdministrativoPage() {
 
     return (
         <div className="font-inter min-h-screen bg-[#F9FAFB]">
-            {/* Banner Hero */}
+            {/* Banner */}
             <div className="relative overflow-hidden bg-indigo-700">
                 <div className="container mx-auto px-6 py-12 lg:py-16 relative z-10">
                     <div className="relative z-10 max-w-3xl">
@@ -205,6 +220,7 @@ export default function AdministrativoPage() {
                                                     <button
                                                         className="transition-transform hover:scale-110 cursor-pointer"
                                                         title="Excluir usuário"
+                                                        onClick={() => { deletarUsuario(usuario._id) }}
                                                     >
                                                         <Trash2 className="text-red-600 w-5 h-5" />
                                                     </button>

@@ -26,12 +26,13 @@ export interface UsuarioApi {
 }
 
 export interface Usuario {
-  _id: string
-  nome: string
-  email: string
-  status: string
+  _id: string;
+  nome: string;
+  email: string;
+  status: string;
+  admin: boolean;
   createdAt: string;
-  updatedAt: string
+  updatedAt: string;
 }
 
 // Tipo para um evento individual
