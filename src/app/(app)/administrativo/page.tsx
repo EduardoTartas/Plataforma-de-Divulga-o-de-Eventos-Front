@@ -4,19 +4,44 @@ import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from "@
 import { Usuario, UsuarioApi } from "@/types/eventos"
 import { useState, useEffect } from "react"
 import { ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
-import { Erro } from '@/types/eventos'
 import { fetchData } from "@/services/api"
 
 export default function AdministrativoPage() {
     const [usuarios, setUsuarios] = useState<Usuario[]>([])
     const [carregandoUsuarios, setCarregandoUsuarios] = useState(true)
     const [erroUsuarios, setErroUsuarios] = useState<string | null>(null)
+    const [atualizandoStatus, setAtualizandoStatus] = useState<string | null>(null)
 
-    const alterarStatus = async (id: string) => {
+    const alterarStatus = async (id: string, status: string) => {
+        const novoStatus: 'ativo' | 'inativo' = status === 'inativo' ? 'ativo' : 'inativo';
+
         try {
-            let resposta = fetchData(`/usuarios/${id}/status`, 'PATCH')
+            setAtualizandoStatus(id);
+
+            // Atualização otimista: atualiza o estado local imediatamente
+            setUsuarios(usuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, status: novoStatus }
+                    : usuario
+            ));
+
+            // Faz a requisição para a API
+            const resposta = await fetchData(`/usuarios/${id}/status`, 'PATCH', undefined, { status: novoStatus });
+
+            // Verifica se houve erro na resposta
+            if (!resposta || (resposta as any).code !== 200) {
+                throw new Error('Erro ao atualizar status');
+            }
         } catch (error) {
-            alert(`Não foi possivel alterar o status do Usuário: ${error}`)
+            // Reverte a mudança em caso de erro
+            setUsuarios(usuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, status: status as 'ativo' | 'inativo' }
+                    : usuario
+            ));
+            alert(`Não foi possivel alterar o status do Usuário: ${error}`);
+        } finally {
+            setAtualizandoStatus(null);
         }
     }
 
@@ -164,11 +189,14 @@ export default function AdministrativoPage() {
                                             <TableCell>
                                                 <div className="flex items-center justify-center gap-3">
                                                     <button
-                                                        className="transition-transform hover:scale-110 cursor-pointer"
+                                                        onClick={() => alterarStatus(usuario._id, usuario.status)}
+                                                        disabled={atualizandoStatus === usuario._id}
+                                                        className="transition-transform hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                         title={usuario.status === 'ativo' ? 'Desativar usuário' : 'Ativar usuário'}
-                                                        onClick={() => alterarStatus(usuario._id)}
                                                     >
-                                                        {usuario.status === 'ativo' ? (
+                                                        {atualizandoStatus === usuario._id ? (
+                                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                                        ) : usuario.status === 'ativo' ? (
                                                             <ToggleRight className="text-green-600 w-5 h-5" />
                                                         ) : (
                                                             <ToggleLeft className="text-gray-400 w-5 h-5" />
