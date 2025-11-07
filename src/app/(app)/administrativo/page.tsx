@@ -21,6 +21,7 @@ export default function AdministrativoPage() {
     const [novoUsuarioSenha, setNovoUsuarioSenha] = useState<string>('')
     const [confirmarSenha, setConfirmarSenha] = useState<string>('')
     const [senhasCombinam, setSenhasCombinam] = useState<boolean | null>(null)
+    const [usuarioDeletando, setUsuarioDeletando] = useState<Usuario | null>(null)
 
     const alterarStatus = async (id: string, status: string) => {
         const novoStatus: 'ativo' | 'inativo' = status === 'inativo' ? 'ativo' : 'inativo';
@@ -52,7 +53,14 @@ export default function AdministrativoPage() {
         }
     }
 
-    const deletarUsuario = async (id: string) => {
+    const deletarUsuario = async (id?: string) => {
+        if (!id) {
+            alert('Usuário inválido.');
+            setUsuarioDeletando(null);
+            setModalAtivo(null);
+            return;
+        }
+
         try {
             const resposta = await fetchData(`/usuarios/${id}`, 'DELETE');
 
@@ -62,6 +70,8 @@ export default function AdministrativoPage() {
 
             // Atualiza a lista de usuários removendo o usuário deletado
             setUsuarios(usuarios.filter(usuario => usuario._id !== id));
+            setUsuarioDeletando(null);
+            setModalAtivo(null);
         } catch (error) {
             alert(`Não foi possivel deletar o Usuário: ${error}`);
 
@@ -313,6 +323,24 @@ export default function AdministrativoPage() {
                 )}
             </Modal>
 
+            {/* Modal de confirmação */}
+            <Modal titulo="Confirmar ação" isOpen={modalAtivo === 'confirmacaoDeletar'} onClose={() => setModalAtivo(null)}>
+                <p>Deseja realmente deletar este usuario?</p>
+                <p>Esta ação não pode ser desfeita.</p>
+                <div className=" bg-gray-100 p-4 rounded-md flex flex-col gap-2">
+                    <span>Nome: {usuarioDeletando?.nome}</span>
+                    <span>Email: {usuarioDeletando?.email}</span>
+                </div>
+                <div className="flex justify-end mt-4">
+                    <button onClick={() => setModalAtivo(null)} className="bg-indigo-600 text-white py-2 px-4 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button onClick={() => { deletarUsuario(usuarioDeletando?._id) }} className="bg-red-600 text-white py-2 px-4 rounded-lg ml-2">
+                        Deletar
+                    </button>
+                </div>
+            </Modal>
+
             {/* Tela */}
             <div className="font-inter min-h-screen bg-[#F9FAFB]">
                 {/* Banner */}
@@ -447,7 +475,7 @@ export default function AdministrativoPage() {
                                                         <button
                                                             className="transition-transform hover:scale-110 cursor-pointer"
                                                             title="Excluir usuário"
-                                                            onClick={() => { deletarUsuario(usuario._id) }}
+                                                            onClick={() => { setUsuarioDeletando(usuario); setModalAtivo('confirmacaoDeletar'); }}
                                                         >
                                                             <Trash2 className="text-red-600 w-5 h-5" />
                                                         </button>

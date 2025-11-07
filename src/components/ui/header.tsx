@@ -22,14 +22,19 @@ export default function Header() {
                     />
                 </Link>
 
-                <div className="flex flex-row gap-10">
+                <div className="flex flex-row gap-10 items-center">
+
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-lg hover:shadow-md transition-shadow">
+                        <span className="text-sm font-medium text-gray-800 cursor-default">{session?.user?.nome}</span>
+                    </div>
+
                     {session?.user?.admin && (
                         pathName === 'meus_eventos' ? (
                             <Link
                                 href='/administrativo'
                                 className="selection:bg-none cursor-pointer text-[#4B5563] flex items-center gap-2 border-b-2 border-transparent hover:border-[#4338CA] transition-all py-1"
                             >
-                                <span className="text-sm sm:text-base">Usuários</span>
+                                <span className="text-sm sm:text-base">Lista de Usuários</span>
                             </Link>
                         ) : (
                             <Link
