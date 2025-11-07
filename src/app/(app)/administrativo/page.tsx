@@ -22,7 +22,6 @@ export default function AdministrativoPage() {
     const [confirmarSenha, setConfirmarSenha] = useState<string>('')
     const [senhasCombinam, setSenhasCombinam] = useState<boolean | null>(null)
 
-
     const alterarStatus = async (id: string, status: string) => {
         const novoStatus: 'ativo' | 'inativo' = status === 'inativo' ? 'ativo' : 'inativo';
 
@@ -148,6 +147,7 @@ export default function AdministrativoPage() {
     return (
         <>
             {/*  Modal Zone */}
+            {/* modal de Novo usuario */}
             <Modal titulo="Cadastrar um novo usuário" isOpen={modalAtivo === 'novoUsuario'} onClose={() => limparModal()}>
                 {sucessoModal ? (
                     <div className="flex flex-col items-center justify-center py-8">
