@@ -332,10 +332,10 @@ export default function AdministrativoPage() {
                     <span>Email: {usuarioDeletando?.email}</span>
                 </div>
                 <div className="flex justify-end mt-4">
-                    <button onClick={() => setModalAtivo(null)} className="bg-indigo-600 text-white py-2 px-4 rounded-lg">
+                    <button onClick={() => setModalAtivo(null)} className="bg-indigo-600 text-white py-2 px-4 rounded-lg cursor-pointer">
                         Cancelar
                     </button>
-                    <button onClick={() => { deletarUsuario(usuarioDeletando?._id) }} className="bg-red-600 text-white py-2 px-4 rounded-lg ml-2">
+                    <button onClick={() => { deletarUsuario(usuarioDeletando?._id) }} className="bg-red-600 text-white py-2 px-4 rounded-lg ml-2 cursor-pointer">
                         Deletar
                     </button>
                 </div>
