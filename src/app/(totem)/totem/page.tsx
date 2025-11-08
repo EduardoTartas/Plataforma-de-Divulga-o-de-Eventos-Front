@@ -327,7 +327,16 @@ export default function EventosPage() {
                             </div>
                             <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
                                 <img src="/tags.svg" alt="Tags" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
-                                <p className="font-inter">{eventoAtual.tags.join(' - ').toLowerCase()}</p>
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                    {eventoAtual.tags.map((tag: string, index: number) => (
+                                        <span
+                                            key={index}
+                                            className="font-inter bg-white/20 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-xs sm:text-sm md:text-base lg:text-sm"
+                                        >
+                                            {tag.toLowerCase()}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
