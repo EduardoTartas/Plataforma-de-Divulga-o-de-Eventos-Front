@@ -2,11 +2,18 @@ import Link from "next/link";
 
 export default function RecuperarSenhaPage() {
     return (
-        <div className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4 py-8">
-            <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
+        <div 
+            className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4 py-8"
+            data-testid="recuperar-page"
+        >
+            <div 
+                className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4"
+                data-testid="recuperar-card"
+            >
                 <Link
                     href="/login"
                     className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                    data-testid="btn-voltar-login"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -24,15 +31,27 @@ export default function RecuperarSenhaPage() {
                 </Link>
 
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Recuperar Senha</h1>
-                    <p className="mt-3 text-sm text-gray-600">
+                    <h1 
+                        className="text-3xl font-bold text-gray-900"
+                        data-testid="titulo-recuperar"
+                    >
+                        Recuperar Senha
+                    </h1>
+                    <p 
+                        className="mt-3 text-sm text-gray-600"
+                        data-testid="descricao-recuperar"
+                    >
                         Enviaremos um link de verificação para o seu e-mail para redefinir sua senha.
                     </p>
                 </div>
 
-                <form className="space-y-4">
+                <form className="space-y-4" data-testid="form-recuperar">
                     <div className="space-y-1.5">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        <label 
+                            htmlFor="email" 
+                            className="block text-sm font-medium text-gray-700"
+                            data-testid="label-email"
+                        >
                             E-mail
                         </label>
                         <input
@@ -42,6 +61,7 @@ export default function RecuperarSenhaPage() {
                                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                      placeholder:text-gray-400 transition-all"
                             placeholder="seu@email.com"
+                            data-testid="input-email"
                         />
                     </div>
 
@@ -50,6 +70,7 @@ export default function RecuperarSenhaPage() {
                         className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                                  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
                                  focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
+                        data-testid="btn-enviar-codigo"
                     >
                         Enviar Código
                     </button>

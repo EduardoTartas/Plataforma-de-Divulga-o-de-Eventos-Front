@@ -2,23 +2,42 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4 py-8">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Entrar</h1>
-          <p className="mt-2 text-sm text-gray-600">
+    <div
+      className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4 py-8"
+      data-test="login-container"
+    >
+      <div
+        className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4"
+        data-test="login-card"
+      >
+        <div className="text-center" data-test="login-header">
+          <h1
+            className="text-3xl font-bold text-gray-900"
+            data-test="login-title"
+          >
+            Entrar
+          </h1>
+          <p
+            className="mt-2 text-sm text-gray-600"
+            data-test="login-subtitle"
+          >
             Acesse sua conta para continuar
           </p>
         </div>
 
-        <form className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <form className="space-y-4" data-test="login-form">
+          <div className="space-y-1.5" data-test="field-email">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+              data-test="label-email"
+            >
               E-mail
             </label>
             <input
               id="email"
               type="email"
+              data-test="input-email"
               className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                        placeholder:text-gray-400 transition-all"
@@ -26,13 +45,18 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <div className="space-y-1.5" data-test="field-password">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+              data-test="label-password"
+            >
               Senha
             </label>
             <input
               id="password"
               type="password"
+              data-test="input-password"
               className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                        placeholder:text-gray-400 transition-all"
@@ -40,20 +64,29 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex items-center gap-2">
+          <div
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+            data-test="remember-section"
+          >
+            <div className="flex items-center gap-2" data-test="remember-field">
               <input
                 id="remember"
                 type="checkbox"
+                data-test="input-remember"
                 className="w-4 h-4 text-indigo-600 border-gray-300 rounded 
                          focus:ring-2 focus:ring-indigo-500"
               />
-              <label htmlFor="remember" className="text-sm text-gray-700">
+              <label
+                htmlFor="remember"
+                className="text-sm text-gray-700"
+                data-test="label-remember"
+              >
                 Lembrar de mim
               </label>
             </div>
             <Link
               href="/recuperar_senha"
+              data-test="link-recuperar-senha"
               className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
             >
               Esqueceu a senha?
@@ -62,6 +95,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
+            data-test="btn-submit-login"
             className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                      hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
                      focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
@@ -70,10 +104,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600">
+        <p
+          className="text-center text-sm text-gray-600"
+          data-test="footer-register"
+        >
           Não tem uma conta?{" "}
           <Link
             href="/cadastro"
+            data-test="link-cadastro"
             className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
           >
             Criar conta
