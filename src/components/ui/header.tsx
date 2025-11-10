@@ -51,7 +51,7 @@ export default function Header() {
                         className="selection:bg-none cursor-pointer text-[#4B5563] flex items-center gap-2 border-b-2 border-transparent hover:border-[#4338CA] transition-all py-1"
                         onClick={() => {
                             setTimeout(() => {
-                                signOut({ callbackUrl: "/login" });
+                                signOut({ callbackUrl: `${window.location.origin}/login` });
                             }, 0);
                         }}
                     >
