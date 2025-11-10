@@ -18,9 +18,6 @@ export default function AdministrativoPage() {
     const [erroModal, setErroModal] = useState<string | null>(null)
     const [novoUsuarioNome, setNovoUsuarioNome] = useState<string>('')
     const [novoUsuarioEmail, setNovoUsuarioEmail] = useState<string>('')
-    const [novoUsuarioSenha, setNovoUsuarioSenha] = useState<string>('')
-    const [confirmarSenha, setConfirmarSenha] = useState<string>('')
-    const [senhasCombinam, setSenhasCombinam] = useState<boolean | null>(null)
     const [usuarioDeletando, setUsuarioDeletando] = useState<Usuario | null>(null)
 
     const alterarStatus = async (id: string, status: string) => {
@@ -112,7 +109,7 @@ export default function AdministrativoPage() {
             setErroModal(null);
             setSucessoModal(false);
 
-            const resposta = await fetchData<UsuarioApi>('/usuarios', 'POST', undefined, { nome: novoUsuarioNome, email: novoUsuarioEmail, senha: novoUsuarioSenha, status: "ativo" })
+            const resposta = await fetchData<UsuarioApi>('/usuarios', 'POST', undefined, { nome: novoUsuarioNome, email: novoUsuarioEmail, status: "ativo" })
 
             if (resposta.code !== 201) {
                 throw new Error('Erro ao cadastrar usuário!');
@@ -144,10 +141,7 @@ export default function AdministrativoPage() {
             setCarregandoModal(false),
             setErroModal(null),
             setNovoUsuarioNome(''),
-            setNovoUsuarioEmail(''),
-            setNovoUsuarioSenha(''),
-            setConfirmarSenha(''),
-            setSenhasCombinam(null)
+            setNovoUsuarioEmail('')
     }
 
     useEffect(() => {
@@ -222,89 +216,22 @@ export default function AdministrativoPage() {
                             />
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Senha
-                            </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                value={novoUsuarioSenha}
-                                autoComplete="new-password"
-                                onChange={(e) => {
-                                    setNovoUsuarioSenha(e.target.value);
-                                    // Valida se já tem algo digitado no campo de confirmação
-                                    if (confirmarSenha) {
-                                        setSenhasCombinam(e.target.value === confirmarSenha);
-                                    }
-                                }}
-                                disabled={carregandoModal}
-                                className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
-                                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                         placeholder:text-gray-400 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                placeholder="••••••••"
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                                Confirmar Senha
-                            </label>
-                            <div className="relative">
-                                <input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type="password"
-                                    value={confirmarSenha}
-                                    autoComplete="new-password"
-                                    onChange={(e) => {
-                                        setConfirmarSenha(e.target.value);
-                                        // Valida em tempo real
-                                        if (e.target.value.length > 0) {
-                                            setSenhasCombinam(novoUsuarioSenha === e.target.value);
-                                        } else {
-                                            setSenhasCombinam(null);
-                                        }
-                                    }}
-                                    disabled={carregandoModal}
-                                    className={`w-full px-4 py-2.5 text-gray-900 border rounded-lg 
-                                             focus:outline-none focus:ring-2 focus:border-transparent
-                                             placeholder:text-gray-400 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed
-                                             ${senhasCombinam === false ? 'border-red-500 focus:ring-red-500' :
-                                            senhasCombinam === true ? 'border-green-500 focus:ring-green-500' :
-                                                'border-gray-300 focus:ring-indigo-500'}`}
-                                    placeholder="••••••••"
-                                />
-                                {/* Ícone de feedback */}
-                                {senhasCombinam !== null && confirmarSenha.length > 0 && (
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                        {senhasCombinam ? (
-                                            <CheckCircle className="w-5 h-5 text-green-500" />
-                                        ) : (
-                                            <XCircle className="w-5 h-5 text-red-500" />
-                                        )}
-                                    </div>
-                                )}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
-                            {/* Mensagem de feedback */}
-                            {senhasCombinam === false && confirmarSenha.length > 0 && (
-                                <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                                    <XCircle className="w-4 h-4" />
-                                    As senhas não coincidem
+                            <div className="flex-1">
+                                <p className="text-sm text-blue-800">
+                                    O usuário receberá um e-mail com instruções para criar sua senha.
                                 </p>
-                            )}
-                            {senhasCombinam === true && (
-                                <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                                    <CheckCircle className="w-4 h-4" />
-                                    As senhas coincidem
-                                </p>
-                            )}
+                            </div>
                         </div>
 
                         <button
                             type="submit"
-                            disabled={carregandoModal || senhasCombinam === false || !novoUsuarioNome || !novoUsuarioEmail || !novoUsuarioSenha || !confirmarSenha}
+                            disabled={carregandoModal || !novoUsuarioNome || !novoUsuarioEmail}
                             className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                                      hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
                                      focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg
@@ -391,7 +318,7 @@ export default function AdministrativoPage() {
                                         <TableHead className="text-gray-700 font-semibold">ID</TableHead>
                                         <TableHead className="text-gray-700 font-semibold">Nome</TableHead>
                                         <TableHead className="text-gray-700 font-semibold">E-mail</TableHead>
-                                        <TableHead className="text-gray-700 font-semibold">Criado Em</TableHead>
+                                        <TableHead className="text-gray-700 font-semibold">Membro Desde</TableHead>
                                         <TableHead className="text-gray-700 font-semibold">Status</TableHead>
                                         <TableHead className="text-gray-700 font-semibold text-center">Ações</TableHead>
                                     </TableRow>
