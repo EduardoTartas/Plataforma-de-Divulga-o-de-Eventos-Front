@@ -97,6 +97,8 @@ export interface EventoTotem {
   categoria: string;
   tags: string[];
   link?: string;
+  duracao?: number;
+  loops?: number;
 }
 
 export interface EventosTotemApiResponse {

@@ -40,7 +40,9 @@ export default function EventosPage() {
         animacao: evento.animacao,
         categoria: evento.categoria,
         tags: evento.tags,
-        link: evento.link
+        link: evento.link,
+        duracao: evento.duracao,
+        loops: evento.loops
     }));
 
     // Estado que controla qual evento está sendo exibido
@@ -48,9 +50,6 @@ export default function EventosPage() {
 
     // Estado que controla qual imagem do evento atual está sendo exibida
     const [imagemAtualIndex, setImagemAtualIndex] = useState(0);
-
-    // Configuração: Quantas vezes o evento deve repetir suas imagens antes de mudar para o próximo
-    const REPETICOES_POR_EVENTO = 3; // TODO: Ajustar para puxar o valor direto da API
 
     // Estado que rastreia quantas vezes o evento atual já completou o ciclo de todas as suas imagens
     const [repeticoesCompletadas, setRepeticoesCompletadas] = useState(0);
@@ -70,13 +69,19 @@ export default function EventosPage() {
         // Só inicia o slideshow se tiver eventos
         if (eventos.length === 0) return;
 
+        // Pega o evento atual
+        const evento = eventos[eventoIndexRef.current];
+
+        // Define a duração baseada no evento atual (padrão: 3000ms = 3 segundos)
+        const duracaoAtual = evento.duracao || 3000;
+
         const intervalo = setInterval(() => {
             const eventoAtual = eventoIndexRef.current;
             const imagemAtual = imagemIndexRef.current;
-            const evento = eventos[eventoAtual];
+            const eventoObj = eventos[eventoAtual];
 
             // Verifica se o evento tem imagens
-            if (!evento.imagens || evento.imagens.length === 0) {
+            if (!eventoObj.imagens || eventoObj.imagens.length === 0) {
                 // Se não tem imagens, pula para o próximo evento e reseta o contador
                 const proximoEvento = (eventoAtual + 1) % eventos.length;
                 setEventoAtualIndex(proximoEvento);
@@ -85,10 +90,13 @@ export default function EventosPage() {
                 return;
             }
 
+            // Define quantas repetições o evento deve ter (padrão: 3)
+            const repeticoesDoEvento = eventoObj.loops || 3;
+
             const proximaImagem = imagemAtual + 1;
 
             // Se ainda tem mais imagens no evento atual
-            if (proximaImagem < evento.imagens.length) {
+            if (proximaImagem < eventoObj.imagens.length) {
                 setImagemAtualIndex(proximaImagem);
             } else {
                 // Completou um ciclo de todas as imagens do evento
@@ -96,7 +104,7 @@ export default function EventosPage() {
                     const novasRepeticoes = prev + 1;
 
                     // Se já completou o número necessário de repetições, muda para o próximo evento
-                    if (novasRepeticoes >= REPETICOES_POR_EVENTO) {
+                    if (novasRepeticoes >= repeticoesDoEvento) {
                         const proximoEvento = (eventoAtual + 1) % eventos.length;
                         setEventoAtualIndex(proximoEvento);
                         setImagemAtualIndex(0);
@@ -109,10 +117,10 @@ export default function EventosPage() {
                 });
             }
 
-        }, 1000);
+        }, duracaoAtual);
 
         return () => clearInterval(intervalo);
-    }, [eventos, REPETICOES_POR_EVENTO]);
+    }, [eventos, eventoAtualIndex]); // Adiciona eventoAtualIndex como dependência para recriar o intervalo quando mudar de evento
 
     // Animações disponíveis
     const ANIMACOES_MAP: Record<number, string> = {
@@ -293,7 +301,7 @@ export default function EventosPage() {
                                 </span>
                             </p>
                             <div className="flex gap-1 lg:gap-0.5">
-                                {Array.from({ length: REPETICOES_POR_EVENTO }).map((_, index) => (
+                                {Array.from({ length: eventoAtual.loops || 3 }).map((_, index) => (
                                     <div
                                         key={index}
                                         className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${index <= repeticoesCompletadas
