@@ -430,7 +430,7 @@ export default function AdministrativoPage() {
                                                                 </div>
                                                             ) : (
                                                                 <div className="flex flex-row gap-2">
-                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-gray-800">
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                                         Não
                                                                     </span>
                                                                     <ToggleLeft className="text-gray-800 w-5 h-5" />
