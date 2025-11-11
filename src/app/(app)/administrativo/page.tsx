@@ -12,6 +12,7 @@ export default function AdministrativoPage() {
     const [carregandoUsuarios, setCarregandoUsuarios] = useState<boolean>(true)
     const [erroUsuarios, setErroUsuarios] = useState<string | null>(null)
     const [atualizandoStatus, setAtualizandoStatus] = useState<string | null>(null)
+    const [atualizandoAdmin, setAtualizandoAdmin] = useState<string | null>(null)
     const [modalAtivo, setModalAtivo] = useState<string | null>(null)
     const [sucessoModal, setSucessoModal] = useState<boolean>(false)
     const [carregandoModal, setCarregandoModal] = useState<boolean>(false)
@@ -47,6 +48,40 @@ export default function AdministrativoPage() {
             alert(`Não foi possivel alterar o status do Usuário: ${error}`);
         } finally {
             setAtualizandoStatus(null);
+        }
+    }
+
+    const alterarAdmin = async (id: string, admin: boolean) => {
+        const atualizando: true | false = admin === false ? true : false
+        console.log(`Atualizando: ${atualizando}`)
+
+        try {
+            console.log('Iniciando requisição!')
+            setAtualizandoAdmin(id);
+
+            setUsuarios(usuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: atualizando }
+                    : usuario
+            ));
+
+            const resposta = await fetchData(`/usuarios/${id}/admin`, 'PATCH', undefined, { admin: atualizando });
+            console.log(JSON.stringify(resposta))
+
+            if (!resposta || (resposta as any).code !== 200) {
+                throw new Error('Erro ao atualizar status');
+            }
+        } catch (error) {
+            console.log(`Erro na requisição: ${JSON.stringify(error)}`)
+            // Reverte a mudança em caso de erro
+            setUsuarios(usuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: admin as true | false }
+                    : usuario
+            ));
+            alert(`Não foi possivel alterar o status de admin do Usuário: ${error}`);
+        } finally {
+            setAtualizandoAdmin(null);
         }
     }
 
@@ -319,8 +354,9 @@ export default function AdministrativoPage() {
                                         <TableHead className="text-gray-700 font-semibold">Nome</TableHead>
                                         <TableHead className="text-gray-700 font-semibold">E-mail</TableHead>
                                         <TableHead className="text-gray-700 font-semibold">Membro Desde</TableHead>
-                                        <TableHead className="text-gray-700 font-semibold">Status</TableHead>
+                                        <TableHead className="text-gray-700 font-semibold">Administrador</TableHead>
                                         <TableHead className="text-gray-700 font-semibold text-center">Ações</TableHead>
+                                        <TableHead className="text-gray-700 font-semibold">Status</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -376,12 +412,32 @@ export default function AdministrativoPage() {
                                                     {new Date(usuario.createdAt).toLocaleDateString('pt-BR')}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${usuario.status === 'ativo'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                        {usuario.status}
-                                                    </span>
+                                                    <div className="flex flex-row items-center gap-2.5">
+                                                        <button
+                                                            onClick={() => alterarAdmin(usuario._id, usuario.admin)}
+                                                            disabled={atualizandoAdmin === usuario._id}
+                                                            className="transition-transform hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title={usuario.admin === true ? 'Retirar Admin' : 'Atribuir Admin'}
+                                                        >
+                                                            {atualizandoAdmin === usuario._id ? (
+                                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                                            ) : usuario.admin === true ? (
+                                                                <div className="flex flex-row gap-2.5">
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                        Sim
+                                                                    </span>
+                                                                    <ToggleRight className="text-blue-800 w-5 h-5" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex flex-row gap-2">
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-gray-800">
+                                                                        Não
+                                                                    </span>
+                                                                    <ToggleLeft className="text-gray-800 w-5 h-5" />
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center justify-center gap-3">
@@ -407,6 +463,14 @@ export default function AdministrativoPage() {
                                                             <Trash2 className="text-red-600 w-5 h-5" />
                                                         </button>
                                                     </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${usuario.status === 'ativo'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                        {usuario.status}
+                                                    </span>
                                                 </TableCell>
                                             </TableRow>
                                         ))
