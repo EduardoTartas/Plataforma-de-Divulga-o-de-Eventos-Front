@@ -1,14 +1,22 @@
 "use client"
 
 import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from "@/components/ui/table"
-import { Usuario, UsuarioApi } from "@/types/eventos"
+import { Usuario, UsuarioApi, UsuariosApiResponse } from "@/types/eventos"
 import { useState, useEffect } from "react"
 import { ToggleLeft, ToggleRight, Trash2, UserPlus, CheckCircle, XCircle } from 'lucide-react'
 import { fetchData } from "@/services/api"
 import Modal from "@/components/ui/modal"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+} from "@/components/ui/pagination"
+
+const ITEMS_PER_PAGE = 10;
 
 export default function AdministrativoPage() {
-    const [usuarios, setUsuarios] = useState<Usuario[]>([])
+    const [todosUsuarios, setTodosUsuarios] = useState<Usuario[]>([]) // Todos os usuários da API
+    const [usuarios, setUsuarios] = useState<Usuario[]>([]) // Usuários da página atual
     const [carregandoUsuarios, setCarregandoUsuarios] = useState<boolean>(true)
     const [erroUsuarios, setErroUsuarios] = useState<string | null>(null)
     const [atualizandoStatus, setAtualizandoStatus] = useState<string | null>(null)
@@ -20,12 +28,22 @@ export default function AdministrativoPage() {
     const [novoUsuarioNome, setNovoUsuarioNome] = useState<string>('')
     const [novoUsuarioEmail, setNovoUsuarioEmail] = useState<string>('')
     const [usuarioDeletando, setUsuarioDeletando] = useState<Usuario | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(0)
+    const [totalDocs, setTotalDocs] = useState(0)
 
     const alterarStatus = async (id: string, status: string) => {
         const novoStatus: 'ativo' | 'inativo' = status === 'inativo' ? 'ativo' : 'inativo';
 
         try {
             setAtualizandoStatus(id);
+
+            // Atualiza tanto a lista completa quanto a lista da página atual
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, status: novoStatus }
+                    : usuario
+            ));
 
             setUsuarios(usuarios.map(usuario =>
                 usuario._id === id
@@ -40,6 +58,12 @@ export default function AdministrativoPage() {
             }
         } catch (error) {
             // Reverte a mudança em caso de erro
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, status: status as 'ativo' | 'inativo' }
+                    : usuario
+            ));
+
             setUsuarios(usuarios.map(usuario =>
                 usuario._id === id
                     ? { ...usuario, status: status as 'ativo' | 'inativo' }
@@ -59,6 +83,13 @@ export default function AdministrativoPage() {
             console.log('Iniciando requisição!')
             setAtualizandoAdmin(id);
 
+            // Atualiza tanto a lista completa quanto a lista da página atual
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: atualizando }
+                    : usuario
+            ));
+
             setUsuarios(usuarios.map(usuario =>
                 usuario._id === id
                     ? { ...usuario, admin: atualizando }
@@ -74,6 +105,12 @@ export default function AdministrativoPage() {
         } catch (error) {
             console.log(`Erro na requisição: ${JSON.stringify(error)}`)
             // Reverte a mudança em caso de erro
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: admin as true | false }
+                    : usuario
+            ));
+
             setUsuarios(usuarios.map(usuario =>
                 usuario._id === id
                     ? { ...usuario, admin: admin as true | false }
@@ -100,15 +137,17 @@ export default function AdministrativoPage() {
                 throw new Error('Erro ao deletar usuário');
             }
 
-            // Atualiza a lista de usuários removendo o usuário deletado
-            setUsuarios(usuarios.filter(usuario => usuario._id !== id));
+            // Fecha o modal
             setUsuarioDeletando(null);
             setModalAtivo(null);
+
+            // Atualiza a lista de usuários
+            await buscarUsuarios();
         } catch (error) {
             alert(`Não foi possivel deletar o Usuário: ${error}`);
 
             // Reverte a mudança em caso de erro
-            buscarUsuarios();
+            await buscarUsuarios();
         }
     }
 
@@ -121,18 +160,45 @@ export default function AdministrativoPage() {
             if (resposta.code !== 200) {
                 throw new Error('Erro ao buscar usuários');
             }
-            const dadosUsuarios = resposta.data
+
+            const dadosUsuarios = resposta.data;
+
+            // A API retorna todos os usuários de uma vez
+            let usuariosArray: Usuario[] = [];
+
             if (!dadosUsuarios) {
-                setUsuarios([]);
+                usuariosArray = [];
             } else if (Array.isArray(dadosUsuarios)) {
-                setUsuarios(dadosUsuarios);
+                usuariosArray = dadosUsuarios;
             } else {
-                setUsuarios([dadosUsuarios]);
+                usuariosArray = [dadosUsuarios];
             }
+
+            // Armazena todos os usuários
+            setTodosUsuarios(usuariosArray);
+
+            // Calcula paginação local
+            const total = usuariosArray.length;
+            const pages = Math.ceil(total / ITEMS_PER_PAGE);
+            setTotalDocs(total);
+            setTotalPages(pages);
+
+            // Define a página atual (garante que não exceda o total)
+            const validPage = Math.min(currentPage, pages || 1);
+            setCurrentPage(validPage);
+
+            // Pega os usuários da página atual
+            const startIndex = (validPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            setUsuarios(usuariosArray.slice(startIndex, endIndex));
+
         } catch (erro) {
             console.error('Erro ao buscar Usuarios:', erro);
             setErroUsuarios(erro instanceof Error ? erro.message : 'Erro desconhecido')
+            setTodosUsuarios([]);
             setUsuarios([]);
+            setTotalPages(0);
+            setTotalDocs(0);
         } finally {
             setCarregandoUsuarios(false);
         }
@@ -159,8 +225,11 @@ export default function AdministrativoPage() {
             setModalAtivo(null);
             setSucessoModal(false);
             setErroModal(null);
+            setNovoUsuarioNome('');
+            setNovoUsuarioEmail('');
 
-            // Atualiza a lista de usuários
+            // Volta para a primeira página e atualiza a lista de usuários
+            setCurrentPage(1);
             await buscarUsuarios();
         } catch (erro) {
             console.error('Erro ao cadastrar Usuarios:', erro)
@@ -179,9 +248,27 @@ export default function AdministrativoPage() {
             setNovoUsuarioEmail('')
     }
 
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+
+        // Pagina localmente os dados já carregados
+        const startIndex = (page - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        setUsuarios(todosUsuarios.slice(startIndex, endIndex));
+    };
+
     useEffect(() => {
         buscarUsuarios();
     }, [])
+
+    // Atualiza a página quando currentPage muda (exceto na montagem inicial)
+    useEffect(() => {
+        if (todosUsuarios.length > 0) {
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            setUsuarios(todosUsuarios.slice(startIndex, endIndex));
+        }
+    }, [currentPage, todosUsuarios])
 
     return (
         <>
@@ -338,7 +425,7 @@ export default function AdministrativoPage() {
                             </h2>
                             <div className="flex flex-row justify-between items-center">
                                 <p className="text-sm text-gray-600 mt-1">
-                                    {carregandoUsuarios ? 'Carregando...' : `${usuarios.length} usuário(s) cadastrado(s)`}
+                                    {carregandoUsuarios ? 'Carregando...' : `${totalDocs} usuário(s) cadastrado(s)`}
                                 </p>
 
                                 <button onClick={() => { setModalAtivo('novoUsuario') }} className="bg-green-600 cursor-pointer p-2 rounded-2xl flex flex-row gap-2 text-white"><UserPlus />Novo Usuário</button>
@@ -430,7 +517,7 @@ export default function AdministrativoPage() {
                                                                 </div>
                                                             ) : (
                                                                 <div className="flex flex-row gap-2">
-                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-gray-800">
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                                         Não
                                                                     </span>
                                                                     <ToggleLeft className="text-gray-800 w-5 h-5" />
@@ -478,6 +565,90 @@ export default function AdministrativoPage() {
                                 </TableBody>
                             </Table>
                         </div>
+
+                        {/* Paginação */}
+                        {totalPages > 1 && (
+                            <div className="flex flex-col items-center space-y-4 mt-6 pb-6">
+                                {/* Informação de paginação */}
+                                <div className="text-sm text-gray-600">
+                                    Página {currentPage} de {totalPages} ({totalDocs} usuários no total)
+                                </div>
+
+                                <Pagination>
+                                    <PaginationContent>
+                                        {/* Botão Anterior */}
+                                        <PaginationItem>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (currentPage > 1) handlePageChange(currentPage - 1);
+                                                }}
+                                                disabled={currentPage === 1}
+                                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === 1
+                                                    ? 'pointer-events-none opacity-50 cursor-not-allowed'
+                                                    : 'cursor-pointer'
+                                                    } bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
+                                            >
+                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                </svg>
+                                                Anterior
+                                            </button>
+                                        </PaginationItem>
+
+                                        {/* Números das páginas */}
+                                        {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
+                                            let pageNum;
+                                            if (totalPages <= 5) {
+                                                pageNum = index + 1;
+                                            } else if (currentPage <= 3) {
+                                                pageNum = index + 1;
+                                            } else if (currentPage >= totalPages - 2) {
+                                                pageNum = totalPages - 4 + index;
+                                            } else {
+                                                pageNum = currentPage - 2 + index;
+                                            }
+
+                                            return (
+                                                <PaginationItem key={pageNum}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePageChange(pageNum)}
+                                                        aria-current={currentPage === pageNum ? 'page' : undefined}
+                                                        className={`cursor-pointer px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === pageNum
+                                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600'
+                                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                            }`}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                </PaginationItem>
+                                            );
+                                        })}
+
+                                        {/* Botão Próximo */}
+                                        <PaginationItem>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                                                }}
+                                                disabled={currentPage === totalPages}
+                                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === totalPages
+                                                    ? 'pointer-events-none opacity-50 cursor-not-allowed'
+                                                    : 'cursor-pointer'
+                                                    } bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
+                                            >
+                                                Próximo
+                                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </button>
+                                        </PaginationItem>
+                                    </PaginationContent>
+                                </Pagination>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
