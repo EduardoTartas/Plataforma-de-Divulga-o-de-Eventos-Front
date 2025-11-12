@@ -1,43 +1,110 @@
 "use client"
 
-import { useState, useCallback } from "react";
-import { criarEventoSchema, type CriarEventoForm } from "@/schema/criarEventoSchema";
+import { useState, useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { 
+  criarEventoSchema, 
+  step1Schema, 
+  step3Schema,
+  type CriarEventoForm 
+} from "@/schema/criarEventoSchema";
 import { fetchData } from "@/services/api";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 
+const STORAGE_KEY = "criar_evento_draft";
+const STORAGE_STEP_KEY = "criar_evento_step";
+
+const initialFormData: CriarEventoForm = {
+  titulo: "",
+  descricao: "",
+  categoria: "",
+  local: "",
+  link: "",
+  dataInicio: "",
+  dataFim: "",
+  tags: [],
+  exibDia: [],
+  exibManha: false,
+  exibTarde: false,
+  exibNoite: false,
+  exibInicio: "",
+  exibFim: "",
+  cor: "",
+  animacao: "",
+};
+
 export function useCriarEvento() {
   const { data: session } = useSession();
-  const [formData, setFormData] = useState<CriarEventoForm>({
-    titulo: "",
-    descricao: "",
-    categoria: "",
-    local: "",
-    link: "",
-    dataInicio: "",
-    dataFim: "",
-    tags: [],
-    exibDia: [],
-    exibManha: false,
-    exibTarde: false,
-    exibNoite: false,
-    exibInicio: "",
-    exibFim: "",
-    cor: "",
-    animacao: "",
+  const queryClient = useQueryClient();
+  
+  const [step, setStep] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_STEP_KEY);
+      if (stored) {
+        try {
+          return parseInt(stored, 10);
+        } catch (e) {
+          console.error("Failed to parse stored step", e);
+        }
+      }
+    }
+    return 1;
+  });
+  
+  const form = useForm<CriarEventoForm>({
+    resolver: zodResolver(criarEventoSchema),
+    defaultValues: (() => {
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            return JSON.parse(stored);
+          } catch (e) {
+            console.error("Failed to parse stored form data", e);
+          }
+        }
+      }
+      return initialFormData;
+    })(),
+    mode: "onTouched", // Só valida após o usuário interagir com o campo
   });
 
-  const [step, setStep] = useState<number>(1);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [validImages, setValidImages] = useState<File[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
-  // Helper to get image dimensions
-  const getImageDimensions = (
-    file: File
-  ): Promise<{ width: number; height: number }> => {
+  const formValues = form.watch();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+    }
+  }, [formValues]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_STEP_KEY, step.toString());
+    }
+  }, [step]);
+
+  const clearStorage = useCallback(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_STEP_KEY);
+    }
+  }, []);
+
+  const resetForm = useCallback(() => {
+    form.reset(initialFormData);
+    setStep(1);
+    setMediaFiles([]);
+    setValidImages([]);
+    clearStorage();
+  }, [form, clearStorage]);
+
+  const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
@@ -53,99 +120,30 @@ export function useCriarEvento() {
     });
   };
 
-  // validate any arbitrary data object and set errors map
-  const validateData = useCallback((data: CriarEventoForm) => {
-    const result = criarEventoSchema.safeParse(data);
-    if (!result.success) {
-      const zErrors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const path = issue.path.join(".") || "form";
-        // prefer to set the first message for that path
-        if (!zErrors[path]) zErrors[path] = issue.message;
-      }
-      setErrors(zErrors);
-      return false;
-    }
-    setErrors({});
-    return true;
-  }, []);
-
-  // set field and validate the resulting data immediately (but only show errors for touched fields)
-  const setField = useCallback((name: string, value: string | boolean | string[]) => {
-    setFormData((prev: CriarEventoForm) => {
-      const next = { ...prev, [name]: value } as CriarEventoForm;
-      // validate next state to update internal errors
-      validateData(next);
-      return next;
-    });
-  }, [validateData]);
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value } = e.target;
-      setTouchedFields((prev) => new Set(prev).add(name));
-      setField(name, value);
-    },
-    [setField]
-  );
-
-  const handleCheckboxChange = useCallback(
-    (name: string, checked: boolean) => {
-      setTouchedFields((prev) => new Set(prev).add(name));
-      setField(name, checked);
-    },
-    [setField]
-  );
-
-  const handleSelectChange = useCallback((value: string, field = "categoria") => {
-    setTouchedFields((prev) => new Set(prev).add(field));
-    setField(field, value);
-  }, [setField]);
-
-  const handleTagsChange = useCallback(
-    (tags: string[]) => {
-      setTouchedFields((prev) => new Set(prev).add("tags"));
-      setField("tags", tags);
-    },
-    [setField]
-  );
-
-  const handleDiasChange = useCallback(
-    (dias: string[]) => {
-      setTouchedFields((prev) => new Set(prev).add("exibDia"));
-      setField("exibDia", dias);
-    },
-    [setField]
-  );
-
   const handleFilesChange = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
-    
-    // Check limit - allow adding only if under 10 total
     const currentCount = validImages.length;
-    const remainingSlots = 10 - currentCount;
+    const remainingSlots = 6 - currentCount;
     
     if (remainingSlots <= 0) {
-      toast.error("Limite máximo de 10 imagens atingido");
+      toast.error("Limite máximo de 6 imagens atingido");
       return;
     }
     
     const filesToProcess = fileArray.slice(0, remainingSlots);
     
     if (fileArray.length > remainingSlots) {
-      toast.warning(`Apenas ${remainingSlots} imagem(ns) será(ão) adicionada(s) devido ao limite de 10`);
+      toast.warning(`Apenas ${remainingSlots} imagem(ns) será(ão) adicionada(s) devido ao limite de 6`);
     }
     
-    // Add to existing mediaFiles
     setMediaFiles((prev) => [...prev, ...filesToProcess]);
 
-    // Validate image dimensions (min HD: 1280x720)
     const valid: File[] = [];
     const invalid: string[] = [];
 
     for (const file of filesToProcess) {
       if (!file.type.startsWith("image/")) {
-        valid.push(file); // non-images pass through
+        valid.push(file);
         continue;
       }
 
@@ -154,24 +152,17 @@ export function useCriarEvento() {
         if (dimensions.width >= 1280 && dimensions.height >= 720) {
           valid.push(file);
         } else {
-          invalid.push(
-            `${file.name} (${dimensions.width}x${dimensions.height} < 1280x720)`
-          );
+          invalid.push(`${file.name} (${dimensions.width}x${dimensions.height} < 1280x720)`);
         }
       } catch (err) {
         invalid.push(`${file.name} (erro ao ler dimensões)`);
       }
     }
 
-    // Add valid images to existing array
     setValidImages((prev) => [...prev, ...valid]);
 
     if (invalid.length > 0) {
-      toast.error(
-        `Erro: As seguintes imagens não atendem à resolução mínima de 1280x720:\n${invalid.join(
-          "\n"
-        )}`
-      );
+      toast.error(`Erro: As seguintes imagens não atendem à resolução mínima de 1280x720:\n${invalid.join("\n")}`);
     }
   }, [validImages.length]);
 
@@ -180,125 +171,205 @@ export function useCriarEvento() {
     setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const validate = useCallback(() => validateData(formData), [formData, validateData]);
-
-  // Validate specific step fields
-  const validateStep = useCallback((stepNumber: number) => {
-    const result = criarEventoSchema.safeParse(formData);
-    
+  const validateStep = useCallback(async (stepNumber: number) => {
     if (stepNumber === 1) {
-      // Step 1: Basic info fields
-      const requiredFields = ['titulo', 'descricao', 'local', 'dataInicio', 'dataFim', 'categoria'];
-      const stepErrors: string[] = [];
+      // Validar apenas campos da Step 1
+      const currentValues = form.getValues();
+      const step1Data = {
+        titulo: currentValues.titulo,
+        descricao: currentValues.descricao,
+        categoria: currentValues.categoria,
+        local: currentValues.local,
+        dataInicio: currentValues.dataInicio,
+        dataFim: currentValues.dataFim,
+        link: currentValues.link,
+        tags: currentValues.tags,
+      };
       
-      // Mark all step 1 fields as touched
-      setTouchedFields((prev) => {
-        const newSet = new Set(prev);
-        requiredFields.forEach(field => newSet.add(field));
-        newSet.add('tags');
-        return newSet;
-      });
-      
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          const fieldName = issue.path[0] as string;
-          if (requiredFields.includes(fieldName)) {
-            stepErrors.push(issue.message);
-          }
-        }
-      }
-      
-      // Check tags separately (min 1)
-      if (formData.tags.length === 0) {
-        stepErrors.push("Pelo menos uma tag é obrigatória");
-      }
-      
-      if (stepErrors.length > 0) {
-        toast.error(`Complete todos os campos obrigatórios antes de continuar`);
-        return false;
-      }
-    } else if (stepNumber === 3) {
-      // Step 3: Display settings
-      const requiredFields = ['exibDia', 'exibInicio', 'exibFim', 'cor', 'animacao'];
-      const stepErrors: string[] = [];
-      
-      // Mark all step 3 fields as touched
-      setTouchedFields((prev) => {
-        const newSet = new Set(prev);
-        requiredFields.forEach(field => newSet.add(field));
-        newSet.add('exibManha');
-        newSet.add('exibTarde');
-        newSet.add('exibNoite');
-        return newSet;
-      });
+      const result = step1Schema.safeParse(step1Data);
       
       if (!result.success) {
-        for (const issue of result.error.issues) {
-          const fieldName = issue.path[0] as string;
-          if (requiredFields.includes(fieldName) || fieldName === 'exibManha') {
-            stepErrors.push(issue.message);
-          }
-        }
-      }
-      
-      if (stepErrors.length > 0) {
-        toast.error(`Complete todos os campos obrigatórios antes de finalizar`);
+        result.error.issues.forEach((issue) => {
+          const field = issue.path[0] as keyof typeof currentValues;
+          form.setError(field as any, { message: issue.message });
+        });
+        toast.error("Complete todos os campos obrigatórios da Etapa 1");
         return false;
       }
+      
+      return true;
+    } 
+    
+    if (stepNumber === 2) {
+      // Validar imagens (mínimo de 1 imagem)
+      if (validImages.length === 0) {
+        toast.error("Adicione pelo menos 1 imagem antes de continuar");
+        return false;
+      }
+      return true;
+    }
+    
+    if (stepNumber === 3) {
+      // Validar apenas campos da Step 3
+      const currentValues = form.getValues();
+      const step3Data = {
+        exibDia: currentValues.exibDia,
+        exibManha: currentValues.exibManha,
+        exibTarde: currentValues.exibTarde,
+        exibNoite: currentValues.exibNoite,
+        exibInicio: currentValues.exibInicio,
+        exibFim: currentValues.exibFim,
+        cor: currentValues.cor,
+        animacao: currentValues.animacao,
+      };
+      
+      const result = step3Schema.safeParse(step3Data);
+      
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          const field = issue.path[0] as keyof typeof currentValues;
+          form.setError(field as any, { message: issue.message });
+        });
+        toast.error("Complete todos os campos obrigatórios da Etapa 3");
+        return false;
+      }
+      
+      return true;
     }
     
     return true;
-  }, [formData]);
+  }, [form, validImages.length]);
 
-  const submit = useCallback(async () => {
-    // validate final
-    const valid = validate();
-    if (!valid) {
-      toast.error("Por favor, corrija os erros antes de finalizar");
-      return false;
-    }
-
-    setLoading(true);
-
-    try {
-      // prepare payload
+  // Mutation para criar evento
+  const criarEventoMutation = useMutation({
+    mutationFn: async (data: CriarEventoForm) => {
+      // 1. Criar o evento
       const payload = {
-        ...formData,
-        exibDia: formData.exibDia.join(","), // Convert array to comma-separated string
+        ...data,
+        exibDia: data.exibDia.join(","),
+        cor: parseInt(data.cor, 10),
+        animacao: parseInt(data.animacao, 10),
       } as any;
 
-      // TODO: upload validImages if needed and include results in payload
-      await fetchData("/eventos", "POST", session?.user?.accesstoken, payload);
-      toast.success("Evento criado com sucesso!");
+      const eventoResponse = await fetchData<{ 
+        error: boolean;
+        code: number;
+        message: string;
+        data: {
+          _id: string;
+          [key: string]: any;
+        };
+      }>(
+        "/eventos",
+        "POST",
+        session?.user?.accesstoken,
+        payload
+      );
+
+      return eventoResponse;
+    },
+    onSuccess: async (eventoResponse) => {
+      const eventoId = eventoResponse.data._id;
+
+      if (!eventoId) {
+        throw new Error("ID do evento não retornado pela API");
+      }
+
+      // 2. Fazer upload das imagens se houver
+      if (validImages.length > 0) {
+        await uploadImagensMutation.mutateAsync(eventoId);
+      } else {
+        toast.success("Evento criado com sucesso!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+
+      // Invalidar queries para atualizar lista de eventos
+      queryClient.invalidateQueries({ queryKey: ["eventos"] });
+      
+      // Limpar tudo
+      clearStorage();
+      form.reset(initialFormData);
+      setStep(1);
+      setMediaFiles([]);
+      setValidImages([]);
+    },
+    onError: (error: any) => {
+      console.error("Erro ao criar evento:", error);
+      toast.error(error?.message || "Erro ao criar evento", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    },
+  });
+
+  // Mutation para upload de imagens
+  const uploadImagensMutation = useMutation({
+    mutationFn: async (eventoId: string) => {
+      const formData = new FormData();
+      
+      validImages.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const uploadResponse = await fetch(
+        `${API_URL}/eventos/${eventoId}/midias`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.user?.accesstoken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(
+          errorData?.message || "Erro ao fazer upload das imagens"
+        );
+      }
+
+      return uploadResponse.json();
+    },
+    onSuccess: () => {
+      toast.success("Evento e imagens criados com sucesso!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    },
+    onError: (error: any) => {
+      console.error("Erro ao fazer upload das imagens:", error);
+      toast.error(error?.message || "Erro ao fazer upload das imagens", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    },
+  });
+
+  const submit = useCallback(async (data: CriarEventoForm) => {
+    try {
+      await criarEventoMutation.mutateAsync(data);
       return true;
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.message || "Erro ao criar evento");
+    } catch {
       return false;
-    } finally {
-      setLoading(false);
     }
-  }, [formData, session, validate]);
+  }, [criarEventoMutation]);
 
   return {
-    formData,
-    setFormData,
-    handleChange,
-    handleCheckboxChange,
-    handleSelectChange,
-    handleTagsChange,
-    handleDiasChange,
+    form,
     handleFilesChange,
     handleRemoveImage,
     mediaFiles,
     validImages,
     step,
     setStep,
-    validate,
     validateStep,
     submit,
-    loading,
-    errors,
-    touchedFields,
+    loading: criarEventoMutation.isPending || uploadImagensMutation.isPending,
+    clearStorage,
+    resetForm,
   } as const;
 }

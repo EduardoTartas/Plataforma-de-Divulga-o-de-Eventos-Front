@@ -93,6 +93,7 @@ export default function MeusEventosPage() {
     };
 
     const handleCriarEvento = () => {
+        router.push("/criar_eventos");
         console.log('Navegar para criar evento');
         router.push("/criar_eventos");
     };
