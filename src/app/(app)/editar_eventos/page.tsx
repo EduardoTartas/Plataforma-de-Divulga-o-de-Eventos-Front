@@ -62,6 +62,7 @@ function EditarEventoContent() {
   } | null>(null);
   const [animacaoKey, setAnimacaoKey] = useState(0);
   const [hasLoadedData, setHasLoadedData] = useState(false);
+  const [previewWindow, setPreviewWindow] = useState<Window | null>(null);
 
   const imageDragDrop = useImageDragDrop(handleFilesChange);
 
@@ -300,8 +301,19 @@ function EditarEventoContent() {
                   <Button
                     type="button"
                     onClick={() => {
-                      // Abre o preview em uma nova aba
-                      window.open('/preview-evento', '_blank', 'noopener,noreferrer');
+                      // Verifica se a janela já existe e está aberta
+                      if (previewWindow && !previewWindow.closed) {
+                        // Se existe, apenas foca nela e força reload
+                        previewWindow.focus();
+                        previewWindow.location.reload();
+                      } else {
+                        // Se não existe ou foi fechada, abre uma nova
+                        const newWindow = window.open('/preview-evento', 'evento-preview');
+                        if (newWindow) {
+                          setPreviewWindow(newWindow);
+                          newWindow.focus();
+                        }
+                      }
                     }}
                     disabled={loading || (validImages.length === 0 && existingMedia.length === 0)}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"

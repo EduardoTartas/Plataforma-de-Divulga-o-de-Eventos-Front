@@ -22,8 +22,8 @@ export default function PreviewEvento() {
         return () => window.removeEventListener('resize', updateSize);
     }, []);
 
-    // Carrega os dados do localStorage quando a página é montada
-    useEffect(() => {
+    // Função para carregar os dados do preview
+    const carregarDadosPreview = () => {
         const dadosForm = localStorage.getItem('criar_evento_draft');
         const imagensValidas = localStorage.getItem('criar-evento-images');
         
@@ -100,6 +100,11 @@ export default function PreviewEvento() {
                 router.push('/criar_eventos');
             }
         }
+    };
+
+    // Carrega os dados do localStorage quando a página é montada
+    useEffect(() => {
+        carregarDadosPreview();
     }, [router]);
 
     // useEffect para slideshow automático
@@ -153,8 +158,8 @@ export default function PreviewEvento() {
         return (
             <div className="h-screen w-screen bg-linear-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
-                    <p className="text-white text-2xl font-inter">Carregando preview...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 2xl:h-20 2xl:w-20 border-t-2 border-b-2 2xl:border-t-2 2xl:border-b-2 border-white mx-auto mb-4 2xl:mb-4"></div>
+                    <p className="text-white text-base sm:text-xl md:text-2xl 2xl:text-2xl font-inter">Carregando preview...</p>
                 </div>
             </div>
         );
@@ -243,23 +248,22 @@ export default function PreviewEvento() {
                                 <img src="/category.svg" alt="Categoria" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
                                 <p className="font-inter">{eventoPreview.categoria.toUpperCase()}</p>
                             </div>
-                            {eventoPreview.tags.length > 0 && (
-                                <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
-                                    <img src="/tags.svg" alt="Tags" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
-                                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                                        {eventoPreview.tags.map((tag: string, index: number) => (
-                                            <span
-                                                key={index}
-                                                className="font-inter bg-white/20 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-xs sm:text-sm md:text-base lg:text-sm"
-                                            >
-                                                {tag.toLowerCase()}
-                                            </span>
-                                        ))}
-                                    </div>
+                            <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
+                                <img src="/tags.svg" alt="Tags" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                    {eventoPreview.tags.map((tag: string, index: number) => (
+                                        <span
+                                            key={index}
+                                            className="font-inter bg-white/20 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-xs sm:text-sm md:text-base lg:text-sm"
+                                        >
+                                            {tag.toLowerCase()}
+                                        </span>
+                                    ))}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
+
 
                     {/* Descrição do Evento */}
                     <div className={`flex-1 max-h-[120px] sm:max-h-[150px] md:max-h-[180px] lg:max-h-[220px] xl:max-h-[250px] 2xl:max-h-80
