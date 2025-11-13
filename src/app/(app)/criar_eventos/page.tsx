@@ -24,6 +24,7 @@ import {
 import { Stepper } from "@/components/ui/stepper";
 import { useCriarEvento } from "@/hooks/useCriarEvento";
 import { CriarEventoForm } from "@/schema/criarEventoSchema";
+import "animate.css";
 
 const STEPS = [
   {
@@ -59,6 +60,11 @@ export default function CriarEvento() {
   } = useCriarEvento();
 
   const [isDragging, setIsDragging] = useState(false);
+  const [animacaoPreview, setAnimacaoPreview] = useState<{
+    nome: string;
+    classe: string;
+  } | null>(null);
+  const [animacaoKey, setAnimacaoKey] = useState(0);
 
   const handleContinue = async () => {
     const isValid = await validateStep(step);
@@ -95,14 +101,8 @@ export default function CriarEvento() {
   };
 
   const handleClearDraft = () => {
-    if (
-      confirm(
-        "Tem certeza que deseja limpar o rascunho? Todos os dados salvos serão perdidos."
-      )
-    ) {
       resetForm();
       toast.success("Rascunho limpo com sucesso!");
-    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -544,6 +544,9 @@ export default function CriarEvento() {
                           { value: "sabado", label: "Sábado" },
                         ];
                         
+                        const todosDias = diasDaSemana.map(d => d.value);
+                        const todosSelecionados = todosDias.every(dia => (field.value || []).includes(dia));
+                        
                         const handleToggle = (dia: string) => {
                           const currentDias = field.value || [];
                           const newDias = currentDias.includes(dia)
@@ -552,23 +555,42 @@ export default function CriarEvento() {
                           field.onChange(newDias);
                         };
                         
+                        const handleToggleTodos = () => {
+                          if (todosSelecionados) {
+                            field.onChange([]);
+                          } else {
+                            field.onChange(todosDias);
+                          }
+                        };
+                        
                         return (
                           <FormItem>
                             <FormLabel className="text-sm font-medium text-[#2D3748]">
                               Dias da Semana * (selecione pelo menos um)
                             </FormLabel>
-                            <div className="grid grid-cols-2 gap-3">
-                              {diasDaSemana.map((dia) => (
-                                <label key={dia.value} className="flex items-center gap-2 cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    checked={(field.value || []).includes(dia.value)}
-                                    onChange={() => handleToggle(dia.value)}
-                                    className="h-4 w-4 text-[#805AD5] focus:ring-[#805AD5] border-[#CBD5E0] rounded accent-[#805AD5]"
-                                  />
-                                  <span className="text-sm text-[#2D3748]">{dia.label}</span>
-                                </label>
-                              ))}
+                            <div className="space-y-3">
+                              <label className="flex items-center gap-2 cursor-pointer p-2 bg-purple-50 rounded-lg border border-purple-200">
+                                <input
+                                  type="checkbox"
+                                  checked={todosSelecionados}
+                                  onChange={handleToggleTodos}
+                                  className="h-4 w-4 text-[#805AD5] focus:ring-[#805AD5] border-[#CBD5E0] rounded accent-[#805AD5]"
+                                />
+                                <span className="text-sm font-semibold text-[#805AD5]">Todos os dias</span>
+                              </label>
+                              <div className="grid grid-cols-2 gap-3">
+                                {diasDaSemana.map((dia) => (
+                                  <label key={dia.value} className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={(field.value || []).includes(dia.value)}
+                                      onChange={() => handleToggle(dia.value)}
+                                      className="h-4 w-4 text-[#805AD5] focus:ring-[#805AD5] border-[#CBD5E0] rounded accent-[#805AD5]"
+                                    />
+                                    <span className="text-sm text-[#2D3748]">{dia.label}</span>
+                                  </label>
+                                ))}
+                              </div>
                             </div>
                             <FormMessage />
                           </FormItem>
@@ -579,64 +601,94 @@ export default function CriarEvento() {
                     {/* Período de Exibição */}
                     <div className="space-y-2">
                       <FormLabel className="text-sm font-medium text-[#2D3748]">Período de Exibição * (selecione pelo menos um)</FormLabel>
-                      <div className="flex flex-col gap-3">
-                        <FormField
-                          control={form.control}
-                          name="exibManha"
-                          render={({ field }) => (
-                            <FormItem className="flex items-center gap-2 space-y-0">
-                              <FormControl>
-                                <input
-                                  type="checkbox"
-                                  checked={field.value}
-                                  onChange={field.onChange}
-                                  className="w-4 h-4 text-[#805AD5] border-[#CBD5E0] rounded focus:ring-[#805AD5] accent-[#805AD5]"
-                                />
-                              </FormControl>
-                              <FormLabel className="text-sm text-[#2D3748] cursor-pointer mt-0!">
-                                Manhã
-                              </FormLabel>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="exibTarde"
-                          render={({ field }) => (
-                            <FormItem className="flex items-center gap-2 space-y-0">
-                              <FormControl>
-                                <input
-                                  type="checkbox"
-                                  checked={field.value}
-                                  onChange={field.onChange}
-                                  className="w-4 h-4 text-[#805AD5] border-[#CBD5E0] rounded focus:ring-[#805AD5] accent-[#805AD5]"
-                                />
-                              </FormControl>
-                              <FormLabel className="text-sm text-[#2D3748] cursor-pointer mt-0!">
-                                Tarde
-                              </FormLabel>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="exibNoite"
-                          render={({ field }) => (
-                            <FormItem className="flex items-center gap-2 space-y-0">
-                              <FormControl>
-                                <input
-                                  type="checkbox"
-                                  checked={field.value}
-                                  onChange={field.onChange}
-                                  className="w-4 h-4 text-[#805AD5] border-[#CBD5E0] rounded focus:ring-[#805AD5] accent-[#805AD5]"
-                                />
-                              </FormControl>
-                              <FormLabel className="text-sm text-[#2D3748] cursor-pointer mt-0!">
-                                Noite
-                              </FormLabel>
-                            </FormItem>
-                          )}
-                        />
+                      <div className="space-y-3">
+                        {/* Opção Todos os Períodos */}
+                        <label 
+                          className="flex items-center gap-2 cursor-pointer p-2 bg-purple-50 rounded-lg border border-purple-200"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const manha = form.getValues("exibManha");
+                            const tarde = form.getValues("exibTarde");
+                            const noite = form.getValues("exibNoite");
+                            const todosSelecionados = manha && tarde && noite;
+                            
+                            form.setValue("exibManha", !todosSelecionados);
+                            form.setValue("exibTarde", !todosSelecionados);
+                            form.setValue("exibNoite", !todosSelecionados);
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              form.watch("exibManha") && 
+                              form.watch("exibTarde") && 
+                              form.watch("exibNoite")
+                            }
+                            readOnly
+                            className="h-4 w-4 text-[#805AD5] focus:ring-[#805AD5] border-[#CBD5E0] rounded accent-[#805AD5] pointer-events-none"
+                          />
+                          <span className="text-sm font-semibold text-[#805AD5]">Todos os períodos</span>
+                        </label>
+                        
+                        <div className="flex flex-col gap-3">
+                          <FormField
+                            control={form.control}
+                            name="exibManha"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center gap-2 space-y-0">
+                                <FormControl>
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                    className="h-4 w-4 text-[#805AD5] border-[#CBD5E0] rounded focus:ring-[#805AD5] accent-[#805AD5]"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm text-[#2D3748] cursor-pointer mt-0!">
+                                  Manhã
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="exibTarde"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center gap-2 space-y-0">
+                                <FormControl>
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                    className="h-4 w-4 text-[#805AD5] border-[#CBD5E0] rounded focus:ring-[#805AD5] accent-[#805AD5]"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm text-[#2D3748] cursor-pointer mt-0!">
+                                  Tarde
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="exibNoite"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center gap-2 space-y-0">
+                                <FormControl>
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                    className="h-4 w-4 text-[#805AD5] border-[#CBD5E0] rounded focus:ring-[#805AD5] accent-[#805AD5]"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm text-[#2D3748] cursor-pointer mt-0!">
+                                  Noite
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -692,7 +744,7 @@ export default function CriarEvento() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-sm font-medium text-[#2D3748]">
-                              Cor *
+                              Cor do Card *
                             </FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
@@ -700,11 +752,61 @@ export default function CriarEvento() {
                                   <SelectValue placeholder="Selecione uma cor" />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg">
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="0">Cor 0</SelectItem>
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="1">Cor 1</SelectItem>
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="2">Cor 2</SelectItem>
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="3">Cor 3</SelectItem>
+                              <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg max-h-[300px]">
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="1">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#6B7280] shadow-sm shrink-0"></div>
+                                    <span>Cinza Escuro</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="2">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#F98DBE] shadow-sm shrink-0"></div>
+                                    <span>Rosa</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#B596FF] shadow-sm shrink-0"></div>
+                                    <span>Roxo</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#76ADFF] shadow-sm shrink-0"></div>
+                                    <span>Azul</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="5">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#77D86B] shadow-sm shrink-0"></div>
+                                    <span>Verde</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="6">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#F2CA77] shadow-sm shrink-0"></div>
+                                    <span>Amarelo</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="7">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#FBA67A] shadow-sm shrink-0"></div>
+                                    <span>Laranja</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="8">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-[#FF766D] shadow-sm shrink-0"></div>
+                                    <span>Vermelho</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] cursor-pointer" value="9">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded bg-white border-2 border-dashed border-gray-400 shrink-0"></div>
+                                    <span>Transparente</span>
+                                  </div>
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -719,7 +821,7 @@ export default function CriarEvento() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-sm font-medium text-[#2D3748]">
-                              Animação *
+                              Animação de Entrada *
                             </FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
@@ -727,11 +829,127 @@ export default function CriarEvento() {
                                   <SelectValue placeholder="Selecione uma animação" />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg">
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="0">Animação 0</SelectItem>
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="1">Animação 1</SelectItem>
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="2">Animação 2</SelectItem>
-                                <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="3">Animação 3</SelectItem>
+                              <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg max-h-[300px]">
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="1"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Fade In', classe: 'animate__fadeIn' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Fade In (Aparecer)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="2"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Fade In Up', classe: 'animate__fadeInUp' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Fade In Up (Subir)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="3"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Fade In Down', classe: 'animate__fadeInDown' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Fade In Down (Descer)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="4"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Slide In Left', classe: 'animate__slideInLeft' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Slide In Left (Esquerda)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="5"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Slide In Right', classe: 'animate__slideInRight' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Slide In Right (Direita)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="6"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Zoom In', classe: 'animate__zoomIn' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Zoom In (Aproximar)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="7"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Flip In X', classe: 'animate__flipInX' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Flip In X (Girar Horizontal)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="8"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Bounce In', classe: 'animate__bounceIn' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Bounce In (Saltar)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="9"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Back In Down', classe: 'animate__backInDown' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Back In Down (Voltar de Cima)
+                                </SelectItem>
+                                <SelectItem 
+                                  className="text-[#2D3748] cursor-pointer" 
+                                  value="10"
+                                  onMouseEnter={() => {
+                                    setAnimacaoPreview({ nome: 'Back In Up', classe: 'animate__backInUp' });
+                                    setAnimacaoKey(prev => prev + 1);
+                                  }}
+                                  onMouseLeave={() => setAnimacaoPreview(null)}
+                                  onClick={() => setAnimacaoPreview(null)}
+                                >
+                                  Back In Up (Voltar de Baixo)
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -777,6 +995,21 @@ export default function CriarEvento() {
           </Form>
         </div>
       </div>
+
+      {/* Preview da Animação */}
+      {animacaoPreview && (
+        <div className="fixed bottom-8 right-8 bg-white rounded-lg shadow-2xl border-2 border-[#805AD5] p-6 z-50 w-[200px]">
+          <p className="text-sm font-semibold text-[#2D3748] mb-3 text-center">
+            {animacaoPreview.nome}
+          </p>
+          <div className="flex items-center justify-center w-full h-32 bg-gradient-to-br from-purple-100 to-purple-50 rounded-lg overflow-hidden">
+            <div
+              key={animacaoKey}
+              className={`w-16 h-16 bg-gradient-to-br from-[#805AD5] to-[#9F7AEA] rounded-lg shadow-lg animate__animated ${animacaoPreview.classe}`}
+            ></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

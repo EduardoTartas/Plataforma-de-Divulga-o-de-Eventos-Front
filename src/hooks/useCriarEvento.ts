@@ -69,7 +69,8 @@ export function useCriarEvento() {
       }
       return initialFormData;
     })(),
-    mode: "onTouched", // Só valida após o usuário interagir com o campo
+    mode: "onSubmit", // Só valida no submit ou quando o campo é tocado após erro
+    reValidateMode: "onChange", // Re-valida em tempo real após o primeiro erro
   });
 
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
@@ -226,11 +227,9 @@ export function useCriarEvento() {
       const result = step3Schema.safeParse(step3Data);
       
       if (!result.success) {
-        result.error.issues.forEach((issue) => {
-          const field = issue.path[0] as keyof typeof currentValues;
-          form.setError(field as any, { message: issue.message });
-        });
-        toast.error("Complete todos os campos obrigatórios da Etapa 3");
+        // Só mostra toast, não define erros no form para evitar mostrar antes de interagir
+        const errorMessages = result.error.issues.map(issue => issue.message).join(", ");
+        toast.error(`Complete todos os campos obrigatórios: ${errorMessages}`);
         return false;
       }
       
