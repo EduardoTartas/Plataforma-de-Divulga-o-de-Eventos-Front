@@ -18,17 +18,17 @@ import {
 } from "@/components/ui/form";
 import { CriarEventoForm } from "@/schema/criarEventoSchema";
 
-interface Step3DisplaySettingsProps {
+interface Etapa3ConfiguracoesExibicaoProps {
   form: UseFormReturn<CriarEventoForm>;
   onAnimacaoPreview: (preview: { nome: string; classe: string } | null) => void;
   onAnimacaoKeyChange: () => void;
 }
 
-export function Step3DisplaySettings({ 
+export function Etapa3ConfiguracoesExibicao({ 
   form, 
   onAnimacaoPreview, 
   onAnimacaoKeyChange 
-}: Step3DisplaySettingsProps) {
+}: Etapa3ConfiguracoesExibicaoProps) {
   return (
     <>
       {/* Step 3: Display Settings */}

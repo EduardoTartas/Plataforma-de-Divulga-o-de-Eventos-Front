@@ -8,9 +8,9 @@ import { Stepper } from "@/components/ui/stepper";
 import Modal from "@/components/ui/modal";
 import { useCriarEvento } from "@/hooks/useCriarEvento";
 import { CriarEventoForm } from "@/schema/criarEventoSchema";
-import { Step1BasicInfo } from "@/components/criar-eventos/Step1BasicInfo";
-import { Step2ImageUpload } from "@/components/criar-eventos/Step2ImageUpload";
-import { Step3DisplaySettings } from "@/components/criar-eventos/Step3DisplaySettings";
+import { Etapa1InformacoesBasicas } from "@/components/criar-eventos/Etapa1";
+import { Etapa2UploadImagens } from "@/components/criar-eventos/Etapa2";
+import { Etapa3ConfiguracoesExibicao } from "@/components/criar-eventos/Etapa3";
 import { AnimationPreview } from "@/components/criar-eventos/AnimationPreview";
 import { useImageDragDrop } from "@/hooks/useImageDragDrop";
 
@@ -74,8 +74,6 @@ export default function CriarEvento() {
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
-    } else {
-      router.push("/meus_eventos");
     }
   };
 
@@ -98,17 +96,19 @@ export default function CriarEvento() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8 flex items-center gap-4">
-        <Button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-[#805AD5] hover:text-[#6B46C1] bg-transparent hover:bg-purple-50 border-none shadow-none"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {step === 1 ? "Voltar aos Eventos" : "Voltar"}
-        </Button>
-      </div>
+      {step > 1 && (
+        <div className="mb-8 flex items-center gap-4">
+          <Button
+            onClick={handleBack}
+            className="flex items-center gap-2 text-[#805AD5] hover:text-[#6B46C1] bg-transparent hover:bg-purple-50 border-none shadow-none"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Voltar
+          </Button>
+        </div>
+      )}
 
       <div>
         <h1 className="text-3xl font-bold text-[#1A202C] mb-2">Criar Novo Evento</h1>
@@ -124,10 +124,10 @@ export default function CriarEvento() {
       <div className="bg-white rounded-xl shadow-lg border border-[#E2E8F0] p-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {step === 1 && <Step1BasicInfo form={form} />}
+            {step === 1 && <Etapa1InformacoesBasicas form={form} />}
 
             {step === 2 && (
-              <Step2ImageUpload
+              <Etapa2UploadImagens
                 validImages={validImages}
                 isDragging={imageDragDrop.isDragging}
                 onDragOver={imageDragDrop.handleDragOver}
@@ -139,7 +139,7 @@ export default function CriarEvento() {
             )}
 
             {step === 3 && (
-              <Step3DisplaySettings
+              <Etapa3ConfiguracoesExibicao
                 form={form}
                 onAnimacaoPreview={handleAnimacaoPreview}
                 onAnimacaoKeyChange={handleAnimacaoKeyChange}
@@ -147,7 +147,7 @@ export default function CriarEvento() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-3 pt-8 mt-8 border-t border-[#E2E8F0]">
+            <div className="flex justify-between items-center pt-8 mt-8 border-t border-[#E2E8F0]">
               <Button
                 type="button"
                 onClick={handleCancel}
@@ -157,24 +157,45 @@ export default function CriarEvento() {
                 Cancelar
               </Button>
 
-              {step < 3 ? (
-                <Button
-                  type="button"
-                  onClick={handleContinue}
-                  disabled={loading}
-                  className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Continuar
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Carregando..." : "Finalizar"}
-                </Button>
-              )}
+              <div className="flex gap-3">
+                {step === 3 && (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      // Abre o preview em uma nova aba
+                      window.open('/preview-evento', '_blank', 'noopener,noreferrer');
+                    }}
+                    disabled={loading || validImages.length === 0}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    title={validImages.length === 0 ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Preview
+                  </Button>
+                )}
+                
+                {step < 3 ? (
+                  <Button
+                    type="button"
+                    onClick={handleContinue}
+                    disabled={loading}
+                    className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Continuar
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Carregando..." : "Finalizar"}
+                  </Button>
+                )}
+              </div>
             </div>
           </form>
         </Form>

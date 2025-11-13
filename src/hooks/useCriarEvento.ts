@@ -69,12 +69,38 @@ export function useCriarEvento() {
       }
       return initialFormData;
     })(),
-    mode: "onTouched", // Valida após o campo ser tocado
-    reValidateMode: "onChange", // Re-valida em tempo real após o primeiro erro
+    mode: "onTouched",
+    reValidateMode: "onChange",
   });
 
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-  const [validImages, setValidImages] = useState<File[]>([]);
+  const restaurarImagens = () => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("criar-evento-images-data");
+      if (stored) {
+        try {
+          const imagesData = JSON.parse(stored);
+          // Converte os dados base64 de volta para Files
+          return imagesData.map((img: any) => {
+            const byteString = atob(img.data.split(',')[1]);
+            const mimeString = img.data.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeString });
+            return new File([blob], img.name, { type: mimeString });
+          });
+        } catch (e) {
+          console.error("Failed to restore images", e);
+        }
+      }
+    }
+    return [];
+  };
+
+  const [validImages, setValidImages] = useState<File[]>(() => restaurarImagens());
+  const [mediaFiles, setMediaFiles] = useState<File[]>(() => restaurarImagens());
 
   const formValues = form.watch();
 
@@ -90,10 +116,46 @@ export function useCriarEvento() {
     }
   }, [step]);
 
+  // Salva as imagens válidas no localStorage para o preview acessar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (validImages.length > 0) {
+        // Converte as imagens para base64 e URLs blob
+        const promises = validImages.map(file => {
+          return new Promise<{ name: string, data: string, url: string }>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const url = URL.createObjectURL(file);
+              resolve({
+                name: file.name,
+                data: reader.result as string,
+                url: url
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+
+        Promise.all(promises).then(imagesData => {
+          // Salva dados base64 para restaurar os Files
+          localStorage.setItem("criar-evento-images-data", JSON.stringify(imagesData.map(img => ({ name: img.name, data: img.data }))));
+          // Salva URLs blob para o preview
+          localStorage.setItem("criar-evento-images", JSON.stringify(imagesData.map(img => img.url)));
+        });
+      } else {
+        // Remove do localStorage se não houver imagens
+        localStorage.removeItem("criar-evento-images");
+        localStorage.removeItem("criar-evento-images-data");
+      }
+    }
+  }, [validImages]);
+
   const clearStorage = useCallback(() => {
     if (typeof window !== "undefined") {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_STEP_KEY);
+      localStorage.removeItem("criar-evento-images");
+      localStorage.removeItem("criar-evento-images-data");
     }
   }, []);
 

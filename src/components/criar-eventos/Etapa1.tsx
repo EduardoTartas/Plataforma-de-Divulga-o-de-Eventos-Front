@@ -21,11 +21,11 @@ import {
 } from "@/components/ui/form";
 import { CriarEventoForm } from "@/schema/criarEventoSchema";
 
-interface Step1BasicInfoProps {
+interface Etapa1InformacoesBasicasProps {
   form: UseFormReturn<CriarEventoForm>;
 }
 
-export function Step1BasicInfo({ form }: Step1BasicInfoProps) {
+export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps) {
   return (
     <>
       {/* Step 1: Basic Information */}

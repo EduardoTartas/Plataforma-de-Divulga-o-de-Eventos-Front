@@ -1,6 +1,6 @@
 "use client";
 
-interface Step2ImageUploadProps {
+interface Etapa2UploadImagensProps {
   validImages: File[];
   isDragging: boolean;
   onDragOver: (e: React.DragEvent) => void;
@@ -10,7 +10,7 @@ interface Step2ImageUploadProps {
   onRemoveImage: (index: number) => void;
 }
 
-export function Step2ImageUpload({
+export function Etapa2UploadImagens({
   validImages,
   isDragging,
   onDragOver,
@@ -18,7 +18,7 @@ export function Step2ImageUpload({
   onDrop,
   onFileInputChange,
   onRemoveImage,
-}: Step2ImageUploadProps) {
+}: Etapa2UploadImagensProps) {
   return (
     <>
       {/* Step 2: Image Upload */}
