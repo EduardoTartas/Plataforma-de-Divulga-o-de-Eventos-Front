@@ -69,7 +69,7 @@ export function useCriarEvento() {
       }
       return initialFormData;
     })(),
-    mode: "onSubmit", // Só valida no submit ou quando o campo é tocado após erro
+    mode: "onTouched", // Valida após o campo ser tocado
     reValidateMode: "onChange", // Re-valida em tempo real após o primeiro erro
   });
 
@@ -248,6 +248,7 @@ export function useCriarEvento() {
         exibDia: data.exibDia.join(","),
         cor: parseInt(data.cor, 10),
         animacao: parseInt(data.animacao, 10),
+        status: 1,
       } as any;
 
       const eventoResponse = await fetchData<{ 

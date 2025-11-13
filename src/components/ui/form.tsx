@@ -88,12 +88,13 @@ const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField()
+  const { error, formItemId, isTouched, isDirty } = useFormField()
+  const shouldShowError = error && (isTouched || isDirty)
 
   return (
     <Label
       ref={ref}
-      className={cn(error && "text-red-600", className)}
+      className={cn(shouldShowError && "text-red-600", className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -105,18 +106,19 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
 >(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const { error, formItemId, formDescriptionId, formMessageId, isTouched, isDirty } = useFormField()
+  const shouldShowError = error && (isTouched || isDirty)
 
   return (
     <Slot
       ref={ref}
       id={formItemId}
       aria-describedby={
-        !error
+        !shouldShowError
           ? `${formDescriptionId}`
           : `${formDescriptionId} ${formMessageId}`
       }
-      aria-invalid={!!error}
+      aria-invalid={!!shouldShowError}
       {...props}
     />
   )
@@ -144,8 +146,11 @@ const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
-  const { error, formMessageId } = useFormField()
-  const body = error ? String(error?.message) : children
+  const { error, formMessageId, isTouched, isDirty } = useFormField()
+  
+  // Só mostra erro se o campo foi tocado ou já foi modificado
+  const shouldShowError = error && (isTouched || isDirty)
+  const body = shouldShowError ? String(error?.message) : children
 
   if (!body) {
     return null
@@ -155,7 +160,7 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn("text-sm font-medium text-red-600", className)}
+      className={cn("text-sm font-medium text-red-600 mt-1.5", className)}
       {...props}
     >
       {body}
