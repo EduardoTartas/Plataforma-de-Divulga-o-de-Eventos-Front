@@ -56,7 +56,8 @@ export default function CriarEvento() {
 
   const imageDragDrop = useImageDragDrop(handleFilesChange);
 
-  const handleContinue = async () => {
+  const handleContinue = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
     const isValid = await validateStep(step);
     if (isValid) {
       setStep(step + 1);
@@ -64,6 +65,9 @@ export default function CriarEvento() {
   };
 
   const onSubmit = async (data: CriarEventoForm) => {
+    // Só submete se estiver na etapa 3
+    if (step !== 3) return;
+    
     const isValid = await validateStep(step);
     if (!isValid) return;
 
@@ -71,7 +75,8 @@ export default function CriarEvento() {
     if (ok) router.push("/meus_eventos");
   };
 
-  const handleBack = () => {
+  const handleBack = (e?: React.MouseEvent) => {
+    e?.preventDefault();
     if (step > 1) {
       setStep(step - 1);
     }

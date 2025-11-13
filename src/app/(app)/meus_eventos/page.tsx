@@ -62,8 +62,7 @@ export default function MeusEventosPage() {
     };
 
     const handleEdit = (eventId: string) => {
-        console.log('Editar evento:', eventId);
-        // router.push(`/editar_eventos?id=${eventId}`);
+        router.push(`/editar_eventos?id=${eventId}`);
     };
 
     const handleDelete = (eventId: string) => {

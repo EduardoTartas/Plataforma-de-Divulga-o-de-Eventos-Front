@@ -29,7 +29,12 @@ export default function PreviewEvento() {
         
         if (!dadosForm || !imagensValidas) {
             // Se não houver dados, redireciona de volta
-            router.push('/criar_eventos');
+            // Tenta voltar para criar ou editar
+            if (window.opener) {
+                window.close();
+            } else {
+                router.push('/criar_eventos');
+            }
             return;
         }
 
@@ -37,10 +42,42 @@ export default function PreviewEvento() {
             const form = JSON.parse(dadosForm);
             const imagens = JSON.parse(imagensValidas);
             
-            setEventoPreview({
+            console.log('=== DEBUG PREVIEW ===');
+            console.log('Formulário carregado:', form);
+            console.log('Imagens carregadas:', imagens);
+            console.log('Total de imagens:', imagens.length);
+            
+            // Formatar categoria para exibição correta
+            const formatarCategoria = (cat: string) => {
+                const categorias: Record<string, string> = {
+                    'academico': 'Acadêmico',
+                    'palestra': 'Palestra',
+                    'workshop': 'Workshop',
+                    'seminario': 'Seminário',
+                    'congresso': 'Congresso',
+                    'minicurso': 'Minicurso',
+                    'cultural': 'Cultural',
+                    'esportivo': 'Esportivo',
+                    'social': 'Social',
+                    'cientifico': 'Científico',
+                    'extensao': 'Extensão',
+                    'pesquisa': 'Pesquisa',
+                    'feira': 'Feira',
+                    'mostra': 'Mostra',
+                    'competicao': 'Competição',
+                    'formatura': 'Formatura',
+                    'vestibular': 'Vestibular',
+                    'enem': 'ENEM',
+                    'institucional': 'Institucional',
+                    'outros': 'Outros'
+                };
+                return categorias[cat] || cat.toUpperCase();
+            };
+            
+            const previewData = {
                 titulo: form.titulo || "Título do Evento",
                 descricao: form.descricao || "Descrição do evento",
-                categoria: form.categoria || "Categoria",
+                categoria: formatarCategoria(form.categoria || "outros"),
                 local: form.local || "Local do evento",
                 dataInicio: form.dataInicio ? formatarDataEvento(form.dataInicio) : "Data",
                 dataFim: form.dataFim ? formatarDataEvento(form.dataFim) : "Data",
@@ -51,10 +88,17 @@ export default function PreviewEvento() {
                 animacao: parseInt(form.animacao) || 1,
                 loops: 3, // Padrão para preview
                 link: form.link
-            });
+            };
+            
+            console.log('Preview data final:', previewData);
+            setEventoPreview(previewData);
         } catch (error) {
             console.error("Erro ao carregar dados do preview:", error);
-            router.push('/criar_eventos');
+            if (window.opener) {
+                window.close();
+            } else {
+                router.push('/criar_eventos');
+            }
         }
     }, [router]);
 
@@ -107,7 +151,7 @@ export default function PreviewEvento() {
 
     if (!eventoPreview) {
         return (
-            <div className="h-screen w-screen bg-gradient-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
+            <div className="h-screen w-screen bg-linear-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
                     <p className="text-white text-2xl font-inter">Carregando preview...</p>

@@ -2,23 +2,35 @@
 
 interface Etapa2UploadImagensProps {
   validImages: File[];
+  existingMedia?: Array<{
+    _id: string;
+    midiLink: string;
+    midiTipo: string;
+  }>;
+  mediaToDelete?: string[];
   isDragging: boolean;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onRemoveExistingMedia?: (mediaId: string) => void;
 }
 
 export function Etapa2UploadImagens({
   validImages,
+  existingMedia = [],
+  mediaToDelete = [],
   isDragging,
   onDragOver,
   onDragLeave,
   onDrop,
   onFileInputChange,
   onRemoveImage,
+  onRemoveExistingMedia,
 }: Etapa2UploadImagensProps) {
+  const totalImages = existingMedia.length + validImages.length;
+  
   return (
     <>
       {/* Step 2: Image Upload */}
@@ -36,7 +48,7 @@ export function Etapa2UploadImagens({
             </p>
           </div>
           <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg border border-purple-200">
-            <span className="text-sm font-semibold text-[#805AD5]">{validImages.length}/6</span>
+            <span className="text-sm font-semibold text-[#805AD5]">{totalImages}/6</span>
             <span className="text-xs text-[#6B46C1]">imagens</span>
           </div>
         </div>
@@ -95,26 +107,108 @@ export function Etapa2UploadImagens({
           </label>
         </div>
 
-        {validImages.length > 0 && (
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mt-4 max-h-[200px] overflow-y-auto scrollbar-thin">
-            {validImages.map((file, idx) => (
-              <div key={idx} className="relative group rounded-lg overflow-hidden border border-[#E2E8F0]">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  className="w-full h-24 object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => onRemoveImage(idx)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 font-bold shadow-md"
-                  title="Remover imagem"
-                >
-                  ×
-                </button>
-                <p className="text-xs text-[#718096] px-2 py-1 truncate">{file.name}</p>
+        {(existingMedia.length > 0 || validImages.length > 0) && (
+          <div className="space-y-4">
+            {/* Mídias existentes no servidor */}
+            {existingMedia.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-[#2D3748] mb-2 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                  </svg>
+                  Imagens Atuais ({existingMedia.length})
+                </h3>
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-[200px] overflow-y-auto scrollbar-thin">
+                  {existingMedia.map((media) => {
+                    const isMarkedForDeletion = mediaToDelete.includes(media._id);
+                    
+                    return (
+                      <div 
+                        key={media._id} 
+                        className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
+                          isMarkedForDeletion 
+                            ? 'border-red-500 bg-red-50 opacity-60' 
+                            : 'border-blue-200 bg-blue-50'
+                        }`}
+                      >
+                        <img
+                          src={media.midiLink}
+                          alt="Mídia existente"
+                          className={`w-full h-24 object-cover transition-all ${
+                            isMarkedForDeletion ? 'grayscale' : ''
+                          }`}
+                        />
+                        {onRemoveExistingMedia && (
+                          <button
+                            type="button"
+                            onClick={() => onRemoveExistingMedia(media._id)}
+                            className={`absolute top-2 right-2 text-white rounded-full w-7 h-7 flex items-center justify-center transition-all font-bold shadow-md ${
+                              isMarkedForDeletion
+                                ? 'bg-yellow-500 hover:bg-yellow-600 opacity-100'
+                                : 'bg-red-500 hover:bg-red-600 opacity-0 group-hover:opacity-100'
+                            }`}
+                            title={isMarkedForDeletion ? "Cancelar exclusão" : "Marcar para exclusão"}
+                          >
+                            {isMarkedForDeletion ? '↺' : '×'}
+                          </button>
+                        )}
+                        <div className={`absolute bottom-0 left-0 right-0 text-white text-[10px] px-2 py-1 flex items-center gap-1 ${
+                          isMarkedForDeletion ? 'bg-red-600/90' : 'bg-blue-600/80'
+                        }`}>
+                          {isMarkedForDeletion ? (
+                            <>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              Será excluída
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Salva
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            ))}
+            )}
+
+            {/* Novas imagens selecionadas */}
+            {validImages.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-[#2D3748] mb-2 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Novas Imagens ({validImages.length})
+                </h3>
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-[200px] overflow-y-auto scrollbar-thin">
+                  {validImages.map((file, idx) => (
+                    <div key={idx} className="relative group rounded-lg overflow-hidden border-2 border-green-200 bg-green-50">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-full h-24 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => onRemoveImage(idx)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 font-bold shadow-md"
+                        title="Remover imagem"
+                      >
+                        ×
+                      </button>
+                      <p className="text-xs text-[#718096] px-2 py-1 truncate bg-white/90">{file.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
