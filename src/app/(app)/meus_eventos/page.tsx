@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/ui/header";
 import CardContainer from "@/components/ui/card-container";
-import AlertModal from "@/components/ui/alertModal";
+import Modal from "@/components/ui/modal";
 import {
   Pagination,
   PaginationContent,
@@ -80,7 +80,10 @@ export default function MeusEventosPage() {
     const confirmDelete = async () => {
         try {
             await deleteEvent(deleteModal.eventId);
-        } catch (error) {}
+            setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" });
+        } catch (error) {
+            setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" });
+        }
     };
 
     const handleToggleStatus = async (eventId: string, currentStatus: number) => {
@@ -284,24 +287,29 @@ export default function MeusEventosPage() {
             </div>
 
             {/* Modal de confirmação de exclusão */}
-            <AlertModal
-                isOpen={deleteModal.isOpen}
+            <Modal 
+                titulo="Confirmar Exclusão" 
+                isOpen={deleteModal.isOpen} 
                 onClose={() => setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" })}
-                title="Confirmar Exclusão"
-                message={`Tem certeza que deseja excluir o evento "${deleteModal.eventTitle}"? Esta ação não pode ser desfeita.`}
-                icon="/alertR.svg"
-                type="alerta"
-                button1={{
-                    text: "Excluir",
-                    action: confirmDelete,
-                    className: "bg-red-600 hover:bg-red-700 text-white",
-                }}
-                button2={{
-                    text: "Cancelar",
-                    action: () => {},
-                    className: "bg-gray-200 hover:bg-gray-300 text-gray-800",
-                }}
-            />
+            >
+                <p className="text-gray-700 mb-4">
+                    Tem certeza que deseja excluir o evento <strong>"{deleteModal.eventTitle}"</strong>? Esta ação não pode ser desfeita.
+                </p>
+                <div className="flex justify-end gap-3 mt-6">
+                    <button 
+                        onClick={() => setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" })} 
+                        className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onClick={confirmDelete} 
+                        className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                    >
+                        Excluir
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 }

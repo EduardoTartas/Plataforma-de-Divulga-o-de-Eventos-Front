@@ -111,7 +111,7 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
             {onEdit && (
               <button
                 onClick={() => onEdit(evento._id)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                className="p-2 text-[#805AD5] hover:bg-purple-50 rounded-lg transition-colors duration-200"
                 title="Editar evento"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
