@@ -36,11 +36,21 @@ const initialFormData: CriarEventoForm = {
   animacao: "",
 };
 
-export function useCriarEvento() {
+interface UseCriarEventoParams {
+  eventId?: string;
+  isEditMode?: boolean;
+}
+
+export function useCriarEvento(params?: UseCriarEventoParams) {
+  const eventId = params?.eventId;
+  const isEditMode = params?.isEditMode || !!eventId;
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   
   const [step, setStep] = useState<number>(() => {
+    // Não carregar step do localStorage no modo de edição
+    if (isEditMode) return 1;
+    
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(STORAGE_STEP_KEY);
       if (stored) {
@@ -57,6 +67,9 @@ export function useCriarEvento() {
   const form = useForm<CriarEventoForm>({
     resolver: zodResolver(criarEventoSchema),
     defaultValues: (() => {
+      // Não carregar do localStorage no modo de edição
+      if (isEditMode) return initialFormData;
+      
       if (typeof window !== "undefined") {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
@@ -101,20 +114,36 @@ export function useCriarEvento() {
 
   const [validImages, setValidImages] = useState<File[]>(() => restaurarImagens());
   const [mediaFiles, setMediaFiles] = useState<File[]>(() => restaurarImagens());
+  
+  // Estado para rastrear mídias existentes no servidor (apenas em modo edição)
+  const [existingMedia, setExistingMedia] = useState<Array<{
+    _id: string;
+    midiLink: string;
+    midiTipo: string;
+  }>>([]);
+  
+  // Estado para rastrear IDs de mídias que devem ser removidas
+  const [mediaToDelete, setMediaToDelete] = useState<string[]>([]);
 
   const formValues = form.watch();
 
   useEffect(() => {
+    // Não salvar no localStorage no modo de edição
+    if (isEditMode) return;
+    
     if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
     }
-  }, [formValues]);
+  }, [formValues, isEditMode]);
 
   useEffect(() => {
+    // Não salvar step no localStorage no modo de edição
+    if (isEditMode) return;
+    
     if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_STEP_KEY, step.toString());
     }
-  }, [step]);
+  }, [step, isEditMode]);
 
   // Salva as imagens válidas no localStorage para o preview acessar
   useEffect(() => {
@@ -159,6 +188,105 @@ export function useCriarEvento() {
     }
   }, []);
 
+  // Função para carregar dados do evento no formulário
+  const loadEventData = useCallback((evento: any) => {
+    console.log('=== LOAD EVENT DATA ===');
+    console.log('Evento completo recebido:', evento);
+    console.log('Mídias do evento:', evento.midia);
+    
+    // Formatar datas para o formato do input datetime-local (YYYY-MM-DDTHH:mm)
+    const formatDateForInput = (dateString: string) => {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    // Formatar datas para o formato do input date (YYYY-MM-DD)
+    const formatDateOnlyForInput = (dateString: string) => {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    // Extrair dias da semana da string (ex: "seg,ter,qua" -> ["seg", "ter", "qua"])
+    const exibDia = typeof evento.exibDia === 'string' 
+      ? evento.exibDia.split(',').filter(Boolean)
+      : Array.isArray(evento.exibDia) 
+        ? evento.exibDia 
+        : [];
+
+    const formData: CriarEventoForm = {
+      titulo: evento.titulo || "",
+      descricao: evento.descricao || "",
+      categoria: evento.categoria || "",
+      local: evento.local || "",
+      link: evento.link || "",
+      dataInicio: formatDateForInput(evento.dataInicio),
+      dataFim: formatDateForInput(evento.dataFim),
+      tags: evento.tags || [],
+      exibDia: exibDia,
+      exibManha: evento.exibManha || false,
+      exibTarde: evento.exibTarde || false,
+      exibNoite: evento.exibNoite || false,
+      exibInicio: formatDateOnlyForInput(evento.exibInicio),
+      exibFim: formatDateOnlyForInput(evento.exibFim),
+      cor: evento.cor?.toString() || "",
+      animacao: evento.animacao?.toString() || "",
+    };
+
+    console.log('Carregando dados do evento:', formData);
+
+    // Resetar o formulário com os novos dados
+    form.reset(formData, {
+      keepErrors: false,
+      keepDirty: false,
+      keepIsSubmitted: false,
+      keepTouched: false,
+      keepIsValid: false,
+      keepSubmitCount: false,
+    });
+    
+    // Forçar atualização dos campos Select após um pequeno delay
+    setTimeout(() => {
+      form.setValue('categoria', formData.categoria, { shouldValidate: false });
+      form.setValue('cor', formData.cor, { shouldValidate: false });
+      form.setValue('animacao', formData.animacao, { shouldValidate: false });
+      // Limpar erros manualmente
+      form.clearErrors('categoria');
+      form.clearErrors('cor');
+      form.clearErrors('animacao');
+    }, 100);
+
+    // Carregar imagens se existirem
+    if (evento.midia && Array.isArray(evento.midia) && evento.midia.length > 0) {
+      console.log('Mídias do evento:', evento.midia);
+      
+      // Salvar as mídias existentes para exibir (NÃO baixar)
+      setExistingMedia(evento.midia.map((media: any) => ({
+        _id: media._id,
+        midiLink: media.midiLink,
+        midiTipo: media.midiTipo,
+      })));
+      
+      // Limpar imagens novas ao carregar evento para edição
+      setValidImages([]);
+      setMediaFiles([]);
+    } else {
+      // Se não tem mídia, garantir que os arrays estão vazios
+      setExistingMedia([]);
+      setValidImages([]);
+      setMediaFiles([]);
+    }
+  }, [form]);
+
   const resetForm = useCallback(() => {
     form.reset(initialFormData);
     setStep(1);
@@ -185,7 +313,9 @@ export function useCriarEvento() {
 
   const handleFilesChange = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
-    const currentCount = validImages.length;
+    // Descontar as mídias marcadas para exclusão da contagem
+    const remainingExistingMedia = existingMedia.length - mediaToDelete.length;
+    const currentCount = validImages.length + remainingExistingMedia;
     const remainingSlots = 6 - currentCount;
     
     if (remainingSlots <= 0) {
@@ -206,7 +336,8 @@ export function useCriarEvento() {
 
     for (const file of filesToProcess) {
       if (!file.type.startsWith("image/")) {
-        valid.push(file);
+        // Arquivos que não são imagens devem ser considerados inválidos
+        invalid.push(`${file.name} (tipo de arquivo não suportado)`);
         continue;
       }
 
@@ -227,12 +358,45 @@ export function useCriarEvento() {
     if (invalid.length > 0) {
       toast.error(`Erro: As seguintes imagens não atendem à resolução mínima de 1280x720:\n${invalid.join("\n")}`);
     }
-  }, [validImages.length]);
+  }, [validImages.length, existingMedia.length, mediaToDelete.length]);
 
   const handleRemoveImage = useCallback((index: number) => {
     setValidImages((prev) => prev.filter((_, i) => i !== index));
     setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
+
+  // Função para marcar mídia existente para exclusão (não deleta imediatamente)
+  const handleRemoveExistingMedia = useCallback((mediaId: string) => {
+    if (!isEditMode) {
+      console.error('Modo de edição não ativo');
+      return;
+    }
+
+    // Adiciona o ID à lista de mídias a serem deletadas
+    setMediaToDelete((prev) => {
+      if (prev.includes(mediaId)) {
+        // Se já está marcada, remove da lista (desfaz a marcação)
+        return prev.filter(id => id !== mediaId);
+      } else {
+        // Marca para exclusão
+        return [...prev, mediaId];
+      }
+    });
+    
+    // Mostra feedback ao usuário
+    const isMarked = !mediaToDelete.includes(mediaId);
+    if (isMarked) {
+      toast.info("Mídia marcada para exclusão. Salve as alterações para confirmar.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } else {
+      toast.info("Exclusão cancelada.", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    }
+  }, [isEditMode, mediaToDelete]);
 
   const validateStep = useCallback(async (stepNumber: number) => {
     if (stepNumber === 1) {
@@ -264,8 +428,10 @@ export function useCriarEvento() {
     } 
     
     if (stepNumber === 2) {
-      // Validar imagens (mínimo de 1 imagem)
-      if (validImages.length === 0) {
+      // Validar imagens (mínimo de 1 imagem entre novas e existentes, descontando as marcadas para exclusão)
+      const remainingExistingMedia = existingMedia.length - mediaToDelete.length;
+      const totalImages = validImages.length + remainingExistingMedia;
+      if (totalImages === 0) {
         toast.error("Adicione pelo menos 1 imagem antes de continuar");
         return false;
       }
@@ -299,49 +465,77 @@ export function useCriarEvento() {
     }
     
     return true;
-  }, [form, validImages.length]);
+  }, [form, validImages.length, existingMedia.length, mediaToDelete.length]);
 
   // Mutation para criar evento
   const criarEventoMutation = useMutation({
     mutationFn: async (data: CriarEventoForm) => {
-      // 1. Criar o evento
       const payload = {
         ...data,
         exibDia: data.exibDia.join(","),
         cor: parseInt(data.cor, 10),
         animacao: parseInt(data.animacao, 10),
-        status: 1,
+        // Ao editar, não sobrescrever o status existente no servidor
+        ...(isEditMode ? {} : { status: 1 }),
       } as any;
 
-      const eventoResponse = await fetchData<{ 
-        error: boolean;
-        code: number;
-        message: string;
-        data: {
-          _id: string;
-          [key: string]: any;
-        };
-      }>(
-        "/eventos",
-        "POST",
-        session?.user?.accesstoken,
-        payload
-      );
-
-      return eventoResponse;
+      if (isEditMode && eventId) {
+        // Atualizar evento existente
+        const eventoResponse = await fetchData<{ 
+          error: boolean;
+          code: number;
+          message: string;
+          data: {
+            _id: string;
+            [key: string]: any;
+          };
+        }>(
+          `/eventos/${eventId}`,
+          "PATCH",
+          session?.user?.accesstoken,
+          payload
+        );
+        return eventoResponse;
+      } else {
+        // Criar novo evento
+        const eventoResponse = await fetchData<{ 
+          error: boolean;
+          code: number;
+          message: string;
+          data: {
+            _id: string;
+            [key: string]: any;
+          };
+        }>(
+          "/eventos",
+          "POST",
+          session?.user?.accesstoken,
+          payload
+        );
+        return eventoResponse;
+      }
     },
     onSuccess: async (eventoResponse) => {
-      const eventoId = eventoResponse.data._id;
+      const eventoIdToUse = eventId || eventoResponse.data._id;
 
-      if (!eventoId) {
-        throw new Error("ID do evento não retornado pela API");
+      if (!eventoIdToUse) {
+        throw new Error("ID do evento não encontrado");
+      }
+
+      // 1. Deletar mídias marcadas para exclusão (apenas em modo edição)
+      if (isEditMode && mediaToDelete.length > 0) {
+        await deletarMidiasMutation.mutateAsync(eventoIdToUse);
       }
 
       // 2. Fazer upload das imagens se houver
       if (validImages.length > 0) {
-        await uploadImagensMutation.mutateAsync(eventoId);
+        await uploadImagensMutation.mutateAsync(eventoIdToUse);
       } else {
-        toast.success("Evento criado com sucesso!", {
+        const successMessage = isEditMode 
+          ? "Evento atualizado com sucesso!" 
+          : "Evento criado com sucesso!";
+        
+        toast.success(successMessage, {
           position: "top-right",
           autoClose: 3000,
         });
@@ -349,6 +543,7 @@ export function useCriarEvento() {
 
       // Invalidar queries para atualizar lista de eventos
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
+      queryClient.invalidateQueries({ queryKey: ["evento", eventId] });
       
       // Limpar tudo
       clearStorage();
@@ -356,10 +551,63 @@ export function useCriarEvento() {
       setStep(1);
       setMediaFiles([]);
       setValidImages([]);
+      setExistingMedia([]);
+      setMediaToDelete([]);
     },
     onError: (error: any) => {
-      console.error("Erro ao criar evento:", error);
-      toast.error(error?.message || "Erro ao criar evento", {
+      console.error("Erro ao salvar evento:", error);
+      const errorMessage = isEditMode 
+        ? "Erro ao atualizar evento" 
+        : "Erro ao criar evento";
+      
+      toast.error(error?.message || errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    },
+  });
+
+  // Mutation para deletar mídias marcadas
+  const deletarMidiasMutation = useMutation({
+    mutationFn: async (eventoIdToUse: string) => {
+      const deletionPromises = mediaToDelete.map(async (midiaId) => {
+        try {
+          await fetchData(
+            `/eventos/${eventoIdToUse}/midia/${midiaId}`,
+            "DELETE",
+            session?.user?.accesstoken
+          );
+          return { success: true, midiaId };
+        } catch (error: any) {
+          console.error(`Erro ao deletar mídia ${midiaId}:`, error);
+          return { success: false, midiaId, error };
+        }
+      });
+
+      const results = await Promise.all(deletionPromises);
+      
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.filter(r => !r.success).length;
+      
+      return { successCount, failCount, results };
+    },
+    onSuccess: (data) => {
+      if (data.successCount > 0) {
+        toast.success(`${data.successCount} mídia(s) removida(s) com sucesso!`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+      if (data.failCount > 0) {
+        toast.warning(`${data.failCount} mídia(s) não puderam ser removidas.`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error("Erro ao deletar mídias:", error);
+      toast.error("Erro ao deletar mídias", {
         position: "top-right",
         autoClose: 3000,
       });
@@ -368,7 +616,7 @@ export function useCriarEvento() {
 
   // Mutation para upload de imagens
   const uploadImagensMutation = useMutation({
-    mutationFn: async (eventoId: string) => {
+    mutationFn: async (eventoIdToUse: string) => {
       const formData = new FormData();
       
       validImages.forEach((file) => {
@@ -377,7 +625,7 @@ export function useCriarEvento() {
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
       const uploadResponse = await fetch(
-        `${API_URL}/eventos/${eventoId}/midias`,
+        `${API_URL}/eventos/${eventoIdToUse}/midias`,
         {
           method: "POST",
           headers: {
@@ -397,7 +645,11 @@ export function useCriarEvento() {
       return uploadResponse.json();
     },
     onSuccess: () => {
-      toast.success("Evento e imagens criados com sucesso!", {
+      const successMessage = isEditMode 
+        ? "Evento e imagens atualizados com sucesso!" 
+        : "Evento e imagens criados com sucesso!";
+      
+      toast.success(successMessage, {
         position: "top-right",
         autoClose: 3000,
       });
@@ -424,14 +676,19 @@ export function useCriarEvento() {
     form,
     handleFilesChange,
     handleRemoveImage,
+    handleRemoveExistingMedia,
     mediaFiles,
     validImages,
+    existingMedia,
+    mediaToDelete,
     step,
     setStep,
     validateStep,
     submit,
-    loading: criarEventoMutation.isPending || uploadImagensMutation.isPending,
+    loading: criarEventoMutation.isPending || uploadImagensMutation.isPending || deletarMidiasMutation.isPending,
     clearStorage,
     resetForm,
+    loadEventData,
+    isEditMode,
   } as const;
 }

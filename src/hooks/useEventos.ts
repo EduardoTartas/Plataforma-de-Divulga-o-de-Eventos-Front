@@ -142,3 +142,17 @@ export function useDeleteEvent() {
     error: deleteEventError,
   };
 }
+
+// Hook para buscar um evento específico
+export function useEvento(eventId: string) {
+  const { data: session } = useSession();
+
+  return useQuery<any, Error>({
+    queryKey: ["evento", eventId],
+    queryFn: async () => {
+      return fetchData(`/eventos/${eventId}`, "GET", session?.user?.accesstoken);
+    },
+    enabled: !!eventId,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+}
