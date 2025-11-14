@@ -73,7 +73,13 @@ export default function CriarEvento() {
     if (!isValid) return;
 
     const ok = await submit(data);
-    if (ok) router.push("/meus_eventos");
+    if (ok) {
+      // Fecha a aba de preview se estiver aberta
+      if (previewWindow && !previewWindow.closed) {
+        previewWindow.close();
+      }
+      router.push("/meus_eventos");
+    }
   };
 
   const handleBack = (e?: React.MouseEvent) => {
@@ -88,6 +94,10 @@ export default function CriarEvento() {
   };
 
   const confirmCancel = () => {
+    // Fecha a aba de preview se estiver aberta
+    if (previewWindow && !previewWindow.closed) {
+      previewWindow.close();
+    }
     clearStorage();
     router.push("/meus_eventos");
   };
@@ -153,17 +163,17 @@ export default function CriarEvento() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-8 mt-8 border-t border-[#E2E8F0]">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 pt-8 mt-8 border-t border-[#E2E8F0]">
               <Button
                 type="button"
                 onClick={handleCancel}
                 disabled={loading}
-                className="px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium"
+                className="w-full sm:w-auto px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium order-2 sm:order-1"
               >
                 Cancelar
               </Button>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2">
                 {step === 3 && (
                   <Button
                     type="button"
@@ -183,7 +193,7 @@ export default function CriarEvento() {
                       }
                     }}
                     disabled={loading || validImages.length === 0}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     title={validImages.length === 0 ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +209,7 @@ export default function CriarEvento() {
                     type="button"
                     onClick={handleContinue}
                     disabled={loading}
-                    className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continuar
                   </Button>
@@ -207,7 +217,7 @@ export default function CriarEvento() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Carregando..." : "Finalizar"}
                   </Button>

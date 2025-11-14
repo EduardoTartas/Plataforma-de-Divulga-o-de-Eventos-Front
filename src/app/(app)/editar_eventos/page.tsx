@@ -173,7 +173,13 @@ function EditarEventoContent() {
     if (!isValid) return;
 
     const ok = await submit(data);
-    if (ok) router.push("/meus_eventos");
+    if (ok) {
+      // Fecha a aba de preview se estiver aberta
+      if (previewWindow && !previewWindow.closed) {
+        previewWindow.close();
+      }
+      router.push("/meus_eventos");
+    }
   };
 
   const handleAnimacaoPreview = (preview: { nome: string; classe: string } | null) => {
@@ -272,13 +278,19 @@ function EditarEventoContent() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-8 mt-8 border-t border-[#E2E8F0]">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 pt-8 mt-8 border-t border-[#E2E8F0]">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 order-2 sm:order-1">
                 <Button
                   type="button"
-                  onClick={() => router.push("/meus_eventos")}
+                  onClick={() => {
+                    // Fecha a aba de preview se estiver aberta
+                    if (previewWindow && !previewWindow.closed) {
+                      previewWindow.close();
+                    }
+                    router.push("/meus_eventos");
+                  }}
                   disabled={loading}
-                  className="px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium"
+                  className="w-full sm:w-auto px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium"
                 >
                   Cancelar
                 </Button>
@@ -286,17 +298,17 @@ function EditarEventoContent() {
                 {/* Indicador de mídias marcadas para exclusão */}
                 {mediaToDelete.length > 0 && (
                   <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 px-3 py-2 rounded-lg">
-                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-orange-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span className="text-sm font-medium text-orange-700">
+                    <span className="text-xs sm:text-sm font-medium text-orange-700">
                       {mediaToDelete.length} mídia(s) será(ão) excluída(s)
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2">
                 {step === 3 && (
                   <Button
                     type="button"
@@ -316,7 +328,7 @@ function EditarEventoContent() {
                       }
                     }}
                     disabled={loading || (validImages.length === 0 && existingMedia.length === 0)}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     title={(validImages.length === 0 && existingMedia.length === 0) ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,7 +344,7 @@ function EditarEventoContent() {
                     type="button"
                     onClick={handleContinue}
                     disabled={loading}
-                    className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continuar
                   </Button>
@@ -340,7 +352,7 @@ function EditarEventoContent() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Salvando..." : "Salvar Alterações"}
                   </Button>
