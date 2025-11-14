@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Etapa1InformacoesBasicas } from "@/components/criar-eventos/Etapa1";
 import { Etapa2UploadImagens } from "@/components/criar-eventos/Etapa2";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useCriarEvento } from "@/hooks/useCriarEvento";
 import { useEvento} from "@/hooks/useEventos";
 import { useImageDragDrop } from "@/hooks/useImageDragDrop";
+import { usePreviewWindow } from "@/hooks/usePreviewWindow";
 import { useSession } from "next-auth/react";
 import { ThreeDot } from "react-loading-indicators";
 import { CriarEventoForm } from "@/schema/criarEventoSchema";
@@ -37,9 +38,9 @@ const STEPS = [
 ];
 
 function EditarEventoContent() {
-  const searchParams = useSearchParams();
+  const params = useParams();
   const router = useRouter();
-  const eventId = searchParams.get("id");
+  const eventId = params.id as string;
   const { data: session } = useSession();
   const queryClient = useQueryClient();
 
@@ -49,6 +50,7 @@ function EditarEventoContent() {
     handleRemoveImage,
     handleRemoveExistingMedia,
     validImages,
+    blobUrls,
     existingMedia,
     mediaToDelete,
     step,
@@ -60,6 +62,7 @@ function EditarEventoContent() {
   } = useCriarEvento({ eventId: eventId || undefined, isEditMode: true });
 
   const { data: eventoData, isLoading: isLoadingEvento } = useEvento(eventId || "");
+  const { openPreview, closePreview } = usePreviewWindow();
 
   const [animacaoPreview, setAnimacaoPreview] = useState<{
     nome: string;
@@ -67,7 +70,6 @@ function EditarEventoContent() {
   } | null>(null);
   const [animacaoKey, setAnimacaoKey] = useState(0);
   const [hasLoadedData, setHasLoadedData] = useState(false);
-  const [previewWindow, setPreviewWindow] = useState<Window | null>(null);
   const [usuariosCompartilhados, setUsuariosCompartilhados] = useState<Array<{ _id: string; email: string }>>([]);
 
   const imageDragDrop = useImageDragDrop(handleFilesChange);
@@ -91,69 +93,30 @@ function EditarEventoContent() {
     }
   }, [eventoData, loadEventData, hasLoadedData]);
 
-  // Atualizar localStorage imediatamente após carregar os dados
+  // Salvar dados no localStorage para o preview (quando o formulário mudar)
   useEffect(() => {
-    if (hasLoadedData && typeof window !== "undefined") {
-      
-      const formValues = form.getValues();
+    if (!hasLoadedData || typeof window === "undefined") return;
+
+    const subscription = form.watch((formValues) => {
       localStorage.setItem('criar_evento_draft', JSON.stringify(formValues));
       
       // Salvar imagens para o preview
-      const allImages: string[] = [];
-      
-      // Adicionar imagens existentes (que não estão marcadas para exclusão)
-      existingMedia.forEach((media) => {
-        if (!mediaToDelete.includes(media._id)) {
-          allImages.push(media.midiLink);
-        }
-      });
-      
-      // Adicionar novas imagens (blob URLs)
-      validImages.forEach((file) => {
-        const blobUrl = URL.createObjectURL(file);
-        console.log('Adicionando nova imagem:', blobUrl);
-        allImages.push(blobUrl);
-      });
-      
+      const allImages: string[] = [
+        ...existingMedia
+          .filter(media => !mediaToDelete.includes(media._id))
+          .map(media => media.midiLink),
+        ...blobUrls
+      ];
       
       if (allImages.length > 0) {
         localStorage.setItem('criar-evento-images', JSON.stringify(allImages));
       } else {
-        console.warn('Nenhuma imagem para salvar no localStorage!');
+        localStorage.removeItem('criar-evento-images');
       }
-    }
-  }, [hasLoadedData, existingMedia, validImages, mediaToDelete, form]);
+    });
 
-  // Salvar dados do formulário no localStorage para o preview funcionar (em tempo real)
-  useEffect(() => {
-    if (typeof window !== "undefined" && hasLoadedData) {
-      const subscription = form.watch((formValues) => {
-        localStorage.setItem('criar_evento_draft', JSON.stringify(formValues));
-        
-        // Salvar imagens para o preview
-        const allImages: string[] = [];
-        
-        // Adicionar imagens existentes (que não estão marcadas para exclusão)
-        existingMedia.forEach((media) => {
-          if (!mediaToDelete.includes(media._id)) {
-            allImages.push(media.midiLink);
-          }
-        });
-        
-        // Adicionar novas imagens (blob URLs)
-        validImages.forEach((file) => {
-          allImages.push(URL.createObjectURL(file));
-        });
-        
-        
-        if (allImages.length > 0) {
-          localStorage.setItem('criar-evento-images', JSON.stringify(allImages));
-        }
-      });
-
-      return () => subscription.unsubscribe();
-    }
-  }, [form, existingMedia, validImages, mediaToDelete, hasLoadedData]);
+    return () => subscription.unsubscribe();
+  }, [form, existingMedia, mediaToDelete, blobUrls, hasLoadedData]);
 
   const handleContinue = async (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -171,7 +134,6 @@ function EditarEventoContent() {
   };
 
   const onSubmit = async (data: CriarEventoForm) => {
-    // Só submete se estiver na etapa 3
     if (step !== 3) return;
     
     const isValid = await validateStep(step);
@@ -179,10 +141,7 @@ function EditarEventoContent() {
 
     const ok = await submit(data);
     if (ok) {
-      // Fecha a aba de preview se estiver aberta
-      if (previewWindow && !previewWindow.closed) {
-        previewWindow.close();
-      }
+      closePreview();
       router.push("/meus_eventos");
     }
   };
@@ -314,10 +273,7 @@ function EditarEventoContent() {
                 <Button
                   type="button"
                   onClick={() => {
-                    // Fecha a aba de preview se estiver aberta
-                    if (previewWindow && !previewWindow.closed) {
-                      previewWindow.close();
-                    }
+                    closePreview();
                     router.push("/meus_eventos");
                   }}
                   disabled={loading}
@@ -343,24 +299,10 @@ function EditarEventoContent() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={() => {
-                      // Verifica se a janela já existe e está aberta
-                      if (previewWindow && !previewWindow.closed) {
-                        // Se existe, apenas foca nela e força reload
-                        previewWindow.focus();
-                        previewWindow.location.reload();
-                      } else {
-                        // Se não existe ou foi fechada, abre uma nova
-                        const newWindow = window.open('/preview-evento', 'evento-preview');
-                        if (newWindow) {
-                          setPreviewWindow(newWindow);
-                          newWindow.focus();
-                        }
-                      }
-                    }}
-                    disabled={loading || (validImages.length === 0 && existingMedia.length === 0)}
+                    onClick={openPreview}
+                    disabled={loading || (validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0)}
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    title={(validImages.length === 0 && existingMedia.length === 0) ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
+                    title={(validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0) ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
