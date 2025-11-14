@@ -16,6 +16,8 @@ import { toast } from "react-toastify";
 
 const STORAGE_KEY = "criar_evento_draft";
 const STORAGE_STEP_KEY = "criar_evento_step";
+const STORAGE_IMAGES_KEY = "criar-evento-images";
+const STORAGE_IMAGES_DATA_KEY = "criar-evento-images-data";
 
 const initialFormData: CriarEventoForm = {
   titulo: "",
@@ -41,6 +43,62 @@ interface UseCriarEventoParams {
   isEditMode?: boolean;
 }
 
+// Helpers de localStorage
+const getLocalStorage = (key: string) => {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const setLocalStorage = (key: string, value: string) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    console.error(`Failed to save ${key}`, e);
+  }
+};
+
+const removeLocalStorage = (key: string) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.error(`Failed to remove ${key}`, e);
+  }
+};
+
+// Helper para formatar datas
+const formatDateForInput = (dateString: string, includeTime = true) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  if (!includeTime) return `${year}-${month}-${day}`;
+  
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+// Helper para converter base64 para File
+const base64ToFile = (data: string, name: string): File => {
+  const byteString = atob(data.split(',')[1]);
+  const mimeString = data.split(',')[0].split(':')[1].split(';')[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ab], { type: mimeString });
+  return new File([blob], name, { type: mimeString });
+};
+
 export function useCriarEvento(params?: UseCriarEventoParams) {
   const eventId = params?.eventId;
   const isEditMode = params?.isEditMode || !!eventId;
@@ -48,36 +106,21 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
   const queryClient = useQueryClient();
   
   const [step, setStep] = useState<number>(() => {
-    // Não carregar step do localStorage no modo de edição
     if (isEditMode) return 1;
-    
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(STORAGE_STEP_KEY);
-      if (stored) {
-        try {
-          return parseInt(stored, 10);
-        } catch (e) {
-          console.error("Failed to parse stored step", e);
-        }
-      }
-    }
-    return 1;
+    const stored = getLocalStorage(STORAGE_STEP_KEY);
+    return stored ? parseInt(stored, 10) || 1 : 1;
   });
   
   const form = useForm<CriarEventoForm>({
     resolver: zodResolver(criarEventoSchema),
     defaultValues: (() => {
-      // Não carregar do localStorage no modo de edição
       if (isEditMode) return initialFormData;
-      
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          try {
-            return JSON.parse(stored);
-          } catch (e) {
-            console.error("Failed to parse stored form data", e);
-          }
+      const stored = getLocalStorage(STORAGE_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return initialFormData;
         }
       }
       return initialFormData;
@@ -86,142 +129,84 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     reValidateMode: "onChange",
   });
 
-  const restaurarImagens = () => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("criar-evento-images-data");
-      if (stored) {
-        try {
-          const imagesData = JSON.parse(stored);
-          // Converte os dados base64 de volta para Files
-          return imagesData.map((img: any) => {
-            const byteString = atob(img.data.split(',')[1]);
-            const mimeString = img.data.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-              ia[i] = byteString.charCodeAt(i);
-            }
-            const blob = new Blob([ab], { type: mimeString });
-            return new File([blob], img.name, { type: mimeString });
-          });
-        } catch (e) {
-          console.error("Failed to restore images", e);
-        }
-      }
+  const restaurarImagens = useCallback(() => {
+    const stored = getLocalStorage(STORAGE_IMAGES_DATA_KEY);
+    if (!stored) return [];
+    
+    try {
+      const imagesData = JSON.parse(stored);
+      return imagesData.map((img: any) => base64ToFile(img.data, img.name));
+    } catch {
+      return [];
     }
-    return [];
-  };
+  }, []);
 
   const [validImages, setValidImages] = useState<File[]>(() => restaurarImagens());
   const [mediaFiles, setMediaFiles] = useState<File[]>(() => restaurarImagens());
-  
-  // Estado para rastrear mídias existentes no servidor (apenas em modo edição)
   const [existingMedia, setExistingMedia] = useState<Array<{
     _id: string;
     midiLink: string;
     midiTipo: string;
   }>>([]);
-  
-  // Estado para rastrear IDs de mídias que devem ser removidas
   const [mediaToDelete, setMediaToDelete] = useState<string[]>([]);
 
   const formValues = form.watch();
 
+  // Salvar formulário no localStorage
   useEffect(() => {
-    // Não salvar no localStorage no modo de edição
-    if (isEditMode) return;
-    
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+    if (!isEditMode && typeof window !== "undefined") {
+      setLocalStorage(STORAGE_KEY, JSON.stringify(formValues));
     }
   }, [formValues, isEditMode]);
 
+  // Salvar step no localStorage
   useEffect(() => {
-    // Não salvar step no localStorage no modo de edição
-    if (isEditMode) return;
-    
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_STEP_KEY, step.toString());
+    if (!isEditMode) {
+      setLocalStorage(STORAGE_STEP_KEY, step.toString());
     }
   }, [step, isEditMode]);
 
-  // Salva as imagens válidas no localStorage para o preview acessar
+  // Salvar imagens no localStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (validImages.length > 0) {
-        // Converte as imagens para base64 e URLs blob
-        const promises = validImages.map(file => {
-          return new Promise<{ name: string, data: string, url: string }>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const url = URL.createObjectURL(file);
-              resolve({
-                name: file.name,
-                data: reader.result as string,
-                url: url
-              });
-            };
-            reader.readAsDataURL(file);
-          });
-        });
-
-        Promise.all(promises).then(imagesData => {
-          // Salva dados base64 para restaurar os Files
-          localStorage.setItem("criar-evento-images-data", JSON.stringify(imagesData.map(img => ({ name: img.name, data: img.data }))));
-          // Salva URLs blob para o preview
-          localStorage.setItem("criar-evento-images", JSON.stringify(imagesData.map(img => img.url)));
-        });
-      } else {
-        // Remove do localStorage se não houver imagens
-        localStorage.removeItem("criar-evento-images");
-        localStorage.removeItem("criar-evento-images-data");
-      }
+    if (typeof window === "undefined") return;
+    
+    if (validImages.length === 0) {
+      removeLocalStorage(STORAGE_IMAGES_KEY);
+      removeLocalStorage(STORAGE_IMAGES_DATA_KEY);
+      return;
     }
+
+    const promises = validImages.map(file => {
+      return new Promise<{ name: string, data: string, url: string }>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve({
+            name: file.name,
+            data: reader.result as string,
+            url: URL.createObjectURL(file)
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(promises).then(imagesData => {
+      setLocalStorage(STORAGE_IMAGES_DATA_KEY, JSON.stringify(imagesData.map(img => ({ name: img.name, data: img.data }))));
+      setLocalStorage(STORAGE_IMAGES_KEY, JSON.stringify(imagesData.map(img => img.url)));
+    });
   }, [validImages]);
 
   const clearStorage = useCallback(() => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(STORAGE_STEP_KEY);
-      localStorage.removeItem("criar-evento-images");
-      localStorage.removeItem("criar-evento-images-data");
-    }
+    removeLocalStorage(STORAGE_KEY);
+    removeLocalStorage(STORAGE_STEP_KEY);
+    removeLocalStorage(STORAGE_IMAGES_KEY);
+    removeLocalStorage(STORAGE_IMAGES_DATA_KEY);
   }, []);
 
-  // Função para carregar dados do evento no formulário
   const loadEventData = useCallback((evento: any) => {
-    console.log('=== LOAD EVENT DATA ===');
-    console.log('Evento completo recebido:', evento);
-    console.log('Mídias do evento:', evento.midia);
-    
-    // Formatar datas para o formato do input datetime-local (YYYY-MM-DDTHH:mm)
-    const formatDateForInput = (dateString: string) => {
-      if (!dateString) return "";
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
-    // Formatar datas para o formato do input date (YYYY-MM-DD)
-    const formatDateOnlyForInput = (dateString: string) => {
-      if (!dateString) return "";
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    // Extrair dias da semana da string (ex: "seg,ter,qua" -> ["seg", "ter", "qua"])
     const exibDia = typeof evento.exibDia === 'string' 
       ? evento.exibDia.split(',').filter(Boolean)
-      : Array.isArray(evento.exibDia) 
-        ? evento.exibDia 
-        : [];
+      : Array.isArray(evento.exibDia) ? evento.exibDia : [];
 
     const formData: CriarEventoForm = {
       titulo: evento.titulo || "",
@@ -232,19 +217,16 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       dataInicio: formatDateForInput(evento.dataInicio),
       dataFim: formatDateForInput(evento.dataFim),
       tags: evento.tags || [],
-      exibDia: exibDia,
+      exibDia,
       exibManha: evento.exibManha || false,
       exibTarde: evento.exibTarde || false,
       exibNoite: evento.exibNoite || false,
-      exibInicio: formatDateOnlyForInput(evento.exibInicio),
-      exibFim: formatDateOnlyForInput(evento.exibFim),
+      exibInicio: formatDateForInput(evento.exibInicio, false),
+      exibFim: formatDateForInput(evento.exibFim, false),
       cor: evento.cor?.toString() || "",
       animacao: evento.animacao?.toString() || "",
     };
 
-    console.log('Carregando dados do evento:', formData);
-
-    // Resetar o formulário com os novos dados
     form.reset(formData, {
       keepErrors: false,
       keepDirty: false,
@@ -254,33 +236,24 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       keepSubmitCount: false,
     });
     
-    // Forçar atualização dos campos Select após um pequeno delay
+    // Atualizar campos Select
     setTimeout(() => {
-      form.setValue('categoria', formData.categoria, { shouldValidate: false });
-      form.setValue('cor', formData.cor, { shouldValidate: false });
-      form.setValue('animacao', formData.animacao, { shouldValidate: false });
-      // Limpar erros manualmente
-      form.clearErrors('categoria');
-      form.clearErrors('cor');
-      form.clearErrors('animacao');
+      ['categoria', 'cor', 'animacao'].forEach(field => {
+        form.setValue(field as any, formData[field as keyof CriarEventoForm] as string, { shouldValidate: false });
+        form.clearErrors(field as any);
+      });
     }, 100);
 
-    // Carregar imagens se existirem
-    if (evento.midia && Array.isArray(evento.midia) && evento.midia.length > 0) {
-      console.log('Mídias do evento:', evento.midia);
-      
-      // Salvar as mídias existentes para exibir (NÃO baixar)
+    // Carregar mídias existentes
+    if (evento.midia?.length > 0) {
       setExistingMedia(evento.midia.map((media: any) => ({
         _id: media._id,
         midiLink: media.midiLink,
         midiTipo: media.midiTipo,
       })));
-      
-      // Limpar imagens novas ao carregar evento para edição
       setValidImages([]);
       setMediaFiles([]);
     } else {
-      // Se não tem mídia, garantir que os arrays estão vazios
       setExistingMedia([]);
       setValidImages([]);
       setMediaFiles([]);
@@ -313,7 +286,6 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
   const handleFilesChange = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
-    // Descontar as mídias marcadas para exclusão da contagem
     const remainingExistingMedia = existingMedia.length - mediaToDelete.length;
     const currentCount = validImages.length + remainingExistingMedia;
     const remainingSlots = 6 - currentCount;
@@ -336,7 +308,6 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
     for (const file of filesToProcess) {
       if (!file.type.startsWith("image/")) {
-        // Arquivos que não são imagens devem ser considerados inválidos
         invalid.push(`${file.name} (tipo de arquivo não suportado)`);
         continue;
       }
@@ -348,7 +319,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         } else {
           invalid.push(`${file.name} (${dimensions.width}x${dimensions.height} < 1280x720)`);
         }
-      } catch (err) {
+      } catch {
         invalid.push(`${file.name} (erro ao ler dimensões)`);
       }
     }
@@ -365,43 +336,31 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Função para marcar mídia existente para exclusão (não deleta imediatamente)
   const handleRemoveExistingMedia = useCallback((mediaId: string) => {
     if (!isEditMode) {
       console.error('Modo de edição não ativo');
       return;
     }
 
-    // Adiciona o ID à lista de mídias a serem deletadas
-    setMediaToDelete((prev) => {
-      if (prev.includes(mediaId)) {
-        // Se já está marcada, remove da lista (desfaz a marcação)
-        return prev.filter(id => id !== mediaId);
-      } else {
-        // Marca para exclusão
-        return [...prev, mediaId];
-      }
-    });
+    setMediaToDelete((prev) => 
+      prev.includes(mediaId) 
+        ? prev.filter(id => id !== mediaId)
+        : [...prev, mediaId]
+    );
     
-    // Mostra feedback ao usuário
     const isMarked = !mediaToDelete.includes(mediaId);
-    if (isMarked) {
-      toast.info("Mídia marcada para exclusão. Salve as alterações para confirmar.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    } else {
-      toast.info("Exclusão cancelada.", {
-        position: "top-right",
-        autoClose: 2000,
-      });
-    }
+    toast.info(
+      isMarked 
+        ? "Mídia marcada para exclusão. Salve as alterações para confirmar."
+        : "Exclusão cancelada.",
+      { position: "top-right", autoClose: isMarked ? 3000 : 2000 }
+    );
   }, [isEditMode, mediaToDelete]);
 
   const validateStep = useCallback(async (stepNumber: number) => {
+    const currentValues = form.getValues();
+    
     if (stepNumber === 1) {
-      // Validar apenas campos da Step 1
-      const currentValues = form.getValues();
       const step1Data = {
         titulo: currentValues.titulo,
         descricao: currentValues.descricao,
@@ -417,18 +376,15 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       
       if (!result.success) {
         result.error.issues.forEach((issue) => {
-          const field = issue.path[0] as keyof typeof currentValues;
-          form.setError(field as any, { message: issue.message });
+          form.setError(issue.path[0] as any, { message: issue.message });
         });
         toast.error("Complete todos os campos obrigatórios da Etapa 1");
         return false;
       }
-      
       return true;
     } 
     
     if (stepNumber === 2) {
-      // Validar imagens (mínimo de 1 imagem entre novas e existentes, descontando as marcadas para exclusão)
       const remainingExistingMedia = existingMedia.length - mediaToDelete.length;
       const totalImages = validImages.length + remainingExistingMedia;
       if (totalImages === 0) {
@@ -439,8 +395,6 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     }
     
     if (stepNumber === 3) {
-      // Validar apenas campos da Step 3
-      const currentValues = form.getValues();
       const step3Data = {
         exibDia: currentValues.exibDia,
         exibManha: currentValues.exibManha,
@@ -455,19 +409,16 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       const result = step3Schema.safeParse(step3Data);
       
       if (!result.success) {
-        // Só mostra toast, não define erros no form para evitar mostrar antes de interagir
         const errorMessages = result.error.issues.map(issue => issue.message).join(", ");
         toast.error(`Complete todos os campos obrigatórios: ${errorMessages}`);
         return false;
       }
-      
       return true;
     }
     
     return true;
   }, [form, validImages.length, existingMedia.length, mediaToDelete.length]);
 
-  // Mutation para criar evento
   const criarEventoMutation = useMutation({
     mutationFn: async (data: CriarEventoForm) => {
       const payload = {
@@ -475,45 +426,18 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         exibDia: data.exibDia.join(","),
         cor: parseInt(data.cor, 10),
         animacao: parseInt(data.animacao, 10),
-        // Ao editar, não sobrescrever o status existente no servidor
-        ...(isEditMode ? {} : { status: 1 }),
-      } as any;
+        ...(!isEditMode && { status: 1 }),
+      };
 
-      if (isEditMode && eventId) {
-        // Atualizar evento existente
-        const eventoResponse = await fetchData<{ 
-          error: boolean;
-          code: number;
-          message: string;
-          data: {
-            _id: string;
-            [key: string]: any;
-          };
-        }>(
-          `/eventos/${eventId}`,
-          "PATCH",
-          session?.user?.accesstoken,
-          payload
-        );
-        return eventoResponse;
-      } else {
-        // Criar novo evento
-        const eventoResponse = await fetchData<{ 
-          error: boolean;
-          code: number;
-          message: string;
-          data: {
-            _id: string;
-            [key: string]: any;
-          };
-        }>(
-          "/eventos",
-          "POST",
-          session?.user?.accesstoken,
-          payload
-        );
-        return eventoResponse;
-      }
+      const endpoint = isEditMode ? `/eventos/${eventId}` : "/eventos";
+      const method = isEditMode ? "PATCH" : "POST";
+
+      return await fetchData<{ 
+        error: boolean;
+        code: number;
+        message: string;
+        data: { _id: string; [key: string]: any };
+      }>(endpoint, method, session?.user?.accesstoken, payload);
     },
     onSuccess: async (eventoResponse) => {
       const eventoIdToUse = eventId || eventoResponse.data._id;
@@ -522,30 +446,22 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         throw new Error("ID do evento não encontrado");
       }
 
-      // 1. Deletar mídias marcadas para exclusão (apenas em modo edição)
       if (isEditMode && mediaToDelete.length > 0) {
         await deletarMidiasMutation.mutateAsync(eventoIdToUse);
       }
 
-      // 2. Fazer upload das imagens se houver
       if (validImages.length > 0) {
         await uploadImagensMutation.mutateAsync(eventoIdToUse);
       } else {
-        const successMessage = isEditMode 
-          ? "Evento atualizado com sucesso!" 
-          : "Evento criado com sucesso!";
-        
-        toast.success(successMessage, {
-          position: "top-right",
-          autoClose: 3000,
-        });
+        toast.success(
+          isEditMode ? "Evento atualizado com sucesso!" : "Evento criado com sucesso!",
+          { position: "top-right", autoClose: 3000 }
+        );
       }
 
-      // Invalidar queries para atualizar lista de eventos
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
       queryClient.invalidateQueries({ queryKey: ["evento", eventId] });
       
-      // Limpar tudo
       clearStorage();
       form.reset(initialFormData);
       setStep(1);
@@ -556,40 +472,36 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     },
     onError: (error: any) => {
       console.error("Erro ao salvar evento:", error);
-      const errorMessage = isEditMode 
-        ? "Erro ao atualizar evento" 
-        : "Erro ao criar evento";
-      
-      toast.error(error?.message || errorMessage, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(
+        error?.message || (isEditMode ? "Erro ao atualizar evento" : "Erro ao criar evento"),
+        { position: "top-right", autoClose: 3000 }
+      );
     },
   });
 
-  // Mutation para deletar mídias marcadas
   const deletarMidiasMutation = useMutation({
     mutationFn: async (eventoIdToUse: string) => {
-      const deletionPromises = mediaToDelete.map(async (midiaId) => {
-        try {
-          await fetchData(
-            `/eventos/${eventoIdToUse}/midia/${midiaId}`,
-            "DELETE",
-            session?.user?.accesstoken
-          );
-          return { success: true, midiaId };
-        } catch (error: any) {
-          console.error(`Erro ao deletar mídia ${midiaId}:`, error);
-          return { success: false, midiaId, error };
-        }
-      });
-
-      const results = await Promise.all(deletionPromises);
+      const results = await Promise.all(
+        mediaToDelete.map(async (midiaId) => {
+          try {
+            await fetchData(
+              `/eventos/${eventoIdToUse}/midia/${midiaId}`,
+              "DELETE",
+              session?.user?.accesstoken
+            );
+            return { success: true, midiaId };
+          } catch (error: any) {
+            console.error(`Erro ao deletar mídia ${midiaId}:`, error);
+            return { success: false, midiaId, error };
+          }
+        })
+      );
       
-      const successCount = results.filter(r => r.success).length;
-      const failCount = results.filter(r => !r.success).length;
-      
-      return { successCount, failCount, results };
+      return {
+        successCount: results.filter(r => r.success).length,
+        failCount: results.filter(r => !r.success).length,
+        results
+      };
     },
     onSuccess: (data) => {
       if (data.successCount > 0) {
@@ -614,45 +526,33 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     },
   });
 
-  // Mutation para upload de imagens
   const uploadImagensMutation = useMutation({
     mutationFn: async (eventoIdToUse: string) => {
       const formData = new FormData();
-      
-      validImages.forEach((file) => {
-        formData.append("files", file);
-      });
+      validImages.forEach((file) => formData.append("files", file));
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
       const uploadResponse = await fetch(
         `${API_URL}/eventos/${eventoIdToUse}/midias`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${session?.user?.accesstoken}`,
-          },
+          headers: { Authorization: `Bearer ${session?.user?.accesstoken}` },
           body: formData,
         }
       );
 
       if (!uploadResponse.ok) {
         const errorData = await uploadResponse.json().catch(() => ({}));
-        throw new Error(
-          errorData?.message || "Erro ao fazer upload das imagens"
-        );
+        throw new Error(errorData?.message || "Erro ao fazer upload das imagens");
       }
 
       return uploadResponse.json();
     },
     onSuccess: () => {
-      const successMessage = isEditMode 
-        ? "Evento e imagens atualizados com sucesso!" 
-        : "Evento e imagens criados com sucesso!";
-      
-      toast.success(successMessage, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success(
+        isEditMode ? "Evento e imagens atualizados com sucesso!" : "Evento e imagens criados com sucesso!",
+        { position: "top-right", autoClose: 3000 }
+      );
     },
     onError: (error: any) => {
       console.error("Erro ao fazer upload das imagens:", error);
