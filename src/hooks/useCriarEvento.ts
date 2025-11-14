@@ -4,11 +4,11 @@ import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  criarEventoSchema, 
-  step1Schema, 
+import {
+  criarEventoSchema,
+  step1Schema,
   step3Schema,
-  type CriarEventoForm 
+  type CriarEventoForm
 } from "@/schema/criarEventoSchema";
 import { fetchData } from "@/services/api";
 import { useSession } from "next-auth/react";
@@ -78,9 +78,9 @@ const formatDateForInput = (dateString: string, includeTime = true) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  
+
   if (!includeTime) return `${year}-${month}-${day}`;
-  
+
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day}T${hours}:${minutes}`;
@@ -104,13 +104,13 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
   const isEditMode = params?.isEditMode || !!eventId;
   const { data: session } = useSession();
   const queryClient = useQueryClient();
-  
+
   const [step, setStep] = useState<number>(() => {
     if (isEditMode) return 1;
     const stored = getLocalStorage(STORAGE_STEP_KEY);
     return stored ? parseInt(stored, 10) || 1 : 1;
   });
-  
+
   const form = useForm<CriarEventoForm>({
     resolver: zodResolver(criarEventoSchema),
     defaultValues: (() => {
@@ -133,7 +133,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     if (isEditMode) return []; // Não restaurar no modo edição
     const stored = getLocalStorage(STORAGE_IMAGES_DATA_KEY);
     if (!stored) return [];
-    
+
     try {
       const imagesData = JSON.parse(stored);
       return imagesData.map((img: any) => base64ToFile(img.data, img.name));
@@ -170,7 +170,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
   // Salvar imagens no localStorage (apenas no modo criação)
   useEffect(() => {
     if (isEditMode || typeof window === "undefined") return;
-    
+
     if (validImages.length === 0) {
       removeLocalStorage(STORAGE_IMAGES_KEY);
       removeLocalStorage(STORAGE_IMAGES_DATA_KEY);
@@ -204,7 +204,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
   }, []);
 
   const loadEventData = useCallback((evento: any) => {
-    const exibDia = typeof evento.exibDia === 'string' 
+    const exibDia = typeof evento.exibDia === 'string'
       ? evento.exibDia.split(',').filter(Boolean)
       : Array.isArray(evento.exibDia) ? evento.exibDia : [];
 
@@ -235,7 +235,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       keepIsValid: false,
       keepSubmitCount: false,
     });
-    
+
     // Atualizar campos Select
     setTimeout(() => {
       ['categoria', 'cor', 'animacao'].forEach(field => {
@@ -287,14 +287,14 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     const remainingExistingMedia = existingMedia.length - mediaToDelete.length;
     const currentCount = validImages.length + remainingExistingMedia;
     const remainingSlots = 6 - currentCount;
-    
+
     if (remainingSlots <= 0) {
       toast.error("Limite máximo de 6 imagens atingido");
       return;
     }
-    
+
     const filesToProcess = fileArray.slice(0, remainingSlots);
-    
+
     if (fileArray.length > remainingSlots) {
       toast.warning(`Apenas ${remainingSlots} imagem(ns) será(ão) adicionada(s) devido ao limite de 6`);
     }
@@ -310,10 +310,10 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
       try {
         const dimensions = await getImageDimensions(file);
-        if (dimensions.width >= 1280 && dimensions.height >= 720) {
+        if (dimensions.width >= 1024 && dimensions.height >= 690) {
           valid.push(file);
         } else {
-          invalid.push(`${file.name} (${dimensions.width}x${dimensions.height} < 1280x720)`);
+          invalid.push(`${file.name} (${dimensions.width}x${dimensions.height} < 1024x690)`);
         }
       } catch {
         invalid.push(`${file.name} (erro ao ler dimensões)`);
@@ -323,7 +323,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     setValidImages((prev) => [...prev, ...valid]);
 
     if (invalid.length > 0) {
-      toast.error(`Erro: As seguintes imagens não atendem à resolução mínima de 1280x720:\n${invalid.join("\n")}`);
+      toast.error(`Erro: As seguintes imagens não atendem à resolução mínima de 1024x690:\n${invalid.join("\n")}`);
     }
   }, [validImages.length, existingMedia.length, mediaToDelete.length]);
 
@@ -336,15 +336,15 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       return;
     }
 
-    setMediaToDelete((prev) => 
-      prev.includes(mediaId) 
+    setMediaToDelete((prev) =>
+      prev.includes(mediaId)
         ? prev.filter(id => id !== mediaId)
         : [...prev, mediaId]
     );
-    
+
     const isMarked = !mediaToDelete.includes(mediaId);
     toast.info(
-      isMarked 
+      isMarked
         ? "Mídia marcada para exclusão. Salve as alterações para confirmar."
         : "Exclusão cancelada.",
       { position: "top-right", autoClose: isMarked ? 3000 : 2000 }
@@ -353,7 +353,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
   const validateStep = useCallback(async (stepNumber: number) => {
     const currentValues = form.getValues();
-    
+
     if (stepNumber === 1) {
       const step1Data = {
         titulo: currentValues.titulo,
@@ -365,9 +365,9 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         link: currentValues.link,
         tags: currentValues.tags,
       };
-      
+
       const result = step1Schema.safeParse(step1Data);
-      
+
       if (!result.success) {
         result.error.issues.forEach((issue) => {
           form.setError(issue.path[0] as any, { message: issue.message });
@@ -376,8 +376,8 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         return false;
       }
       return true;
-    } 
-    
+    }
+
     if (stepNumber === 2) {
       const remainingExistingMedia = existingMedia.length - mediaToDelete.length;
       const totalImages = validImages.length + remainingExistingMedia;
@@ -387,7 +387,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       }
       return true;
     }
-    
+
     if (stepNumber === 3) {
       const step3Data = {
         exibDia: currentValues.exibDia,
@@ -399,9 +399,9 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         cor: currentValues.cor,
         animacao: currentValues.animacao,
       };
-      
+
       const result = step3Schema.safeParse(step3Data);
-      
+
       if (!result.success) {
         const errorMessages = result.error.issues.map(issue => issue.message).join(", ");
         toast.error(`Complete todos os campos obrigatórios: ${errorMessages}`);
@@ -409,7 +409,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       }
       return true;
     }
-    
+
     return true;
   }, [form, validImages.length, existingMedia.length, mediaToDelete.length]);
 
@@ -426,11 +426,11 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       const endpoint = isEditMode ? `/eventos/${eventId}` : "/eventos";
       const method = isEditMode ? "PATCH" : "POST";
 
-      return await fetchData<{ 
+      return await fetchData<{
         error: boolean;
         code: number;
         message: string;
-        data: { _id: string; [key: string]: any };
+        data: { _id: string;[key: string]: any };
       }>(endpoint, method, session?.user?.accesstoken, payload);
     },
     onSuccess: async (eventoResponse) => {
@@ -455,7 +455,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
       queryClient.invalidateQueries({ queryKey: ["evento", eventId] });
-      
+
       clearStorage();
       form.reset(initialFormData);
       setStep(1);
@@ -490,7 +490,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
           }
         })
       );
-      
+
       return {
         successCount: results.filter(r => r.success).length,
         failCount: results.filter(r => !r.success).length,
