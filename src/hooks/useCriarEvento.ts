@@ -130,6 +130,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
   });
 
   const restaurarImagens = useCallback(() => {
+    if (isEditMode) return []; // Não restaurar no modo edição
     const stored = getLocalStorage(STORAGE_IMAGES_DATA_KEY);
     if (!stored) return [];
     
@@ -139,10 +140,10 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     } catch {
       return [];
     }
-  }, []);
+  }, [isEditMode]);
 
   const [validImages, setValidImages] = useState<File[]>(() => restaurarImagens());
-  const [mediaFiles, setMediaFiles] = useState<File[]>(() => restaurarImagens());
+  const [blobUrls, setBlobUrls] = useState<string[]>([]);
   const [existingMedia, setExistingMedia] = useState<Array<{
     _id: string;
     midiLink: string;
@@ -166,9 +167,9 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     }
   }, [step, isEditMode]);
 
-  // Salvar imagens no localStorage
+  // Salvar imagens no localStorage (apenas no modo criação)
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (isEditMode || typeof window === "undefined") return;
     
     if (validImages.length === 0) {
       removeLocalStorage(STORAGE_IMAGES_KEY);
@@ -177,13 +178,12 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     }
 
     const promises = validImages.map(file => {
-      return new Promise<{ name: string, data: string, url: string }>((resolve) => {
+      return new Promise<{ name: string, data: string }>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           resolve({
             name: file.name,
-            data: reader.result as string,
-            url: URL.createObjectURL(file)
+            data: reader.result as string
           });
         };
         reader.readAsDataURL(file);
@@ -191,10 +191,10 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     });
 
     Promise.all(promises).then(imagesData => {
-      setLocalStorage(STORAGE_IMAGES_DATA_KEY, JSON.stringify(imagesData.map(img => ({ name: img.name, data: img.data }))));
-      setLocalStorage(STORAGE_IMAGES_KEY, JSON.stringify(imagesData.map(img => img.url)));
+      setLocalStorage(STORAGE_IMAGES_DATA_KEY, JSON.stringify(imagesData));
+      setLocalStorage(STORAGE_IMAGES_KEY, JSON.stringify(blobUrls));
     });
-  }, [validImages]);
+  }, [validImages, blobUrls, isEditMode]);
 
   const clearStorage = useCallback(() => {
     removeLocalStorage(STORAGE_KEY);
@@ -252,19 +252,17 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         midiTipo: media.midiTipo,
       })));
       setValidImages([]);
-      setMediaFiles([]);
     } else {
       setExistingMedia([]);
       setValidImages([]);
-      setMediaFiles([]);
     }
   }, [form]);
 
   const resetForm = useCallback(() => {
     form.reset(initialFormData);
     setStep(1);
-    setMediaFiles([]);
     setValidImages([]);
+    setBlobUrls([]);
     clearStorage();
   }, [form, clearStorage]);
 
@@ -300,8 +298,6 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     if (fileArray.length > remainingSlots) {
       toast.warning(`Apenas ${remainingSlots} imagem(ns) será(ão) adicionada(s) devido ao limite de 6`);
     }
-    
-    setMediaFiles((prev) => [...prev, ...filesToProcess]);
 
     const valid: File[] = [];
     const invalid: string[] = [];
@@ -333,7 +329,6 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
   const handleRemoveImage = useCallback((index: number) => {
     setValidImages((prev) => prev.filter((_, i) => i !== index));
-    setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleRemoveExistingMedia = useCallback((mediaId: string) => {
@@ -464,8 +459,8 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       clearStorage();
       form.reset(initialFormData);
       setStep(1);
-      setMediaFiles([]);
       setValidImages([]);
+      setBlobUrls([]);
       setExistingMedia([]);
       setMediaToDelete([]);
     },
@@ -576,8 +571,8 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     handleFilesChange,
     handleRemoveImage,
     handleRemoveExistingMedia,
-    mediaFiles,
     validImages,
+    blobUrls,
     existingMedia,
     mediaToDelete,
     step,

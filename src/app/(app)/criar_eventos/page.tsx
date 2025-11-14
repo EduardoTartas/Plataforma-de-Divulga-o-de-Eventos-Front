@@ -13,6 +13,7 @@ import { Etapa2UploadImagens } from "@/components/criar-eventos/Etapa2";
 import { Etapa3ConfiguracoesExibicao } from "@/components/criar-eventos/Etapa3";
 import { AnimationPreview } from "@/components/criar-eventos/AnimationPreview";
 import { useImageDragDrop } from "@/hooks/useImageDragDrop";
+import { usePreviewWindow } from "@/hooks/usePreviewWindow";
 
 const STEPS = [
   {
@@ -53,9 +54,9 @@ export default function CriarEvento() {
   } | null>(null);
   const [animacaoKey, setAnimacaoKey] = useState(0);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [previewWindow, setPreviewWindow] = useState<Window | null>(null);
 
   const imageDragDrop = useImageDragDrop(handleFilesChange);
+  const { openPreview, closePreview } = usePreviewWindow();
 
   const handleContinue = async (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -66,7 +67,6 @@ export default function CriarEvento() {
   };
 
   const onSubmit = async (data: CriarEventoForm) => {
-    // Só submete se estiver na etapa 3
     if (step !== 3) return;
     
     const isValid = await validateStep(step);
@@ -74,10 +74,7 @@ export default function CriarEvento() {
 
     const ok = await submit(data);
     if (ok) {
-      // Fecha a aba de preview se estiver aberta
-      if (previewWindow && !previewWindow.closed) {
-        previewWindow.close();
-      }
+      closePreview();
       router.push("/meus_eventos");
     }
   };
@@ -94,10 +91,7 @@ export default function CriarEvento() {
   };
 
   const confirmCancel = () => {
-    // Fecha a aba de preview se estiver aberta
-    if (previewWindow && !previewWindow.closed) {
-      previewWindow.close();
-    }
+    closePreview();
     clearStorage();
     router.push("/meus_eventos");
   };
@@ -177,21 +171,7 @@ export default function CriarEvento() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={() => {
-                      // Verifica se a janela já existe e está aberta
-                      if (previewWindow && !previewWindow.closed) {
-                        // Se existe, apenas foca nela e força reload
-                        previewWindow.focus();
-                        previewWindow.location.reload();
-                      } else {
-                        // Se não existe ou foi fechada, abre uma nova
-                        const newWindow = window.open('/preview-evento', 'evento-preview');
-                        if (newWindow) {
-                          setPreviewWindow(newWindow);
-                          newWindow.focus();
-                        }
-                      }
-                    }}
+                    onClick={openPreview}
                     disabled={loading || validImages.length === 0}
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     title={validImages.length === 0 ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
