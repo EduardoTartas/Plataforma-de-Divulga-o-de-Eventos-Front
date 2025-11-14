@@ -5,15 +5,18 @@ import { Suspense, useEffect, useState } from "react";
 import { Etapa1InformacoesBasicas } from "@/components/criar-eventos/Etapa1";
 import { Etapa2UploadImagens } from "@/components/criar-eventos/Etapa2";
 import { Etapa3ConfiguracoesExibicao } from "@/components/criar-eventos/Etapa3";
+import { CompartilharPermissoes } from "@/components/criar-eventos/CompartilharPermissoes";
 import { AnimationPreview } from "@/components/criar-eventos/AnimationPreview";
 import { Stepper } from "@/components/ui/stepper";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useCriarEvento } from "@/hooks/useCriarEvento";
-import { useEvento } from "@/hooks/useEventos";
+import { useEvento} from "@/hooks/useEventos";
 import { useImageDragDrop } from "@/hooks/useImageDragDrop";
+import { useSession } from "next-auth/react";
 import { ThreeDot } from "react-loading-indicators";
 import { CriarEventoForm } from "@/schema/criarEventoSchema";
+import { useQueryClient } from "@tanstack/react-query";
 
 const STEPS = [
   {
@@ -37,6 +40,8 @@ function EditarEventoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const eventId = searchParams.get("id");
+  const { data: session } = useSession();
+  const queryClient = useQueryClient();
 
   const {
     form,
@@ -63,13 +68,24 @@ function EditarEventoContent() {
   const [animacaoKey, setAnimacaoKey] = useState(0);
   const [hasLoadedData, setHasLoadedData] = useState(false);
   const [previewWindow, setPreviewWindow] = useState<Window | null>(null);
+  const [usuariosCompartilhados, setUsuariosCompartilhados] = useState<Array<{ _id: string; email: string }>>([]);
 
   const imageDragDrop = useImageDragDrop(handleFilesChange);
+
+  // Carregar usuários compartilhados quando os dados do evento chegarem
+  useEffect(() => {
+    if (eventoData?.data?.permissoes && Array.isArray(eventoData.data.permissoes)) {
+      const usuarios = eventoData.data.permissoes.map((permissao: any) => ({
+        _id: permissao.usuario,
+        email: permissao.email,
+      }));
+      setUsuariosCompartilhados(usuarios);
+    }
+  }, [eventoData]);
 
   // Carregar dados do evento quando disponíveis (apenas uma vez)
   useEffect(() => {
     if (eventoData?.data && loadEventData && !hasLoadedData) {
-      console.log('Carregando dados do evento pela primeira vez');
       loadEventData(eventoData.data);
       setHasLoadedData(true);
     }
@@ -78,10 +94,6 @@ function EditarEventoContent() {
   // Atualizar localStorage imediatamente após carregar os dados
   useEffect(() => {
     if (hasLoadedData && typeof window !== "undefined") {
-      console.log('=== SALVANDO NO LOCALSTORAGE PARA PREVIEW ===');
-      console.log('existingMedia:', existingMedia);
-      console.log('validImages:', validImages);
-      console.log('mediaToDelete:', mediaToDelete);
       
       const formValues = form.getValues();
       localStorage.setItem('criar_evento_draft', JSON.stringify(formValues));
@@ -92,7 +104,6 @@ function EditarEventoContent() {
       // Adicionar imagens existentes (que não estão marcadas para exclusão)
       existingMedia.forEach((media) => {
         if (!mediaToDelete.includes(media._id)) {
-          console.log('Adicionando imagem existente:', media.midiLink);
           allImages.push(media.midiLink);
         }
       });
@@ -104,8 +115,6 @@ function EditarEventoContent() {
         allImages.push(blobUrl);
       });
       
-      console.log('Total de imagens para preview:', allImages.length);
-      console.log('Array de imagens:', allImages);
       
       if (allImages.length > 0) {
         localStorage.setItem('criar-evento-images', JSON.stringify(allImages));
@@ -119,14 +128,12 @@ function EditarEventoContent() {
   useEffect(() => {
     if (typeof window !== "undefined" && hasLoadedData) {
       const subscription = form.watch((formValues) => {
-        console.log('=== FORM WATCH DISPARADO ===');
         localStorage.setItem('criar_evento_draft', JSON.stringify(formValues));
         
         // Salvar imagens para o preview
         const allImages: string[] = [];
         
         // Adicionar imagens existentes (que não estão marcadas para exclusão)
-        console.log('existingMedia no watch:', existingMedia.length);
         existingMedia.forEach((media) => {
           if (!mediaToDelete.includes(media._id)) {
             allImages.push(media.midiLink);
@@ -134,12 +141,10 @@ function EditarEventoContent() {
         });
         
         // Adicionar novas imagens (blob URLs)
-        console.log('validImages no watch:', validImages.length);
         validImages.forEach((file) => {
           allImages.push(URL.createObjectURL(file));
         });
         
-        console.log('Total de imagens no watch:', allImages.length);
         
         if (allImages.length > 0) {
           localStorage.setItem('criar-evento-images', JSON.stringify(allImages));
@@ -188,6 +193,16 @@ function EditarEventoContent() {
 
   const handleAnimacaoKeyChange = () => {
     setAnimacaoKey(prev => prev + 1);
+  };
+
+  const handleUsuarioAdicionado = (usuario: { _id: string; email: string }) => {
+    setUsuariosCompartilhados(prev => [...prev, usuario]);
+    queryClient.invalidateQueries({ queryKey: ["usuarios-compartilhados", eventId] });
+  };
+
+  const handleUsuarioRemovido = (usuarioId: string) => {
+    setUsuariosCompartilhados(prev => prev.filter(u => u._id !== usuarioId));
+    queryClient.invalidateQueries({ queryKey: ["usuarios-compartilhados", eventId] });
   };
 
   if (!eventId) {
@@ -252,7 +267,23 @@ function EditarEventoContent() {
       <div className="bg-white rounded-xl shadow-lg border border-[#E2E8F0] p-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {step === 1 && <Etapa1InformacoesBasicas form={form} />}
+            {step === 1 && (
+              <>
+                <Etapa1InformacoesBasicas form={form} />
+                
+                {/* Seção de compartilhamento de permissões */}
+                <div className="pt-8 mt-8 border-t border-[#E2E8F0]">
+                  <CompartilharPermissoes
+                    eventId={eventId}
+                    usuariosCompartilhados={usuariosCompartilhados}
+                    onUsuarioAdicionado={handleUsuarioAdicionado}
+                    onUsuarioRemovido={handleUsuarioRemovido}
+                    accessToken={session?.user?.accesstoken}
+                    userEmail={session?.user?.email}
+                  />
+                </div>
+              </>
+            )}
 
             {step === 2 && (
               <Etapa2UploadImagens
