@@ -247,7 +247,7 @@ export default function MeusEventosPage() {
                                                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                                                         currentPage === pageNum
                                                             ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600'
-                                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                            : 'cursor-pointer bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                                                     }`}
                                                 >
                                                     {pageNum}
