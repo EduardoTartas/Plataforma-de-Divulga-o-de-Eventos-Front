@@ -227,7 +227,7 @@ export default function PreviewEvento() {
                                 ))}
                             </div>
                         </div>
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-3 font-inter leading-tight">
+                        <h1 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-3 font-inter leading-tight">
                             {eventoPreview.titulo}
                         </h1>
 
