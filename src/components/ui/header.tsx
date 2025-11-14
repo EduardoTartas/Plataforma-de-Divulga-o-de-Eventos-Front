@@ -28,6 +28,13 @@ export default function Header() {
                         <span className="text-xs sm:text-sm font-medium text-gray-800 cursor-default">{session?.user?.nome}</span>
                     </div>
 
+                    <Link href='/totem'
+                        className="selection:bg-none cursor-pointer text-[#4B5563] flex items-center gap-1 sm:gap-2 border-b-2 border-transparent hover:border-[#4338CA] transition-all py-1"
+                        target="_blank"
+                    >
+                        TOTEM
+                    </Link>
+
                     {session?.user?.admin && (
                         pathName === 'meus_eventos' ? (
                             <Link
