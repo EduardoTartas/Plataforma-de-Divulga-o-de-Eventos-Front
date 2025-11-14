@@ -338,7 +338,6 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
   const handleRemoveExistingMedia = useCallback((mediaId: string) => {
     if (!isEditMode) {
-      console.error('Modo de edição não ativo');
       return;
     }
 
