@@ -1,3 +1,8 @@
+// Erro da api
+export interface Erro {
+  message: string
+}
+
 // Tipo para o organizador do evento
 export interface Organizador {
   _id: string;
@@ -9,6 +14,48 @@ export interface Permissao {
   usuario: string;
   permissao: string;
   expiraEm: string;
+}
+
+// Tipos para listagem de usuários
+export interface UsuarioApi {
+  error: false,
+  code: number,
+  message: string,
+  data: Usuario,
+  errors: Erro[]
+}
+
+export interface Usuario {
+  _id: string;
+  nome: string;
+  email: string;
+  status: string;
+  admin: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Tipo para os dados paginados de usuários
+export interface UsuariosData {
+  docs: Usuario[];
+  totalDocs: number;
+  limit: number;
+  totalPages: number;
+  page: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number | null;
+  nextPage: number | null;
+}
+
+// Tipo para a resposta completa da API de usuários paginada
+export interface UsuariosApiResponse {
+  error: boolean;
+  code: number;
+  message: string;
+  data: UsuariosData;
+  errors: any[];
 }
 
 // Tipo para um evento individual
@@ -73,6 +120,8 @@ export interface EventoTotem {
   categoria: string;
   tags: string[];
   link?: string;
+  duracao?: number;
+  loops?: number;
 }
 
 export interface EventosTotemApiResponse {

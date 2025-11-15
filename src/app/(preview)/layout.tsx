@@ -4,10 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import Footer from "@/components/ui/footer";
-import Header from "@/components/ui/header";
-
-export default function AuthLayout({
+export default function PreviewLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -21,19 +18,10 @@ export default function AuthLayout({
     }
   }, [status, router]);
 
-  // Se está autenticado, renderiza os filhos
+  // Se está autenticado, renderiza os filhos sem header/footer
   if (status === "authenticated") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-      </div>
-    );
+    return <>{children}</>;
   }
-
-  // Evita renderizar algo antes da verificação
+  
   return null;
 }

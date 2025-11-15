@@ -1,4 +1,5 @@
 import { Evento } from "@/types/eventos";
+import { useSession } from "next-auth/react";
 
 interface EventCardProps {
   evento: Evento;
@@ -8,6 +9,8 @@ interface EventCardProps {
 }
 
 export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: EventCardProps) {
+  const { data: session } = useSession();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -26,20 +29,20 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
     });
   };
 
-  const statusInfo = evento.status === 1 
+  const statusInfo = evento.status === 1
     ? { text: 'Ativo', color: 'bg-green-100 text-green-600 border-green-300' }
     : { text: 'Inativo', color: 'bg-gray-100 text-gray-600 border-gray-300' };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-[320px]">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-auto">
       {/* Imagem do evento */}
       <div className="relative h-32 bg-gray-100 flex-shrink-0">
-        <img 
-          src={evento.midia && evento.midia.length > 0 ? evento.midia[0].midiLink : "/Group 4.png"} 
+        <img
+          src={evento.midia && evento.midia.length > 0 ? evento.midia[0].midiLink : "/Group 4.png"}
           alt={evento.titulo}
           className="w-full h-full object-cover"
         />
-        
+
         {/* Status badge */}
         <div className="absolute top-3 right-3">
           <span className={`px-3 py-1 rounded-full text-xs font-medium border ${statusInfo.color}`}>
@@ -51,9 +54,17 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
       {/* Conteúdo do card */}
       <div className="p-3 flex-1 flex flex-col min-h-0">
         {/* Título */}
-        <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 font-inter h-12">
+        <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 font-inter h-12 flex-shrink-0">
           {evento.titulo}
         </h3>
+
+        {session?.user?.admin && (
+          <div className="bg-blue-100 flex flex-row items-center rounded-2xl max-w-fit px-2 py-1 mb-2 flex-shrink-0">
+            <h3 className="text-sm text-gray-600">
+              Organizador: {evento.organizador.nome}
+            </h3>
+          </div>
+        )}
 
         {/* Data e hora */}
         <div className="flex items-center text-sm text-gray-600 mb-1.5">
@@ -73,26 +84,24 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
           </svg>
           <span className="line-clamp-1">{evento.local}</span>
         </div>
-        
+
 
         {/* Ações*/}
-        <div className="flex justify-between items-center mt-auto">
+        <div className="flex justify-between items-center mb-auto pb-1">
           {/* Toggle Status */}
           {onToggleStatus && (
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => onToggleStatus(evento._id, evento.status)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  evento.status === 1 
-                    ? 'bg-green-500' 
-                    : 'bg-gray-300'
-                }`}
+                className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${evento.status === 1
+                  ? 'bg-green-500'
+                  : 'bg-gray-300'
+                  }`}
                 title={evento.status === 1 ? 'Desativar evento' : 'Ativar evento'}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
-                    evento.status === 1 ? 'translate-x-6' : 'translate-x-1'
-                  }`}
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${evento.status === 1 ? 'translate-x-6' : 'translate-x-1'
+                    }`}
                 />
               </button>
             </div>
@@ -102,7 +111,7 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
             {onEdit && (
               <button
                 onClick={() => onEdit(evento._id)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                className="cursor-pointer p-2 text-[#805AD5] hover:bg-purple-50 rounded-lg transition-colors duration-200"
                 title="Editar evento"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,11 +119,11 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
                 </svg>
               </button>
             )}
-            
+
             {onDelete && (
               <button
                 onClick={() => onDelete(evento._id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                className="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                 title="Excluir evento"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,6 +1,78 @@
+"use client"
+
 import Link from "next/link";
+import { fetchData } from "@/services/api";
+import { useState } from "react";
+import { toast } from "react-toastify";
+
+interface Errors {
+    message: string
+}
+
+interface RecoverResponse {
+    error: string,
+    code: string,
+    message: string,
+    data: {
+        message: string
+    }
+    errors: Errors[] | null
+}
 
 export default function RecuperarSenhaPage() {
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('')
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        console.log("📧 [Recuperar Senha] Iniciando processo de recuperação");
+
+        if (!email) {
+            toast.error("Por favor, informe seu e-mail");
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+
+        try {
+
+            const response = await fetchData<RecoverResponse>(
+                "/recover",
+                "POST",
+                null,
+                { email }
+            );
+
+            toast.success(
+                response.data?.message ||
+                response.message ||
+                "Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha."
+            );
+
+            setEmail('');
+        } catch (error: any) {
+
+            // Trata diferentes tipos de erro
+            let mensagem = "Erro ao enviar e-mail de recuperação";
+
+            if (error.status === 0) {
+                mensagem = "Erro de conexão com o servidor. Verifique sua internet.";
+            } else if (error.message) {
+                mensagem = error.message;
+            } else if (error.data?.message) {
+                mensagem = error.data.message;
+            } else if (error.errors && error.errors.length > 0) {
+                mensagem = error.errors[0].message;
+            }
+            setError(mensagem);
+            toast.error(mensagem);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     return (
         <div className="w-full max-w-md">
             <div className="bg-white rounded-lg shadow-xl pt-4 pb-6 pl-6 pr-6 space-y-4">
@@ -22,7 +94,7 @@ export default function RecuperarSenhaPage() {
                     </svg>
                     <span>Voltar para login</span>
                 </Link>
-                <img src="/ifro-events-icon.svg" alt="Ifro Events" className="mx-auto h-24 w-24" />
+                <img src="/ifro-events-icon.svg" alt="Ifro Events" className="mx-auto h-24 w-24" draggable='false' />
 
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-900">Recuperar Senha</h1>
@@ -31,7 +103,7 @@ export default function RecuperarSenhaPage() {
                     </p>
                 </div>
 
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="space-y-1.5">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                             E-mail
@@ -43,16 +115,29 @@ export default function RecuperarSenhaPage() {
                                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                      placeholder:text-gray-400 transition-all"
                             placeholder="seu@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={isLoading}
+                            required
                         />
                     </div>
 
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                            <p className="font-medium">Erro:</p>
+                            <p>{error}</p>
+                        </div>
+                    )}
+
                     <button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
+                        disabled={isLoading}
+                        className={`w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                                  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
-                                 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
+                                 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg
+                                 ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
-                        Enviar Código
+                        {isLoading ? 'Enviando...' : 'Pedir Link de Recuperação'}
                     </button>
                 </form>
             </div>

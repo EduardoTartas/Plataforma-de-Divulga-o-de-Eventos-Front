@@ -10,6 +10,19 @@ import { EventoTotem, QrCodeResponse } from "@/types/eventos";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5015';
 
 export default function EventosPage() {
+    // Estado para armazenar o tamanho da tela
+    const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
+
+    // useEffect para capturar o tamanho da tela
+    useEffect(() => {
+        const updateSize = () => {
+            setScreenSize({ width: window.innerWidth, height: window.innerHeight });
+        };
+        updateSize();
+        window.addEventListener('resize', updateSize);
+        return () => window.removeEventListener('resize', updateSize);
+    }, []);
+
     // Busca os eventos reais da API
     const { data: eventosApi, isLoading, isError } = useEventosTotem();
 
@@ -27,7 +40,9 @@ export default function EventosPage() {
         animacao: evento.animacao,
         categoria: evento.categoria,
         tags: evento.tags,
-        link: evento.link
+        link: evento.link,
+        duracao: evento.duracao,
+        loops: evento.loops
     }));
 
     // Estado que controla qual evento está sendo exibido
@@ -35,9 +50,6 @@ export default function EventosPage() {
 
     // Estado que controla qual imagem do evento atual está sendo exibida
     const [imagemAtualIndex, setImagemAtualIndex] = useState(0);
-
-    // Configuração: Quantas vezes o evento deve repetir suas imagens antes de mudar para o próximo
-    const REPETICOES_POR_EVENTO = 3; // TODO: Ajustar para puxar o valor direto da API
 
     // Estado que rastreia quantas vezes o evento atual já completou o ciclo de todas as suas imagens
     const [repeticoesCompletadas, setRepeticoesCompletadas] = useState(0);
@@ -57,13 +69,19 @@ export default function EventosPage() {
         // Só inicia o slideshow se tiver eventos
         if (eventos.length === 0) return;
 
+        // Pega o evento atual
+        const evento = eventos[eventoIndexRef.current];
+
+        // Define a duração baseada no evento atual (padrão: 3000ms = 3 segundos)
+        const duracaoAtual = evento.duracao || 3000;
+
         const intervalo = setInterval(() => {
             const eventoAtual = eventoIndexRef.current;
             const imagemAtual = imagemIndexRef.current;
-            const evento = eventos[eventoAtual];
+            const eventoObj = eventos[eventoAtual];
 
             // Verifica se o evento tem imagens
-            if (!evento.imagens || evento.imagens.length === 0) {
+            if (!eventoObj.imagens || eventoObj.imagens.length === 0) {
                 // Se não tem imagens, pula para o próximo evento e reseta o contador
                 const proximoEvento = (eventoAtual + 1) % eventos.length;
                 setEventoAtualIndex(proximoEvento);
@@ -72,10 +90,13 @@ export default function EventosPage() {
                 return;
             }
 
+            // Define quantas repetições o evento deve ter (padrão: 3)
+            const repeticoesDoEvento = eventoObj.loops || 3;
+
             const proximaImagem = imagemAtual + 1;
 
             // Se ainda tem mais imagens no evento atual
-            if (proximaImagem < evento.imagens.length) {
+            if (proximaImagem < eventoObj.imagens.length) {
                 setImagemAtualIndex(proximaImagem);
             } else {
                 // Completou um ciclo de todas as imagens do evento
@@ -83,7 +104,7 @@ export default function EventosPage() {
                     const novasRepeticoes = prev + 1;
 
                     // Se já completou o número necessário de repetições, muda para o próximo evento
-                    if (novasRepeticoes >= REPETICOES_POR_EVENTO) {
+                    if (novasRepeticoes >= repeticoesDoEvento) {
                         const proximoEvento = (eventoAtual + 1) % eventos.length;
                         setEventoAtualIndex(proximoEvento);
                         setImagemAtualIndex(0);
@@ -96,10 +117,10 @@ export default function EventosPage() {
                 });
             }
 
-        }, 5000);
+        }, duracaoAtual);
 
         return () => clearInterval(intervalo);
-    }, [eventos, REPETICOES_POR_EVENTO]);
+    }, [eventos, eventoAtualIndex]); // Adiciona eventoAtualIndex como dependência para recriar o intervalo quando mudar de evento
 
     // Animações disponíveis
     const ANIMACOES_MAP: Record<number, string> = {
@@ -207,10 +228,10 @@ export default function EventosPage() {
     // Tela de loading
     if (isLoading) {
         return (
-            <div className="h-screen w-screen bg-gradient-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
+            <div className="h-screen w-screen bg-linear-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
-                    <p className="text-white text-base sm:text-xl md:text-2xl font-inter">Carregando eventos...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 2xl:h-20 2xl:w-20 border-t-2 border-b-2 2xl:border-t-2 2xl:border-b-2 border-white mx-auto mb-4 2xl:mb-4"></div>
+                    <p className="text-white text-base sm:text-xl md:text-2xl 2xl:text-2xl font-inter">Carregando eventos...</p>
                 </div>
             </div>
         );
@@ -219,10 +240,10 @@ export default function EventosPage() {
     // Tela de erro
     if (isError) {
         return (
-            <div className="h-screen w-screen bg-gradient-to-br from-red-950 to-red-800 flex items-center justify-center p-4">
-                <div className="text-center p-4 sm:p-6 md:p-8">
-                    <p className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl font-inter mb-3 sm:mb-4">❌ Erro ao carregar eventos</p>
-                    <p className="text-gray-300 font-inter text-sm sm:text-base md:text-lg">Por favor, verifique a conexão com o servidor.</p>
+            <div className="h-screen w-screen bg-linear-to-br from-red-950 to-red-800 flex items-center justify-center p-4">
+                <div className="text-center p-4 sm:p-6 md:p-8 2xl:p-8">
+                    <p className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl 2xl:text-3xl font-inter mb-3 sm:mb-4 2xl:mb-4">❌ Erro ao carregar eventos</p>
+                    <p className="text-gray-300 font-inter text-sm sm:text-base md:text-lg 2xl:text-lg">Por favor, verifique a conexão com o servidor.</p>
                 </div>
             </div>
         );
@@ -231,10 +252,10 @@ export default function EventosPage() {
     // Se não houver eventos
     if (eventos.length === 0) {
         return (
-            <div className="h-screen w-screen bg-gradient-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
-                <div className="text-center p-4 sm:p-6 md:p-8">
-                    <p className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl font-inter mb-3 sm:mb-4">📅 Nenhum evento disponível</p>
-                    <p className="text-gray-300 font-inter text-sm sm:text-base md:text-lg">Não há eventos programados para exibição no momento.</p>
+            <div className="h-screen w-screen bg-linear-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
+                <div className="text-center p-4 sm:p-6 md:p-8 2xl:p-8">
+                    <p className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl 2xl:text-3xl font-inter mb-3 sm:mb-4 2xl:mb-4">📅 Nenhum evento disponível</p>
+                    <p className="text-gray-300 font-inter text-sm sm:text-base md:text-lg 2xl:text-lg">Não há eventos programados para exibição no momento.</p>
                 </div>
             </div>
         );
@@ -259,21 +280,44 @@ export default function EventosPage() {
             <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch relative">
 
                 {/* Barra Lateral de Informações */}
-                <div className={`h-auto sm:h-full w-full sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:max-w-2xl 
-                    p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 
-                    flex flex-col gap-3 sm:gap-4 md:gap-5 lg:gap-6
-                    rounded-2xl sm:rounded-tl-2xl sm:rounded-bl-2xl sm:rounded-tr-none sm:rounded-br-none
+                <div className={`relative h-auto sm:h-full w-full sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:max-w-2xl
+                    p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 2xl:p-10
+                    flex flex-col gap-3 sm:gap-4 md:gap-5 lg:gap-6 2xl:gap-4
+                    rounded-2xl sm:rounded-tl-2xl sm:rounded-bl-2xl sm:rounded-tr-none sm:rounded-br-none 2xl:rounded-tl-2xl 2xl:rounded-bl-2xl
                     mx-4 sm:mx-0 my-auto sm:my-0
                     ${obterClasseCorFundo()}`}>
 
                     <div className="grow">
-                        <div className="flex justify-between items-center mb-3 sm:mb-4">
-                            <p className="text-xs sm:text-sm md:text-base font-semibold text-gray-300 font-inter">IFRO EVENTS</p>
-                            <div className="flex gap-1">
-                                {Array.from({ length: REPETICOES_POR_EVENTO }).map((_, index) => (
+                        <div className="flex justify-between items-center mb-3 sm:mb-4 lg:mb-2">
+                            <h1 className="text-xs sm:text-sm md:text-base lg:text-xs font-semibold text-gray-100 font-inter">
+                                <div className="flex flex-row items-center gap-5 bg-white/50 pl-1 pr-2 rounded-md">
+                                    <span className="text-[20px] text-gray-100">IFRO EVENTS</span>
+                                    <img className="w-[60px] h-[30px]" src="/logo_fslab.svg" />
+                                </div>
+                                {/* mostrar a resolução da tela atual */}
+                                {/* <span className="text-red-500 ml-2 text-xs">
+                                    [{screenSize.width}x{screenSize.height}]
+                                    <span className="hidden sm:inline"> SM</span>
+                                    <span className="hidden md:inline"> MD</span>
+                                    <span className="hidden lg:inline"> LG</span>
+                                    <span className="hidden xl:inline"> XL</span>
+                                    <span className="hidden 2xl:inline"> 2XL</span>
+                                </span> */}
+                            </h1>
+                            <p className="text-xs sm:text-sm md:text-base lg:text-xs font-semiboldrounded-md font-inter">
+                                {/* <span className="font-bold text-white">F</span>
+                                <span className="font-bold text-white">S</span>
+                                <span className="text-white">L</span>
+                                <span className="text-white">a</span>
+                                <span className="text-white">b</span>
+                                <span className="text-green-500">〉</span>
+                                <span className="text-green-500">_</span> */}
+                            </p>
+                            <div className="flex gap-1 lg:gap-0.5">
+                                {Array.from({ length: eventoAtual.loops || 3 }).map((_, index) => (
                                     <div
                                         key={index}
-                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full transition-all ${index <= repeticoesCompletadas
+                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${index <= repeticoesCompletadas
                                             ? 'bg-white'
                                             : 'bg-white/30'
                                             }`}
@@ -281,61 +325,70 @@ export default function EventosPage() {
                                 ))}
                             </div>
                         </div>
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 md:mb-8 font-inter leading-tight">
+                        <h1 className="text-gray-100 text-2xl sm:text-3xl md:text-4xl lg:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-3 font-inter leading-tight">
                             {eventoAtual.titulo}
                         </h1>
 
-                        <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 text-gray-200 text-xs sm:text-sm md:text-base lg:text-lg">
-                            <div className="flex flex-row gap-2 items-center">
-                                <img src="/calendar.svg" alt="Calendário" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
+                        <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 lg:gap-1.5 text-gray-200 text-xs sm:text-sm md:text-base lg:text-sm">
+                            <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
+                                <img src="/calendar.svg" alt="Calendário" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
                                 <p className="font-inter">{eventoAtual.dataInicio} - {eventoAtual.dataFim}</p>
                             </div>
-                            <div className="flex flex-row gap-2 items-center">
-                                <img src="/watch.svg" alt="Relógio" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
+                            <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
+                                <img src="/watch.svg" alt="Relógio" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
                                 <p className="font-inter">{eventoAtual.horario}</p>
                             </div>
-                            <div className="flex flex-row gap-2 items-center">
-                                <img src="/gps.svg" alt="Localização" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
+                            <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
+                                <img src="/gps.svg" alt="Localização" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
                                 <p className="font-inter">{eventoAtual.local}</p>
                             </div>
-                            <div className="flex flex-row gap-2 items-center">
-                                <img src="/category.svg" alt="Categoria" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
+                            <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
+                                <img src="/category.svg" alt="Categoria" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
                                 <p className="font-inter">{eventoAtual.categoria.toUpperCase()}</p>
                             </div>
-                            <div className="flex flex-row gap-2 items-center">
-                                <img src="/tags.svg" alt="Tags" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
-                                <p className="font-inter">{eventoAtual.tags.join(' - ').toLowerCase()}</p>
+                            <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
+                                <img src="/tags.svg" alt="Tags" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                    {eventoAtual.tags.map((tag: string, index: number) => (
+                                        <span
+                                            key={index}
+                                            className="font-inter bg-white/20 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-xs sm:text-sm md:text-base lg:text-sm"
+                                        >
+                                            {tag.toLowerCase()}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
 
 
                     {/* Descrição do Evento */}
-                    <div className={`flex-1 max-h-[120px] sm:max-h-[150px] md:max-h-[180px] lg:max-h-[220px] xl:max-h-[250px] 2xl:max-h-[280px]
-                            min-h-0 bg-white/10 rounded-lg p-3 sm:p-4 md:p-5 overflow-hidden
+                    <div className={`flex-1 max-h-[120px] sm:max-h-[150px] md:max-h-[180px] lg:max-h-[220px] xl:max-h-[250px] 2xl:max-h-[320px]
+                            min-h-0 bg-white/10 rounded-lg 2xl:rounded-lg p-3 sm:p-4 md:p-5 2xl:p-4 overflow-hidden
                             ${eventoAtual.link ? 'mb-28 sm:mb-32 md:mb-36 lg:mb-44 xl:mb-48 2xl:mb-52' : ''}`}>
-                        <p className="text-gray-300 font-inter text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed line-clamp-6 sm:line-clamp-7 md:line-clamp-8 lg:line-clamp-10">
+                        <p className="text-gray-300 font-inter text-xs sm:text-sm md:text-base lg:text-lg 2xl:text-base leading-relaxed line-clamp-6 sm:line-clamp-7 md:line-clamp-8 lg:line-clamp-10 2xl:line-clamp-[15]">
                             {eventoAtual.descricao}
                         </p>
                     </div>
-                </div>
 
-                {/* QR Code - Fixo no canto inferior direito da tela */}
-                {eventoAtual.link && (
-                    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 lg:bottom-10 lg:right-10 xl:bottom-12 xl:right-12
-                        bg-white/10 rounded-lg 
-                        w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48
-                        p-3 sm:p-4 flex items-center justify-center 
-                        shrink-0 z-10">
-                        {carregandoQrCode ? (
-                            <div className="animate-spin rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border-t-2 border-b-2 border-white"></div>
-                        ) : qrCodeAtual ? (
-                            <img src={qrCodeAtual} className="h-full w-full object-contain rounded-lg" alt="QR-Code" />
-                        ) : (
-                            <p className="text-white text-center font-inter text-xs sm:text-sm">QR Code não disponível</p>
-                        )}
-                    </div>
-                )}
+                    {/* QR Code - Absolute dentro da barra lateral */}
+                    {eventoAtual.link && (
+                        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 lg:bottom-10 lg:right-10 xl:bottom-12 xl:right-12 2xl:bottom-10 2xl:right-10
+                            bg-white/10 rounded-lg 2xl:rounded-lg
+                            w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48
+                            p-3 sm:p-4 2xl:p-4 flex items-center justify-center 
+                            shrink-0 z-10">
+                            {carregandoQrCode ? (
+                                <div className="animate-spin rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 2xl:w-12 2xl:h-12 border-t-2 border-b-2 2xl:border-t-2 2xl:border-b-2 border-white"></div>
+                            ) : qrCodeAtual ? (
+                                <img src={qrCodeAtual} className="h-full w-full object-contain rounded-lg 2xl:rounded-lg" alt="QR-Code" />
+                            ) : (
+                                <p className="text-white text-center font-inter text-xs sm:text-sm 2xl:text-sm">QR Code não disponível</p>
+                            )}
+                        </div>
+                    )}
+                </div>
             </main>
         </>
     );
