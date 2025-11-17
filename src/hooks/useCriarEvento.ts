@@ -192,13 +192,12 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
     Promise.all(promises).then(imagesData => {
       setLocalStorage(STORAGE_IMAGES_DATA_KEY, JSON.stringify(imagesData));
-      // salva também as blob urls (válidas apenas na sessão atual) para visualização imediata
+      // salva também as blob urls para visualização imediata
       setLocalStorage(STORAGE_IMAGES_KEY, JSON.stringify(blobUrls));
     });
   }, [validImages, blobUrls, isEditMode]);
 
   const clearStorage = useCallback(() => {
-    // revoga quaisquer object URLs criadas nesta sessão
     try {
       blobUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch {} });
     } catch {}
