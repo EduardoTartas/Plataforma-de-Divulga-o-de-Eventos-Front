@@ -192,16 +192,22 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
     Promise.all(promises).then(imagesData => {
       setLocalStorage(STORAGE_IMAGES_DATA_KEY, JSON.stringify(imagesData));
+      // salva também as blob urls (válidas apenas na sessão atual) para visualização imediata
       setLocalStorage(STORAGE_IMAGES_KEY, JSON.stringify(blobUrls));
     });
   }, [validImages, blobUrls, isEditMode]);
 
   const clearStorage = useCallback(() => {
+    // revoga quaisquer object URLs criadas nesta sessão
+    try {
+      blobUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch {} });
+    } catch {}
+
     removeLocalStorage(STORAGE_KEY);
     removeLocalStorage(STORAGE_STEP_KEY);
     removeLocalStorage(STORAGE_IMAGES_KEY);
     removeLocalStorage(STORAGE_IMAGES_DATA_KEY);
-  }, []);
+  }, [blobUrls]);
 
   const loadEventData = useCallback((evento: any) => {
     const exibDia = typeof evento.exibDia === 'string' 
@@ -252,9 +258,11 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
         midiTipo: media.midiTipo,
       })));
       setValidImages([]);
+      setBlobUrls([]);
     } else {
       setExistingMedia([]);
       setValidImages([]);
+      setBlobUrls([]);
     }
   }, [form]);
 
@@ -262,9 +270,13 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     form.reset(initialFormData);
     setStep(1);
     setValidImages([]);
+    // revoga e limpa blob urls
+    try {
+      blobUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch {} });
+    } catch {}
     setBlobUrls([]);
     clearStorage();
-  }, [form, clearStorage]);
+  }, [form, clearStorage, blobUrls]);
 
   const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
     return new Promise((resolve, reject) => {
@@ -320,7 +332,10 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       }
     }
 
-    setValidImages((prev) => [...prev, ...valid]);
+  // cria object URLs para visualização imediata na sessão
+  const newBlobUrls = valid.map(f => URL.createObjectURL(f));
+  setBlobUrls((prev) => [...prev, ...newBlobUrls]);
+  setValidImages((prev) => [...prev, ...valid]);
 
     if (invalid.length > 0) {
       toast.error(`Erro: As seguintes imagens não atendem à resolução mínima de 1280x720:\n${invalid.join("\n")}`);
@@ -329,6 +344,11 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
   const handleRemoveImage = useCallback((index: number) => {
     setValidImages((prev) => prev.filter((_, i) => i !== index));
+    setBlobUrls((prev) => {
+      const url = prev[index];
+      try { if (url) URL.revokeObjectURL(url); } catch {}
+      return prev.filter((_, i) => i !== index);
+    });
   }, []);
 
   const handleRemoveExistingMedia = useCallback((mediaId: string) => {
