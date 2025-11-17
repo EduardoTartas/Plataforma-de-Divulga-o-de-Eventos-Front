@@ -35,6 +35,29 @@ export interface Usuario {
   updatedAt: string;
 }
 
+// Tipo para os dados paginados de usuários
+export interface UsuariosData {
+  docs: Usuario[];
+  totalDocs: number;
+  limit: number;
+  totalPages: number;
+  page: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number | null;
+  nextPage: number | null;
+}
+
+// Tipo para a resposta completa da API de usuários paginada
+export interface UsuariosApiResponse {
+  error: boolean;
+  code: number;
+  message: string;
+  data: UsuariosData;
+  errors: any[];
+}
+
 // Tipo para um evento individual
 export interface Evento {
   organizador: Organizador;
@@ -97,6 +120,8 @@ export interface EventoTotem {
   categoria: string;
   tags: string[];
   link?: string;
+  duracao?: number;
+  loops?: number;
 }
 
 export interface EventosTotemApiResponse {

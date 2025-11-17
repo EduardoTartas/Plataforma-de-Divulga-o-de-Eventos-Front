@@ -1,33 +1,49 @@
 "use client"
 
 import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from "@/components/ui/table"
-import { Usuario, UsuarioApi } from "@/types/eventos"
+import { Usuario, UsuarioApi, UsuariosApiResponse } from "@/types/eventos"
 import { useState, useEffect } from "react"
 import { ToggleLeft, ToggleRight, Trash2, UserPlus, CheckCircle, XCircle } from 'lucide-react'
 import { fetchData } from "@/services/api"
 import Modal from "@/components/ui/modal"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+} from "@/components/ui/pagination"
+
+const ITEMS_PER_PAGE = 10;
 
 export default function AdministrativoPage() {
-    const [usuarios, setUsuarios] = useState<Usuario[]>([])
+    const [todosUsuarios, setTodosUsuarios] = useState<Usuario[]>([]) // Todos os usuários da API
+    const [usuarios, setUsuarios] = useState<Usuario[]>([]) // Usuários da página atual
     const [carregandoUsuarios, setCarregandoUsuarios] = useState<boolean>(true)
     const [erroUsuarios, setErroUsuarios] = useState<string | null>(null)
     const [atualizandoStatus, setAtualizandoStatus] = useState<string | null>(null)
+    const [atualizandoAdmin, setAtualizandoAdmin] = useState<string | null>(null)
     const [modalAtivo, setModalAtivo] = useState<string | null>(null)
     const [sucessoModal, setSucessoModal] = useState<boolean>(false)
     const [carregandoModal, setCarregandoModal] = useState<boolean>(false)
     const [erroModal, setErroModal] = useState<string | null>(null)
     const [novoUsuarioNome, setNovoUsuarioNome] = useState<string>('')
     const [novoUsuarioEmail, setNovoUsuarioEmail] = useState<string>('')
-    const [novoUsuarioSenha, setNovoUsuarioSenha] = useState<string>('')
-    const [confirmarSenha, setConfirmarSenha] = useState<string>('')
-    const [senhasCombinam, setSenhasCombinam] = useState<boolean | null>(null)
     const [usuarioDeletando, setUsuarioDeletando] = useState<Usuario | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(0)
+    const [totalDocs, setTotalDocs] = useState(0)
 
     const alterarStatus = async (id: string, status: string) => {
         const novoStatus: 'ativo' | 'inativo' = status === 'inativo' ? 'ativo' : 'inativo';
 
         try {
             setAtualizandoStatus(id);
+
+            // Atualiza tanto a lista completa quanto a lista da página atual
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, status: novoStatus }
+                    : usuario
+            ));
 
             setUsuarios(usuarios.map(usuario =>
                 usuario._id === id
@@ -42,6 +58,12 @@ export default function AdministrativoPage() {
             }
         } catch (error) {
             // Reverte a mudança em caso de erro
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, status: status as 'ativo' | 'inativo' }
+                    : usuario
+            ));
+
             setUsuarios(usuarios.map(usuario =>
                 usuario._id === id
                     ? { ...usuario, status: status as 'ativo' | 'inativo' }
@@ -50,6 +72,53 @@ export default function AdministrativoPage() {
             alert(`Não foi possivel alterar o status do Usuário: ${error}`);
         } finally {
             setAtualizandoStatus(null);
+        }
+    }
+
+    const alterarAdmin = async (id: string, admin: boolean) => {
+        const atualizando: true | false = admin === false ? true : false
+        console.log(`Atualizando: ${atualizando}`)
+
+        try {
+            console.log('Iniciando requisição!')
+            setAtualizandoAdmin(id);
+
+            // Atualiza tanto a lista completa quanto a lista da página atual
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: atualizando }
+                    : usuario
+            ));
+
+            setUsuarios(usuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: atualizando }
+                    : usuario
+            ));
+
+            const resposta = await fetchData(`/usuarios/${id}/admin`, 'PATCH', undefined, { admin: atualizando });
+            console.log(JSON.stringify(resposta))
+
+            if (!resposta || (resposta as any).code !== 200) {
+                throw new Error('Erro ao atualizar status');
+            }
+        } catch (error) {
+            console.log(`Erro na requisição: ${JSON.stringify(error)}`)
+            // Reverte a mudança em caso de erro
+            setTodosUsuarios(todosUsuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: admin as true | false }
+                    : usuario
+            ));
+
+            setUsuarios(usuarios.map(usuario =>
+                usuario._id === id
+                    ? { ...usuario, admin: admin as true | false }
+                    : usuario
+            ));
+            alert(`Não foi possivel alterar o status de admin do Usuário: ${error}`);
+        } finally {
+            setAtualizandoAdmin(null);
         }
     }
 
@@ -68,15 +137,17 @@ export default function AdministrativoPage() {
                 throw new Error('Erro ao deletar usuário');
             }
 
-            // Atualiza a lista de usuários removendo o usuário deletado
-            setUsuarios(usuarios.filter(usuario => usuario._id !== id));
+            // Fecha o modal
             setUsuarioDeletando(null);
             setModalAtivo(null);
+
+            // Atualiza a lista de usuários
+            await buscarUsuarios();
         } catch (error) {
             alert(`Não foi possivel deletar o Usuário: ${error}`);
 
             // Reverte a mudança em caso de erro
-            buscarUsuarios();
+            await buscarUsuarios();
         }
     }
 
@@ -89,18 +160,45 @@ export default function AdministrativoPage() {
             if (resposta.code !== 200) {
                 throw new Error('Erro ao buscar usuários');
             }
-            const dadosUsuarios = resposta.data
+
+            const dadosUsuarios = resposta.data;
+
+            // A API retorna todos os usuários de uma vez
+            let usuariosArray: Usuario[] = [];
+
             if (!dadosUsuarios) {
-                setUsuarios([]);
+                usuariosArray = [];
             } else if (Array.isArray(dadosUsuarios)) {
-                setUsuarios(dadosUsuarios);
+                usuariosArray = dadosUsuarios;
             } else {
-                setUsuarios([dadosUsuarios]);
+                usuariosArray = [dadosUsuarios];
             }
+
+            // Armazena todos os usuários
+            setTodosUsuarios(usuariosArray);
+
+            // Calcula paginação local
+            const total = usuariosArray.length;
+            const pages = Math.ceil(total / ITEMS_PER_PAGE);
+            setTotalDocs(total);
+            setTotalPages(pages);
+
+            // Define a página atual (garante que não exceda o total)
+            const validPage = Math.min(currentPage, pages || 1);
+            setCurrentPage(validPage);
+
+            // Pega os usuários da página atual
+            const startIndex = (validPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            setUsuarios(usuariosArray.slice(startIndex, endIndex));
+
         } catch (erro) {
             console.error('Erro ao buscar Usuarios:', erro);
             setErroUsuarios(erro instanceof Error ? erro.message : 'Erro desconhecido')
+            setTodosUsuarios([]);
             setUsuarios([]);
+            setTotalPages(0);
+            setTotalDocs(0);
         } finally {
             setCarregandoUsuarios(false);
         }
@@ -112,7 +210,7 @@ export default function AdministrativoPage() {
             setErroModal(null);
             setSucessoModal(false);
 
-            const resposta = await fetchData<UsuarioApi>('/usuarios', 'POST', undefined, { nome: novoUsuarioNome, email: novoUsuarioEmail, senha: novoUsuarioSenha, status: "ativo" })
+            const resposta = await fetchData<UsuarioApi>('/usuarios', 'POST', undefined, { nome: novoUsuarioNome, email: novoUsuarioEmail, status: "ativo" })
 
             if (resposta.code !== 201) {
                 throw new Error('Erro ao cadastrar usuário!');
@@ -127,8 +225,11 @@ export default function AdministrativoPage() {
             setModalAtivo(null);
             setSucessoModal(false);
             setErroModal(null);
+            setNovoUsuarioNome('');
+            setNovoUsuarioEmail('');
 
-            // Atualiza a lista de usuários
+            // Volta para a primeira página e atualiza a lista de usuários
+            setCurrentPage(1);
             await buscarUsuarios();
         } catch (erro) {
             console.error('Erro ao cadastrar Usuarios:', erro)
@@ -144,15 +245,30 @@ export default function AdministrativoPage() {
             setCarregandoModal(false),
             setErroModal(null),
             setNovoUsuarioNome(''),
-            setNovoUsuarioEmail(''),
-            setNovoUsuarioSenha(''),
-            setConfirmarSenha(''),
-            setSenhasCombinam(null)
+            setNovoUsuarioEmail('')
     }
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+
+        // Pagina localmente os dados já carregados
+        const startIndex = (page - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        setUsuarios(todosUsuarios.slice(startIndex, endIndex));
+    };
 
     useEffect(() => {
         buscarUsuarios();
     }, [])
+
+    // Atualiza a página quando currentPage muda (exceto na montagem inicial)
+    useEffect(() => {
+        if (todosUsuarios.length > 0) {
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            setUsuarios(todosUsuarios.slice(startIndex, endIndex));
+        }
+    }, [currentPage, todosUsuarios])
 
     return (
         <>
@@ -222,89 +338,22 @@ export default function AdministrativoPage() {
                             />
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Senha
-                            </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                value={novoUsuarioSenha}
-                                autoComplete="new-password"
-                                onChange={(e) => {
-                                    setNovoUsuarioSenha(e.target.value);
-                                    // Valida se já tem algo digitado no campo de confirmação
-                                    if (confirmarSenha) {
-                                        setSenhasCombinam(e.target.value === confirmarSenha);
-                                    }
-                                }}
-                                disabled={carregandoModal}
-                                className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
-                                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                         placeholder:text-gray-400 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                placeholder="••••••••"
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                                Confirmar Senha
-                            </label>
-                            <div className="relative">
-                                <input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type="password"
-                                    value={confirmarSenha}
-                                    autoComplete="new-password"
-                                    onChange={(e) => {
-                                        setConfirmarSenha(e.target.value);
-                                        // Valida em tempo real
-                                        if (e.target.value.length > 0) {
-                                            setSenhasCombinam(novoUsuarioSenha === e.target.value);
-                                        } else {
-                                            setSenhasCombinam(null);
-                                        }
-                                    }}
-                                    disabled={carregandoModal}
-                                    className={`w-full px-4 py-2.5 text-gray-900 border rounded-lg 
-                                             focus:outline-none focus:ring-2 focus:border-transparent
-                                             placeholder:text-gray-400 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed
-                                             ${senhasCombinam === false ? 'border-red-500 focus:ring-red-500' :
-                                            senhasCombinam === true ? 'border-green-500 focus:ring-green-500' :
-                                                'border-gray-300 focus:ring-indigo-500'}`}
-                                    placeholder="••••••••"
-                                />
-                                {/* Ícone de feedback */}
-                                {senhasCombinam !== null && confirmarSenha.length > 0 && (
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                        {senhasCombinam ? (
-                                            <CheckCircle className="w-5 h-5 text-green-500" />
-                                        ) : (
-                                            <XCircle className="w-5 h-5 text-red-500" />
-                                        )}
-                                    </div>
-                                )}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
-                            {/* Mensagem de feedback */}
-                            {senhasCombinam === false && confirmarSenha.length > 0 && (
-                                <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                                    <XCircle className="w-4 h-4" />
-                                    As senhas não coincidem
+                            <div className="flex-1">
+                                <p className="text-sm text-blue-800">
+                                    O usuário receberá um e-mail com instruções para criar sua senha.
                                 </p>
-                            )}
-                            {senhasCombinam === true && (
-                                <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                                    <CheckCircle className="w-4 h-4" />
-                                    As senhas coincidem
-                                </p>
-                            )}
+                            </div>
                         </div>
 
                         <button
                             type="submit"
-                            disabled={carregandoModal || senhasCombinam === false || !novoUsuarioNome || !novoUsuarioEmail || !novoUsuarioSenha || !confirmarSenha}
+                            disabled={carregandoModal || !novoUsuarioNome || !novoUsuarioEmail}
                             className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                                      hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
                                      focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg
@@ -332,10 +381,10 @@ export default function AdministrativoPage() {
                     <span>Email: {usuarioDeletando?.email}</span>
                 </div>
                 <div className="flex justify-end mt-4">
-                    <button onClick={() => setModalAtivo(null)} className="bg-indigo-600 text-white py-2 px-4 rounded-lg">
+                    <button onClick={() => setModalAtivo(null)} className="bg-indigo-600 text-white py-2 px-4 rounded-lg cursor-pointer">
                         Cancelar
                     </button>
-                    <button onClick={() => { deletarUsuario(usuarioDeletando?._id) }} className="bg-red-600 text-white py-2 px-4 rounded-lg ml-2">
+                    <button onClick={() => { deletarUsuario(usuarioDeletando?._id) }} className="bg-red-600 text-white py-2 px-4 rounded-lg ml-2 cursor-pointer">
                         Deletar
                     </button>
                 </div>
@@ -376,7 +425,7 @@ export default function AdministrativoPage() {
                             </h2>
                             <div className="flex flex-row justify-between items-center">
                                 <p className="text-sm text-gray-600 mt-1">
-                                    {carregandoUsuarios ? 'Carregando...' : `${usuarios.length} usuário(s) cadastrado(s)`}
+                                    {carregandoUsuarios ? 'Carregando...' : `${totalDocs} usuário(s) cadastrado(s)`}
                                 </p>
 
                                 <button onClick={() => { setModalAtivo('novoUsuario') }} className="bg-green-600 cursor-pointer p-2 rounded-2xl flex flex-row gap-2 text-white"><UserPlus />Novo Usuário</button>
@@ -391,9 +440,10 @@ export default function AdministrativoPage() {
                                         <TableHead className="text-gray-700 font-semibold">ID</TableHead>
                                         <TableHead className="text-gray-700 font-semibold">Nome</TableHead>
                                         <TableHead className="text-gray-700 font-semibold">E-mail</TableHead>
-                                        <TableHead className="text-gray-700 font-semibold">Criado Em</TableHead>
-                                        <TableHead className="text-gray-700 font-semibold">Status</TableHead>
+                                        <TableHead className="text-gray-700 font-semibold">Membro Desde</TableHead>
+                                        <TableHead className="text-gray-700 font-semibold">Administrador</TableHead>
                                         <TableHead className="text-gray-700 font-semibold text-center">Ações</TableHead>
+                                        <TableHead className="text-gray-700 font-semibold">Status</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -449,12 +499,32 @@ export default function AdministrativoPage() {
                                                     {new Date(usuario.createdAt).toLocaleDateString('pt-BR')}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${usuario.status === 'ativo'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                        {usuario.status}
-                                                    </span>
+                                                    <div className="flex flex-row items-center gap-2.5">
+                                                        <button
+                                                            onClick={() => alterarAdmin(usuario._id, usuario.admin)}
+                                                            disabled={atualizandoAdmin === usuario._id}
+                                                            className="transition-transform hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title={usuario.admin === true ? 'Retirar Admin' : 'Atribuir Admin'}
+                                                        >
+                                                            {atualizandoAdmin === usuario._id ? (
+                                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                                            ) : usuario.admin === true ? (
+                                                                <div className="flex flex-row gap-2.5">
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                        Sim
+                                                                    </span>
+                                                                    <ToggleRight className="text-blue-800 w-5 h-5" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex flex-row gap-2">
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                                        Não
+                                                                    </span>
+                                                                    <ToggleLeft className="text-gray-800 w-5 h-5" />
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center justify-center gap-3">
@@ -481,12 +551,104 @@ export default function AdministrativoPage() {
                                                         </button>
                                                     </div>
                                                 </TableCell>
+                                                <TableCell>
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${usuario.status === 'ativo'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                        {usuario.status}
+                                                    </span>
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     )}
                                 </TableBody>
                             </Table>
                         </div>
+
+                        {/* Paginação */}
+                        {totalPages > 1 && (
+                            <div className="flex flex-col items-center space-y-4 mt-6 pb-6">
+                                {/* Informação de paginação */}
+                                <div className="text-sm text-gray-600">
+                                    Página {currentPage} de {totalPages} ({totalDocs} usuários no total)
+                                </div>
+
+                                <Pagination>
+                                    <PaginationContent>
+                                        {/* Botão Anterior */}
+                                        <PaginationItem>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (currentPage > 1) handlePageChange(currentPage - 1);
+                                                }}
+                                                disabled={currentPage === 1}
+                                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === 1
+                                                    ? 'pointer-events-none opacity-50 cursor-not-allowed'
+                                                    : 'cursor-pointer'
+                                                    } bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
+                                            >
+                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                </svg>
+                                                Anterior
+                                            </button>
+                                        </PaginationItem>
+
+                                        {/* Números das páginas */}
+                                        {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
+                                            let pageNum;
+                                            if (totalPages <= 5) {
+                                                pageNum = index + 1;
+                                            } else if (currentPage <= 3) {
+                                                pageNum = index + 1;
+                                            } else if (currentPage >= totalPages - 2) {
+                                                pageNum = totalPages - 4 + index;
+                                            } else {
+                                                pageNum = currentPage - 2 + index;
+                                            }
+
+                                            return (
+                                                <PaginationItem key={pageNum}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePageChange(pageNum)}
+                                                        aria-current={currentPage === pageNum ? 'page' : undefined}
+                                                        className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === pageNum
+                                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600'
+                                                            : 'cursor-pointer bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                            }`}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                </PaginationItem>
+                                            );
+                                        })}
+
+                                        {/* Botão Próximo */}
+                                        <PaginationItem>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                                                }}
+                                                disabled={currentPage === totalPages}
+                                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === totalPages
+                                                    ? 'pointer-events-none opacity-50 cursor-not-allowed'
+                                                    : 'cursor-pointer'
+                                                    } bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
+                                            >
+                                                Próximo
+                                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </button>
+                                        </PaginationItem>
+                                    </PaginationContent>
+                                </Pagination>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

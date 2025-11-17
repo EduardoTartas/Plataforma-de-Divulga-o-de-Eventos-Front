@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-ifroevents
+spec:
+  selector:
+    matchLabels:
+      app: front-ifroevents
+  template:
+    metadata:
+      labels:
+        app: front-ifroevents
+    spec:
+      containers:
+      - name: front-ifroevents
+        image: eduardotartas/front-ifroevents:latest
+        resources: {}
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ifroevents
+spec:
+  selector:
+    app: front-ifroevents
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000

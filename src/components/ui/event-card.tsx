@@ -93,7 +93,7 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => onToggleStatus(evento._id, evento.status)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${evento.status === 1
+                className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${evento.status === 1
                   ? 'bg-green-500'
                   : 'bg-gray-300'
                   }`}
@@ -111,7 +111,7 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
             {onEdit && (
               <button
                 onClick={() => onEdit(evento._id)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                className="cursor-pointer p-2 text-[#805AD5] hover:bg-purple-50 rounded-lg transition-colors duration-200"
                 title="Editar evento"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +123,7 @@ export default function EventCard({ evento, onEdit, onDelete, onToggleStatus }: 
             {onDelete && (
               <button
                 onClick={() => onDelete(evento._id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                className="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                 title="Excluir evento"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
