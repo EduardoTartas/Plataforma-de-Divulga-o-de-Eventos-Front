@@ -1,50 +1,78 @@
-describe('Página Meus Eventos', () => {
+describe("Página Meus Eventos", () => {
 
   beforeEach(() => {
-    cy.intercept('GET', '**/eventos*', {
+    cy.intercept("GET", "/api/auth/session", {
+      statusCode: 200,
+      body: {
+        user: {
+          id: "1",
+          name: "Admin",
+          email: "admin@admin.com",
+        },
+      },
+    }).as("sessionLogged");
+
+    cy.intercept("GET", "/api/eventos*", {
       statusCode: 200,
       body: {
         data: {
           docs: [
-            { _id: '1', titulo: 'Evento Teste 1', status: 1 },
-            { _id: '2', titulo: 'Evento Teste 2', status: 0 },
+            {
+              _id: "1",
+              titulo: "Evento Teste",
+              status: 1,
+              categoria: "Palestra",
+            }
           ],
-          totalDocs: 2,
-          totalPages: 1
+          totalPages: 3,
+          totalDocs: 20
         }
       }
-    }).as('getEventos');
+    }).as("eventos");
 
-    cy.visit('/meus-eventos');
+    cy.visit("/meus_eventos");
+    cy.wait("@sessionLogged");
+    cy.wait("@eventos");
   });
 
-  it('carrega a página', () => {
-    cy.get('[data-test="page-meus-eventos"]').should('exist');
+  it("renderiza a página corretamente", () => {
+    cy.get('[data-test="meus-eventos-page"]').should("exist");
+    cy.get('[data-test="hero-title"]').should("exist");
+    cy.get('[data-test="card-container"]').should("exist");
   });
 
-  it('exibe loading enquanto busca eventos', () => {
-    cy.get('[data-test="loading-eventos"]').should('exist');
-    cy.wait('@getEventos');
+  it("navega para criar evento", () => {
+    cy.get('[data-test="btn-criar-evento"]').click();
+    cy.url().should("include", "/criar_eventos");
   });
 
-  it('lista eventos após carregar', () => {
-    cy.wait('@getEventos');
-    cy.get('[data-test="lista-eventos"]').should('exist');
+  it("abre modal ao clicar excluir", () => {
+    cy.get('[data-test="card-container"]')
+      .find('[data-test="btn-delete-event"]').first().click();
 
-    cy.contains('Evento Teste 1').should('exist');
-    cy.contains('Evento Teste 2').should('exist');
+    cy.get('[data-test="delete-modal"]').should("exist");
   });
 
-  it('abre modal ao clicar em deletar', () => {
-    cy.wait('@getEventos');
-
-   
-    cy.get('[data-test="lista-eventos"]')
-      .contains('Evento Teste 1')
-      .parent()
-      .find('[data-test="btn-delete"]') 
-      .click();
-
-    cy.get('[data-test="modal-delete-evento"]').should('exist');
+  it("cancela o modal", () => {
+    cy.get('[data-test="btn-delete-event"]').first().click();
+    cy.get('[data-test="btn-cancel-delete"]').click();
+    cy.get('[data-test="delete-modal"]').should("not.exist");
   });
+
+  it("confirma delete", () => {
+    cy.intercept("DELETE", "/api/eventos/1", {
+      statusCode: 200,
+      body: { message: "Deletado" }
+    }).as("deleteEvent");
+
+    cy.get('[data-test="btn-delete-event"]').first().click();
+    cy.get('[data-test="btn-confirm-delete"]').click();
+    cy.wait("@deleteEvent");
+  });
+
+  it("troca de página", () => {
+    cy.get('[data-test="btn-next-page"]').click();
+    cy.get('[data-test="page-2"]').should("have.attr", "aria-current", "page");
+  });
+
 });
