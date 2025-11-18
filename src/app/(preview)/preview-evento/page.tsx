@@ -11,6 +11,7 @@ export default function PreviewEvento() {
     const [imagemAtualIndex, setImagemAtualIndex] = useState(0);
     const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
     const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+    const [repeticoesCompletadas, setRepeticoesCompletadas] = useState(0);
 
     // useEffect para capturar o tamanho da tela
     useEffect(() => {
@@ -26,10 +27,10 @@ export default function PreviewEvento() {
     const carregarDadosPreview = () => {
         const dadosForm = localStorage.getItem('criar_evento_draft');
         const imagensValidas = localStorage.getItem('criar-evento-images');
-        
-        if (!dadosForm || !imagensValidas) {
-            // Se não houver dados, redireciona de volta
-            // Tenta voltar para criar ou editar
+        const imagensData = localStorage.getItem('criar-evento-images-data');
+
+        if (!dadosForm || (!imagensValidas && !imagensData)) {
+            //voltar para criar ou editar
             if (window.opener) {
                 window.close();
             } else {
@@ -40,8 +41,28 @@ export default function PreviewEvento() {
 
         try {
             const form = JSON.parse(dadosForm);
-            const imagens = JSON.parse(imagensValidas);
-            
+            let imagens: string[] = [];
+
+            if (imagensValidas) {
+                try {
+                    imagens = JSON.parse(imagensValidas) || [];
+                } catch (e) {
+                    console.warn('Falha ao parsear criar-evento-images, tentando criar-evento-images-data', e);
+                    imagens = [];
+                }
+            }
+
+            if ((!imagens || imagens.length === 0) && imagensData) {
+                try {
+                    const imagesDataParsed = JSON.parse(imagensData);
+                    // imagesDataParsed é um array de { name, data }
+                    imagens = (imagesDataParsed || []).map((i: any) => i.data).filter(Boolean);
+                } catch (e) {
+                    console.warn('Falha ao parsear criar-evento-images-data', e);
+                    imagens = [];
+                }
+            }
+
             console.log('=== DEBUG PREVIEW ===');
             console.log('Formulário carregado:', form);
             console.log('Imagens carregadas:', imagens);
@@ -50,25 +71,11 @@ export default function PreviewEvento() {
             // Formatar categoria para exibição correta
             const formatarCategoria = (cat: string) => {
                 const categorias: Record<string, string> = {
-                    'academico': 'Acadêmico',
                     'palestra': 'Palestra',
                     'workshop': 'Workshop',
                     'seminario': 'Seminário',
-                    'congresso': 'Congresso',
-                    'minicurso': 'Minicurso',
-                    'cultural': 'Cultural',
+                    'curso': 'Curso',
                     'esportivo': 'Esportivo',
-                    'social': 'Social',
-                    'cientifico': 'Científico',
-                    'extensao': 'Extensão',
-                    'pesquisa': 'Pesquisa',
-                    'feira': 'Feira',
-                    'mostra': 'Mostra',
-                    'competicao': 'Competição',
-                    'formatura': 'Formatura',
-                    'vestibular': 'Vestibular',
-                    'enem': 'ENEM',
-                    'institucional': 'Institucional',
                     'outros': 'Outros'
                 };
                 return categorias[cat] || cat.toUpperCase();
@@ -107,21 +114,41 @@ export default function PreviewEvento() {
         carregarDadosPreview();
     }, [router]);
 
-    // useEffect para slideshow automático
+    // useEffect para slideshow automático (controle de imagens e repetições similar ao totem)
     useEffect(() => {
         if (!eventoPreview || !eventoPreview.imagens || eventoPreview.imagens.length === 0) return;
 
+        const len = eventoPreview.imagens.length;
+        const loops = eventoPreview.loops || 3;
+        const duracao = 3000;
+
         const intervalo = setInterval(() => {
-            setImagemAtualIndex((prev) => (prev + 1) % eventoPreview.imagens.length);
-        }, 3000); // 3 segundos por imagem
+            setImagemAtualIndex((prev) => {
+                const proxima = prev + 1;
+                if (proxima < len) {
+                    return proxima;
+                }
+
+                // completou um ciclo de imagens
+                setRepeticoesCompletadas((prevRep) => {
+                    const novas = prevRep + 1;
+                    if (novas >= loops) {
+                        // resetar contador de repetições
+                        return 0;
+                    }
+                    return novas;
+                });
+
+                return 0;
+            });
+        }, duracao); // 3 segundos por imagem
 
         return () => clearInterval(intervalo);
     }, [eventoPreview]);
 
-    // useEffect para gerar QR code quando tiver link
+    // gerar QR code quando tiver link
     useEffect(() => {
         if (eventoPreview && eventoPreview.link) {
-            // Usando API pública do QR Server para gerar QR code
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(eventoPreview.link)}`;
             setQrCodeUrl(qrUrl);
         } else {
@@ -154,6 +181,15 @@ export default function PreviewEvento() {
         9: 'bg-transparent'
     };
 
+    function obterAnimacao() {
+        const animacaoEvento = ANIMACOES_MAP[eventoPreview?.animacao] || 'animate__fadeIn';
+        return `animate__animated ${animacaoEvento}`;
+    }
+
+    function obterClasseCorFundo() {
+        return CORES_MAP[eventoPreview?.cor] || 'bg-gray-900/90';
+    }
+
     if (!eventoPreview) {
         return (
             <div className="h-screen w-screen bg-linear-to-br from-indigo-950 to-purple-900 flex items-center justify-center p-4">
@@ -165,9 +201,9 @@ export default function PreviewEvento() {
         );
     }
 
-    const animacaoClasse = ANIMACOES_MAP[eventoPreview.animacao] || 'animate__fadeIn';
-    const corFundo = CORES_MAP[eventoPreview.cor] || 'bg-gray-900/90';
     const imagemAtual = eventoPreview.imagens[imagemAtualIndex];
+    const animacaoClasse = obterAnimacao();
+    const corFundo = obterClasseCorFundo();
 
     return (
         <>
@@ -221,7 +257,7 @@ export default function PreviewEvento() {
                                     <div
                                         key={index}
                                         className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${
-                                            index === 0 ? 'bg-white' : 'bg-white/30'
+                                            index <= repeticoesCompletadas ? 'bg-white' : 'bg-white/30'
                                         }`}
                                     />
                                 ))}
