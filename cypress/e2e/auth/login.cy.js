@@ -5,27 +5,14 @@ Cypress.on("uncaught:exception", (err) => {
   }
 });
 
-
-
 describe("Tela de Login", () => {
 
   beforeEach(() => {
-    // Sessão sem usuário
-    cy.intercept("GET", "/api/auth/session", {
-      statusCode: 200,
-      body: { user: null },
-    }).as("sessionEmpty");
-
-    cy.intercept("GET", "/api/auth/providers").as("providers");
-    cy.intercept("GET", "/api/auth/csrf").as("csrf");
-
-    cy.intercept("POST", "/api/auth/callback/credentials**", {
-      statusCode: 200,
-      body: { ok: true },
-    }).as("loginRequest");
-
+    // Limpar cookies e sessão antes de cada teste
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    
     cy.visit("http://localhost:3000/login");
-    cy.wait("@sessionEmpty");
   });
 
   it("deve renderizar todos os elementos da tela", () => {
@@ -68,32 +55,14 @@ describe("Tela de Login", () => {
 
   it("deve realizar o login com sucesso e redirecionar", () => {
     cy.get('[data-test="input-email"]').clear().type("admin@admin.com");
-    cy.get('[data-test="input-senha"]').clear().type("admin");
+    cy.get('[data-test="input-senha"]').clear().type("SenhaSuperSegur@123");
 
     cy.get('[data-test="btn-entrar"]').click();
 
-    cy.wait("@providers");
-    cy.wait("@csrf");
-    cy.wait("@loginRequest");
-
-    // Agora mock da sessão autenticada
-    cy.intercept("GET", "/api/auth/session", {
-      statusCode: 200,
-      body: {
-        user: {
-          id: "1",
-          email: "admin@admin.com",
-          name: "Administrador",
-        },
-      },
-    }).as("sessionAfter");
-
-    // Força NextAuth a pedir a nova sessão
-    cy.window().then((win) => win.fetch("/api/auth/session"));
-    cy.wait("@sessionAfter");
-
-    // Checa o redirect FINAL
     cy.url({ timeout: 10000 }).should("include", "/meus_eventos");
+    
+    // verificar que o usuário está autenticado
+    cy.getCookie("next-auth.session-token").should("exist");
   });
 
 });
