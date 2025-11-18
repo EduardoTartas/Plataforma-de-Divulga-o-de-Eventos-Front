@@ -1,7 +1,9 @@
 describe('Página de Usuários', () => {
 
   beforeEach(() => {
-    cy.visit('/usuarios');
+    // Login como administrador antes de cada teste
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
+    cy.visit('/administrativo/usuarios');
   });
 
   it('carrega a página e mostra loading', () => {

@@ -1,38 +1,9 @@
 describe("Página Meus Eventos", () => {
 
   beforeEach(() => {
-    cy.intercept("GET", "/api/auth/session", {
-      statusCode: 200,
-      body: {
-        user: {
-          id: "1",
-          name: "Admin",
-          email: "admin@admin.com",
-        },
-      },
-    }).as("sessionLogged");
-
-    cy.intercept("GET", "/api/eventos*", {
-      statusCode: 200,
-      body: {
-        data: {
-          docs: [
-            {
-              _id: "1",
-              titulo: "Evento Teste",
-              status: 1,
-              categoria: "Palestra",
-            }
-          ],
-          totalPages: 3,
-          totalDocs: 20
-        }
-      }
-    }).as("eventos");
-
+    // Login antes de acessar a página
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
     cy.visit("/meus_eventos");
-    cy.wait("@sessionLogged");
-    cy.wait("@eventos");
   });
 
   it("renderiza a página corretamente", () => {
