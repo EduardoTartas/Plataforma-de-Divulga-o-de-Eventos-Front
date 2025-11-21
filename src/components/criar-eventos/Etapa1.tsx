@@ -55,6 +55,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                 <Input
                   placeholder="Ex: Workshop de Desenvolvimento Web"
                   {...field}
+                  data-test="input-titulo"
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                 />
               </FormControl>
@@ -76,6 +77,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                 <Textarea
                   placeholder="Conte mais sobre o evento, incluindo objetivos, conteúdo e público-alvo..."
                   {...field}
+                  data-test="input-descricao"
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all resize-none"
                   rows={5}
                 />
@@ -105,7 +107,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white">
+                    <SelectTrigger className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white" data-test="select-categoria">
                       <SelectValue placeholder="Escolha o tipo do evento" />
                     </SelectTrigger>
                   </FormControl>
@@ -148,6 +150,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   <Input
                     placeholder="Ex: Auditório Principal - Bloco A"
                     {...field}
+                    data-test="input-local"
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                 </FormControl>
@@ -174,6 +177,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   <Input
                     type="datetime-local"
                     {...field}
+                    data-test="input-data-inicio"
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                 </FormControl>
@@ -198,6 +202,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   <Input
                     type="datetime-local"
                     {...field}
+                    data-test="input-data-fim"
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                 </FormControl>
@@ -225,6 +230,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   placeholder="https://seu-site.com/inscricoes"
                   {...field}
                   value={field.value || ""}
+                  data-test="input-link"
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                 />
               </FormControl>
@@ -274,11 +280,13 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                         handleAddTag();
                       }
                     }}
+                    data-test="input-tag"
                     className="flex-1 border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                   <Button 
                     type="button" 
                     onClick={handleAddTag}
+                    data-test="btn-adicionar-tag"
                     className="px-6 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
