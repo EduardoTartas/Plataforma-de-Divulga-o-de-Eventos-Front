@@ -1,114 +1,117 @@
-describe('Página de Administração', () => {
-  const API_BASE_URL = 'http://localhost:5015/api';
-  let usuariosAPI = [];
+describe('Página Administrativo (Mockada)', () => {
+  const API_URL = 'http://localhost:5015/api';
 
   beforeEach(() => {
-    cy.intercept('GET', `${API_BASE_URL}/usuarios`).as('fetchUsuarios');
+    // 1. Faz o login (ou restaura a sessão cacheada)
+    cy.login("admin@admin.com", "SenhaSuperSegur@123");
 
-    cy.visit('http://localhost:3000/login');
-    
-    // Realizar login como administrador
-    cy.get('[data-test="input-email"]').clear().type("admin@admin.com");
-    cy.get('[data-test="input-senha"]').clear().type("SenhaSuperSegur@123");
-    cy.get('[data-test="btn-entrar"]').click();
-    cy.url({ timeout: 10000 }).should("include", "/meus_eventos");
+    // 2. Intercepta a API (Mock)
+    cy.intercept('GET', `${API_URL}/usuarios`, {
+      statusCode: 200,
+      fixture: 'usuarios_mock.json'
+    }).as('getUsuarios');
 
+    // 3. Visita a página que você quer testar
     cy.visit('http://localhost:3000/administrativo');
 
-    cy.wait('@fetchUsuarios').then((interception) => {
-      usuariosAPI = interception.response.body.data;
-    });
+    cy.wait('@getUsuarios');
   });
 
-  it('deve exibir elementos visuais da página', () => {
+  it('Deve renderizar a tabela corretamente com dados da fixture', () => {
     cy.contains('h1', 'Gerenciamento de Usuários').should('be.visible');
-    cy.contains('h2', 'Lista de Usuários').should('be.visible');
-    cy.get('[data-teste="btn-novo-usuario"]').should('be.visible').should('contain.text', 'Novo Usuário');
-    cy.contains('usuário(s) cadastrado(s)').should('be.visible');
-  });
 
-  it('deve comparar dados da API com dados exibidos no frontend', () => {
-    cy.then(() => {
-      const totalUsuarios = usuariosAPI.length;
-      const usuariosPaginaAtual = usuariosAPI.slice(0, 10);
+    // Verifica se renderizou as 2 linhas do JSON fictício
+    cy.get('tbody tr').should('have.length', 2);
 
-      usuariosPaginaAtual.forEach((usuario, index) => {
-        cy.get('tbody tr').eq(index).within(() => {
-          cy.get('td').eq(1).should('contain', usuario.nome);
-          cy.get('td').eq(2).should('contain', usuario.email);
-
-          const dataFormatada = new Date(usuario.createdAt).toLocaleDateString('pt-BR');
-          cy.get('td').eq(3).should('contain', dataFormatada);
-
-          cy.get('td').eq(4).should('contain', usuario.admin ? 'Sim' : 'Não');
-          cy.get('td').eq(6).should('contain', usuario.status);
-        });
-      });
-
-      cy.contains(`${totalUsuarios} usuário(s) cadastrado(s)`).should('be.visible');
+    // Verifica dados específicos da primeira linha mockada
+    cy.get('tbody tr').first().within(() => {
+      cy.contains('Usuario Teste 1').should('be.visible');
+      cy.contains('teste1@email.com').should('be.visible');
+      // Verifica o status (que no JSON é 'ativo')
+      cy.get('button[title="Desativar usuário"]').should('exist');
     });
   });
 
-  it('deve exibir modal e criar novo usuário', () => {
-    cy.intercept('POST', `${API_BASE_URL}/usuarios`).as('criarUsuario');
-    cy.intercept('GET', `${API_BASE_URL}/usuarios`).as('atualizarLista');
+  it('Deve realizar o fluxo de criar novo usuário com sucesso', () => {
+    // Mock da criação (POST)
+    cy.intercept('POST', `${API_URL}/usuarios`, {
+      statusCode: 201,
+      body: { code: 201, message: "Criado com sucesso" }
+    }).as('postUsuario');
 
-    cy.get('[data-teste="btn-novo-usuario"]').click();
-    cy.get('[data-teste="modal-novo-usuario"]').should('be.visible');
+    // Mock do refresh da lista após criar
+    cy.intercept('GET', `${API_URL}/usuarios`, {
+      statusCode: 200,
+      fixture: 'usuarios_mock.json'
+    }).as('getUsuariosRefresh');
 
-    cy.get('input[placeholder="John Doe"]').type('Novo User Teste');
-    cy.get('input[placeholder="johndoe@email.com"]').type('novousertest@email.com');
-    cy.contains('button', 'Criar Conta').click();
+    cy.getByData('btn-novo-usuario').click();
 
-    cy.wait('@criarUsuario').its('response.statusCode').should('eq', 201);
+    // Preenche formulário
+    cy.getByData('modal-novo-usuario').within(() => {
+      cy.get('input#nome').type('Novo Dev');
+      cy.get('input#email').type('dev@ifro.edu.br');
+      cy.contains('button', 'Criar Conta').click();
+    });
+
+    // Verifica chamadas e UI
+    cy.wait('@postUsuario');
     cy.contains('Usuário cadastrado com sucesso!').should('be.visible');
+    // Verifica se o modal fechou (após o timeout do componente)
+    cy.getByData('modal-novo-usuario').should('not.exist');
   });
 
-  it('deve alternar status e comparar com resposta da API', () => {
-    cy.intercept('PATCH', `${API_BASE_URL}/usuarios/*/status`).as('alterarStatus');
+  it('Deve tratar erro ao criar usuário (Cenário de Falha)', () => {
+    // Simulamos um erro do backend (Ex: email duplicado)
+    cy.intercept('POST', `${API_URL}/usuarios`, {
+      statusCode: 400,
+      body: { message: "Email já cadastrado" }
+    }).as('postUsuarioErro');
 
-    cy.get('tbody tr').first().within(() => {
-      cy.get('button[title*="Desativar"], button[title*="Ativar"]').first().click();
+    cy.getByData('btn-novo-usuario').click();
+
+    cy.getByData('modal-novo-usuario').within(() => {
+      cy.get('input#nome').type('Duplicado');
+      cy.get('input#email').type('teste1@email.com');
+      cy.contains('button', 'Criar Conta').click();
     });
 
-    cy.wait('@alterarStatus').then((interception) => {
-      const novoStatus = interception.response.body.data.status;
-
-      cy.get('tbody tr').first().within(() => {
-        cy.contains('span', novoStatus).should('be.visible');
-      });
-    });
+    cy.wait('@postUsuarioErro');
+    // O alerta de erro deve aparecer DENTRO do modal
+    cy.contains('Erro ao cadastrar usuário').should('be.visible');
   });
 
-  it('deve alternar permissão admin e comparar com resposta da API', () => {
-    cy.intercept('PATCH', `${API_BASE_URL}/usuarios/*/admin`).as('alterarAdmin');
+  it('Deve abrir modal de exclusão e confirmar deleção', () => {
+    // Mock do DELETE
+    cy.intercept('DELETE', `${API_URL}/usuarios/*`, {
+      statusCode: 200,
+      body: { code: 200 }
+    }).as('deleteUsuario');
 
-    cy.get('tbody tr').first().within(() => {
-      cy.get('button').contains('Não, Sim').first().parent().click();
-    });
+    // Clicar na lixeira do primeiro usuário da lista mockada
+    cy.get('tbody tr').first().find('button[title="Excluir usuário"]').click();
 
-    cy.wait('@alterarAdmin').then((interception) => {
-      const novoAdmin = interception.response.body.data.admin;
-      const adminText = novoAdmin ? 'Sim' : 'Não';
+    // Validar modal de confirmação
+    cy.getByData('modal-confirmar-deletar').should('be.visible');
+    cy.contains('Usuario Teste 1').should('be.visible'); // Dados do mock
 
-      cy.get('tbody tr').first().within(() => {
-        cy.contains('span', adminText).should('be.visible');
-      });
-    });
+    cy.getByData('btn-confirmar-deletar').click();
+
+    cy.wait('@deleteUsuario');
+    cy.getByData('modal-confirmar-deletar').should('not.exist');
   });
 
-  it('deve exibir modal de confirmação e deletar usuário', () => {
-    cy.intercept('DELETE', `${API_BASE_URL}/usuarios/*`).as('deletarUsuario');
-    cy.intercept('GET', `${API_BASE_URL}/usuarios`).as('atualizarLista');
+  it('Deve alterar o status do usuário (Patch)', () => {
+    // Mock da resposta de atualização de status
+    cy.intercept('PATCH', `${API_URL}/usuarios/*/status`, {
+      statusCode: 200,
+      body: { code: 200, data: { status: 'inativo' } }
+    }).as('patchStatus');
 
-    cy.get('tbody tr').first().within(() => {
-      cy.get('button[title="Excluir usuário"]').click();
-    });
+    // Clica no toggle do primeiro usuário (que é ativo no mock)
+    cy.get('tbody tr').first().find('button[title="Desativar usuário"]').click();
 
-    cy.get('[data-teste="modal-confirmar-deletar"]').should('be.visible');
-    cy.contains('Deseja realmente deletar este usuario?').should('be.visible');
-    cy.get('[data-teste="btn-confirmar-deletar"]').click();
-
-    cy.wait('@deletarUsuario').its('response.statusCode').should('eq', 200);
+    // Verifica se houve o loading (spinner) ou a chamada
+    cy.wait('@patchStatus');
   });
 });

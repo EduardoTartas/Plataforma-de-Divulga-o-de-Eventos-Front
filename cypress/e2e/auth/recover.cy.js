@@ -5,13 +5,13 @@ describe("Página de Recuperação de Senha", () => {
   });
 
   it("deve carregar os elementos da página", () => {
-    cy.get('[data-test="recover-page"]').should("exist");
-    cy.get('[data-test="input-email"]').should("exist");
-    cy.get('[data-test="btn-submit-recover"]').should("exist");
+    cy.getByData('recover-page').should("exist");
+    cy.getByData('input-email').should("exist");
+    cy.getByData('btn-submit-recover').should("exist");
   });
 
   it("deve exibir erro ao tentar enviar sem email", () => {
-    cy.get('[data-test="btn-submit-recover"]').click();
+    cy.getByData('btn-submit-recover').click();
     cy.contains("Por favor, informe seu e-mail");
   });
 
@@ -23,8 +23,8 @@ describe("Página de Recuperação de Senha", () => {
       }
     }).as("recoverRequest");
 
-    cy.get('[data-test="input-email"]').type("teste@exemplo.com");
-    cy.get('[data-test="btn-submit-recover"]').click();
+    cy.getByData('input-email').type("teste@exemplo.com");
+    cy.getByData('btn-submit-recover').click();
 
     cy.wait("@recoverRequest");
     cy.contains("Email enviado com sucesso!").should("exist");
@@ -36,8 +36,8 @@ describe("Página de Recuperação de Senha", () => {
       body: { message: "Email não encontrado" }
     }).as("recoverFail");
 
-    cy.get('[data-test="input-email"]').type("errado@exemplo.com");
-    cy.get('[data-test="btn-submit-recover"]').click();
+    cy.getByData('input-email').type("errado@exemplo.com");
+    cy.getByData('btn-submit-recover').click();
 
     cy.wait("@recoverFail");
     cy.contains("Email não encontrado").should("exist");
