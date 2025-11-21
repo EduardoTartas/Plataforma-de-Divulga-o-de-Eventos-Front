@@ -12,7 +12,8 @@ describe("Tela de Login", () => {
     cy.clearCookies();
     cy.clearLocalStorage();
     
-    cy.visit("http://localhost:3000/login");
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/login`);
   });
 
   it("deve renderizar todos os elementos da tela", () => {

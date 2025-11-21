@@ -11,7 +11,8 @@ describe("Página Meus Eventos", () => {
 
     // login antes de cada teste
     cy.login('admin@admin.com', 'SenhaSuperSegur@123');
-    cy.visit("http://localhost:3000/meus_eventos");
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/meus_eventos`);
   });
 
   describe("Integração com API", () => {

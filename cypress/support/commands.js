@@ -6,7 +6,8 @@
  */
 Cypress.Commands.add('login', (email, senha) => {
   cy.session([email, senha], () => {
-    cy.visit('http://localhost:3000/login');
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/login`);
     cy.get('[data-test="input-email"]').clear().type(email);
     cy.get('[data-test="input-senha"]').clear().type(senha);
     cy.get('[data-test="btn-entrar"]').should('not.be.disabled').click();
