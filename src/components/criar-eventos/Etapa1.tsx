@@ -126,7 +126,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                       Esportes
                     </SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="outros">
-                      Outro
+                      Outros
                     </SelectItem>
                   </SelectContent>
                 </Select>

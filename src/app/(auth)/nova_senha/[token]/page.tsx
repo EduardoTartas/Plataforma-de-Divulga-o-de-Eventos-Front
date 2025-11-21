@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { fetchData } from "@/services/api";
@@ -7,34 +7,33 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 interface Errors {
-    message: string
+    message: string;
 }
 
 interface ResetPasswordResponse {
-    error: string,
-    code: string,
-    message: string,
+    error: string;
+    code: string;
+    message: string;
     data: {
-        message: string
-    }
-    errors: Errors[] | null
+        message: string;
+    };
+    errors: Errors[] | null;
 }
 
 interface PageProps {
     params: Promise<{
-        token: string
-    }>
+        token: string;
+    }>;
 }
 
 export default function NovaSenhaPage({ params }: PageProps) {
     const router = useRouter();
-    const [token, setToken] = useState<string>('');
-    const [novaSenha, setNovaSenha] = useState('');
-    const [confirmarSenha, setConfirmarSenha] = useState('');
+    const [token, setToken] = useState<string>("");
+    const [novaSenha, setNovaSenha] = useState("");
+    const [confirmarSenha, setConfirmarSenha] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
 
-    // Extrai o token dos parâmetros da URL
     useEffect(() => {
         const getToken = async () => {
             const resolvedParams = await params;
@@ -65,8 +64,9 @@ export default function NovaSenhaPage({ params }: PageProps) {
             toast.error("Token inválido ou expirado");
             return;
         }
+
         setIsLoading(true);
-        setError('');
+        setError("");
 
         try {
             const response = await fetchData<ResetPasswordResponse>(
@@ -82,25 +82,21 @@ export default function NovaSenhaPage({ params }: PageProps) {
                 "Senha redefinida com sucesso!"
             );
 
-            // Redireciona para o login após 2 segundos
             setTimeout(() => {
                 router.push("/login");
             }, 5000);
-
         } catch (error: any) {
-
-            // Trata diferentes tipos de erro
             let mensagem = "Erro ao redefinir senha";
 
             if (error.status === 0) {
-                mensagem = "Erro de conexão com o servidor. Verifique sua internet.";
+                mensagem = "Erro de conexão com o servidor.";
             } else if (error.status === 400 || error.status === 401) {
-                mensagem = "Token inválido ou expirado. Solicite um novo link de recuperação.";
+                mensagem = "Token inválido ou expirado.";
             } else if (error.message) {
                 mensagem = error.message;
             } else if (error.data?.message) {
                 mensagem = error.data.message;
-            } else if (error.errors && error.errors.length > 0) {
+            } else if (error.errors?.length > 0) {
                 mensagem = error.errors[0].message;
             }
 
@@ -112,11 +108,12 @@ export default function NovaSenhaPage({ params }: PageProps) {
     }
 
     return (
-        <div className="w-full max-w-md">
-            <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
+        <div className="w-full max-w-md" data-test="reset-container">
+            <div className="bg-white rounded-lg shadow-xl p-6 space-y-4" data-test="reset-card">
                 <Link
                     href="/login"
                     className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                    data-test="reset-back"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -134,13 +131,15 @@ export default function NovaSenhaPage({ params }: PageProps) {
                 </Link>
 
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Definir Nova Senha</h1>
-                    <p className="mt-3 text-sm text-gray-600">
-                        Escolha uma senha forte para proteger sua conta
+                    <h1 className="text-3xl font-bold text-gray-900" data-test="reset-title">
+                        Definir Nova Senha
+                    </h1>
+                    <p className="mt-3 text-sm text-gray-600" data-test="reset-subtitle">
+                        Escolha uma senha forte
                     </p>
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                <form className="space-y-4" onSubmit={handleSubmit} data-test="reset-form">
                     <div className="space-y-1.5">
                         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                             Nova Senha
@@ -148,9 +147,8 @@ export default function NovaSenhaPage({ params }: PageProps) {
                         <input
                             id="password"
                             type="password"
-                            className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
-                                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                     placeholder:text-gray-400 transition-all"
+                            data-test="input-password"
+                            className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg"
                             placeholder="••••••••"
                             value={novaSenha}
                             onChange={(e) => setNovaSenha(e.target.value)}
@@ -158,7 +156,6 @@ export default function NovaSenhaPage({ params }: PageProps) {
                             required
                             minLength={6}
                         />
-                        <p className="text-xs text-gray-500 mt-1">Mínimo de 6 caracteres</p>
                     </div>
 
                     <div className="space-y-1.5">
@@ -168,9 +165,8 @@ export default function NovaSenhaPage({ params }: PageProps) {
                         <input
                             id="confirmPassword"
                             type="password"
-                            className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
-                                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                     placeholder:text-gray-400 transition-all"
+                            data-test="input-confirm"
+                            className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg"
                             placeholder="••••••••"
                             value={confirmarSenha}
                             onChange={(e) => setConfirmarSenha(e.target.value)}
@@ -181,27 +177,31 @@ export default function NovaSenhaPage({ params }: PageProps) {
                     </div>
 
                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                        <div
+                            className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+                            data-test="reset-error"
+                        >
                             <p className="font-medium">Erro:</p>
                             <p>{error}</p>
                         </div>
                     )}
 
                     {!token && (
-                        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg text-sm">
-                            <p className="font-medium">Carregando token...</p>
+                        <div
+                            className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg text-sm"
+                            data-test="reset-loading-token"
+                        >
+                            Carregando token...
                         </div>
                     )}
 
                     <button
                         type="submit"
+                        data-test="btn-reset"
                         disabled={isLoading || !token}
-                        className={`w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
-                                 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
-                                 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg
-                                 ${isLoading || !token ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        className={`w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium`}
                     >
-                        {isLoading ? 'Redefinindo...' : 'Redefinir Senha'}
+                        {isLoading ? "Redefinindo..." : "Redefinir Senha"}
                     </button>
                 </form>
             </div>
