@@ -11,7 +11,7 @@ import { Stepper } from "@/components/ui/stepper";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useCriarEvento } from "@/hooks/useCriarEvento";
-import { useEvento} from "@/hooks/useEventos";
+import { useEvento } from "@/hooks/useEventos";
 import { useImageDragDrop } from "@/hooks/useImageDragDrop";
 import { usePreviewWindow } from "@/hooks/usePreviewWindow";
 import { useSession } from "next-auth/react";
@@ -99,7 +99,7 @@ function EditarEventoContent() {
 
     const subscription = form.watch((formValues) => {
       localStorage.setItem('criar_evento_draft', JSON.stringify(formValues));
-      
+
       // Salvar imagens para o preview
       const allImages: string[] = [
         ...existingMedia
@@ -107,7 +107,7 @@ function EditarEventoContent() {
           .map(media => media.midiLink),
         ...blobUrls
       ];
-      
+
       if (allImages.length > 0) {
         localStorage.setItem('criar-evento-images', JSON.stringify(allImages));
       } else {
@@ -135,7 +135,7 @@ function EditarEventoContent() {
 
   const onSubmit = async (data: CriarEventoForm) => {
     if (step !== 3) return;
-    
+
     const isValid = await validateStep(step);
     if (!isValid) return;
 
@@ -197,11 +197,12 @@ function EditarEventoContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl" data-teste="editar-evento-container">
       {step > 1 && (
         <div className="mb-8 flex items-center gap-4">
           <Button
             onClick={handleBack}
+            data-teste="btn-voltar-editar"
             className="flex items-center gap-2 text-[#805AD5] hover:text-[#6B46C1] bg-transparent hover:bg-purple-50 border-none shadow-none"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,7 +230,7 @@ function EditarEventoContent() {
             {step === 1 && (
               <>
                 <Etapa1InformacoesBasicas form={form} />
-                
+
                 {/* Seção de compartilhamento de permissões */}
                 <div className="pt-8 mt-8 border-t border-[#E2E8F0]">
                   <CompartilharPermissoes
@@ -277,11 +278,12 @@ function EditarEventoContent() {
                     router.push("/meus_eventos");
                   }}
                   disabled={loading}
+                  data-teste="btn-cancelar-edicao"
                   className="w-full sm:w-auto px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium"
                 >
                   Cancelar
                 </Button>
-                
+
                 {/* Indicador de mídias marcadas para exclusão */}
                 {mediaToDelete.length > 0 && (
                   <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 px-3 py-2 rounded-lg">
@@ -301,6 +303,7 @@ function EditarEventoContent() {
                     type="button"
                     onClick={openPreview}
                     disabled={loading || (validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0)}
+                    data-teste="btn-preview-editar-evento"
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     title={(validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0) ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
                   >
@@ -311,12 +314,13 @@ function EditarEventoContent() {
                     Preview
                   </Button>
                 )}
-                
+
                 {step < 3 ? (
                   <Button
                     type="button"
                     onClick={handleContinue}
                     disabled={loading}
+                    data-teste="btn-continuar-editar-etapa"
                     className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continuar
@@ -325,6 +329,7 @@ function EditarEventoContent() {
                   <Button
                     type="submit"
                     disabled={loading}
+                    data-teste="btn-salvar-alteracoes"
                     className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Salvando..." : "Salvar Alterações"}
