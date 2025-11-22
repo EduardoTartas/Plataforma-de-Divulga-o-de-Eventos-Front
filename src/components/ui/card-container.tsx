@@ -107,20 +107,20 @@ export default function CardContainer({
               placeholder="Buscar eventos..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="w-full pl-10 h-10 border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500"
+              className="w-full pl-10 py-3 border-2 border-[#E2E8F0] rounded-lg text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white"
             />
           </div>
 
           {/* Filtro de status */}
           <div className="w-full md:w-48">
             <Select value={statusFilter} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500">
+              <SelectTrigger className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="all" className="text-gray-900">Todos os status</SelectItem>
-                <SelectItem value="active" className="text-gray-900">Ativo</SelectItem>
-                <SelectItem value="inactive" className="text-gray-900">Inativo</SelectItem>
+                  <SelectItem value="all" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Todos os status</SelectItem>
+                  <SelectItem value="active" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Ativo</SelectItem>
+                  <SelectItem value="inactive" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Inativo</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -128,16 +128,17 @@ export default function CardContainer({
           {/* Filtro de categoria */}
           <div className="w-full md:w-52">
             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="w-full h-10 border-gray-300 text-gray-700 bg-white focus:ring-0 focus:ring-offset-0 focus:border-indigo-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500">
+              <SelectTrigger className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white">
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="all" className="text-gray-900">Todas as categorias</SelectItem>
-                <SelectItem value="palestra" className="text-gray-900">Palestra</SelectItem>
-                <SelectItem value="seminario" className="text-gray-900">Seminário</SelectItem>
-                <SelectItem value="workshop" className="text-gray-900">Workshop</SelectItem>
-                <SelectItem value="curso" className="text-gray-900">Curso</SelectItem>
-                <SelectItem value="conferencia" className="text-gray-900">Conferência</SelectItem>
+                  <SelectItem value="all" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Todas as categorias</SelectItem>
+                  <SelectItem value="palestra" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Palestra</SelectItem>
+                  <SelectItem value="seminario" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Seminário</SelectItem>
+                  <SelectItem value="workshop" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Workshop</SelectItem>
+                  <SelectItem value="curso" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Curso</SelectItem>
+                  <SelectItem value="esportivo" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Esportivo</SelectItem>
+                  <SelectItem value="outros" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Outros</SelectItem>
               </SelectContent>
             </Select>
           </div>
