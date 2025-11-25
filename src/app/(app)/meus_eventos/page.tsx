@@ -173,7 +173,7 @@ export default function MeusEventosPage() {
                                                         if (currentPage > 1) handlePageChange(currentPage - 1);
                                                     }}
                                                     disabled={currentPage === 1}
-                                                    className="px-3 py-2 bg-white border rounded-md text-gray-700"
+                                                    className="cursor-pointer px-3 py-2 bg-white border rounded-md text-gray-700"
                                                 >
                                                     Anterior
                                                 </button>
@@ -197,7 +197,7 @@ export default function MeusEventosPage() {
                                                             data-test={`page-${pageNum}`}
                                                             type="button"
                                                             onClick={() => handlePageChange(pageNum)}
-                                                            className={`px-3 py-2 border rounded-md ${
+                                                            className={`cursor-pointer px-3 py-2 border rounded-md ${
                                                                 currentPage === pageNum
                                                                     ? "bg-indigo-600 text-white"
                                                                     : "bg-white text-gray-700"
@@ -217,7 +217,7 @@ export default function MeusEventosPage() {
                                                         if (currentPage < totalPages) handlePageChange(currentPage + 1);
                                                     }}
                                                     disabled={currentPage === totalPages}
-                                                    className="px-3 py-2 bg-white border rounded-md text-gray-700"
+                                                    className="cursor-pointer px-3 py-2 bg-white border rounded-md text-gray-700"
                                                 >
                                                     Próximo
                                                 </button>

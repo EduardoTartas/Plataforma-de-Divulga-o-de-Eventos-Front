@@ -96,13 +96,13 @@ export default function LoginPage() {
                 id="remember"
                 type="checkbox"
                 data-test="checkbox-remember"
-                className="w-4 h-4 text-indigo-600 border-gray-300 rounded 
+                className="cursor-pointer w-4 h-4 text-indigo-600 border-gray-300 rounded 
                          focus:ring-2 focus:ring-indigo-500"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
               />
 
-              <label htmlFor="remember" className="text-sm text-gray-700">
+              <label htmlFor="remember" className="cursor-pointer text-sm text-gray-700">
                 Lembrar de mim
               </label>
             </div>
@@ -120,7 +120,7 @@ export default function LoginPage() {
             type="submit"
             data-test="btn-entrar"
             disabled={isLoading}
-            className={`w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
+            className={`cursor-pointer w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                      hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
                      focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg 
                      ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
