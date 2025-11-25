@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start",
+    "start": "NEXT_PUBLIC_AMBIENTE=production next start",
+    "build:prod": "cross-env NEXT_PUBLIC_AMBIENTE=production next build --turbopack",
+    "start:prod": "cross-env NODE_ENV=production next start -p 3000",
     "lint": "eslint"
   },
   "dependencies": {
@@ -39,7 +41,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
-    "cypress": "^15.4.0",
+    "cross-env": "^10.1.0",
+    "cypress": "^15.6.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14",
     "typescript": "^5"

@@ -19,10 +19,8 @@ export default function LoginPage() {
   
   const { login, isLoading } = useLogin();
 
-  const [email, setEmail] = useState("admin@admin.com")
-  const [senha, setSenha] = useState(
-    process.env.NEXT_PUBLIC_AMBIENTE != "production" ? "admin" : ""
-  );
+  const [email, setEmail] = useState("")
+  const [senha, setSenha] = useState("")
   const [remember, setRemember] = useState(true);
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,17 +129,6 @@ export default function LoginPage() {
             {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-600">
-          Não tem uma conta?{" "}
-          <Link
-            href="/cadastro"
-            data-test="link-cadastro"
-            className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-          >
-            Criar conta
-          </Link>
-        </p>
       </div>
     </div>
   );

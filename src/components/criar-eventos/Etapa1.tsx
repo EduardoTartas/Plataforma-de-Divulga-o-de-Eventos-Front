@@ -26,6 +26,8 @@ interface Etapa1InformacoesBasicasProps {
 }
 
 export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps) {
+  const [tagInput, setTagInput] = useState("");
+  
   return (
     <>
       {/* Step 1: Basic Information */}
@@ -239,8 +241,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
           control={form.control}
           name="tags"
           render={({ field }) => {
-            const [tagInput, setTagInput] = useState("");
-            
             const handleAddTag = () => {
               if (tagInput.trim() && !field.value.includes(tagInput.trim())) {
                 field.onChange([...field.value, tagInput.trim()]);
