@@ -113,23 +113,26 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   </FormControl>
                   <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg">
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="palestra">
-                      Palestra
+                      Empreendedorismo & Inovação
                     </SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="workshop">
-                      Workshop
+                      Artistico & Cultural
+                    </SelectItem>
+                    <SelectItem value="A">Científico & Tecnológico</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="esportes">
+                      Desportivos
                     </SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="seminario">
-                      Seminário
+                      Palestra
                     </SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="curso">
-                      Curso
-                    </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="esportes">
-                      Esportes
+                      Workshops
                     </SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="outros">
-                      Outros
+                      Atividades Sociais
                     </SelectItem>
+                    <SelectItem value="B">Gestão De Pessoas</SelectItem>
+                    <SelectItem value="C">Outro</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
