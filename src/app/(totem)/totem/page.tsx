@@ -269,14 +269,19 @@ export default function EventosPage() {
 
     return (
         <>
-            {/* Imagem de Fundo */}
-            <img
-                key={`${eventoAtualIndex}-${imagemAtualIndex}`}
-                className={`fixed inset-0 object-cover w-full h-full -z-10 ${obterAnimacao()}`}
-                src={imagemAtual}
-                alt="Imagem de fundo do evento"
-                draggable='false'
-            />
+            {/* Wrapper para animação de entrada - usa key para resetar animação ao mudar imagem */}
+            <div
+                key={`wrapper-${eventoAtualIndex}-${imagemAtualIndex}`}
+                className={`fixed inset-0 -z-10 overflow-hidden transition-opacity duration-300 ${obterAnimacao()}`}>
+                {/* Imagem de Fundo com loop de zoom+deslize */}
+                <img
+                    key={`${eventoAtualIndex}-${imagemAtualIndex}`}
+                    className="animate-zoomInSlide w-full h-full object-cover transition-opacity duration-300"
+                    src={imagemAtual}
+                    alt="Imagem de fundo do evento"
+                    draggable='false'
+                />
+            </div>
 
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
             <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch relative">

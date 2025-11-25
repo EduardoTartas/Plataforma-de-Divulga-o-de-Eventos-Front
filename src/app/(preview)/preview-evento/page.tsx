@@ -210,7 +210,7 @@ export default function PreviewEvento() {
             {/* Botão de atualizar no canto superior direito */}
             <button
                 onClick={() => window.location.reload()}
-                className="fixed top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-3 flex items-center justify-center shadow-lg transition-all hover:scale-110 group"
+                className="cursor-pointer fixed top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-3 flex items-center justify-center shadow-lg transition-all hover:scale-110 group"
                 title="Atualizar preview"
             >
                 <svg 

@@ -274,7 +274,7 @@ export default function AdministrativoPage() {
         <>
             {/*  Modal Zone */}
             {/* modal de Novo usuario */}
-            <Modal titulo="Cadastrar um novo usuário" isOpen={modalAtivo === 'novoUsuario'} onClose={() => limparModal()}>
+            <Modal titulo="Cadastrar um novo usuário" isOpen={modalAtivo === 'novoUsuario'} onClose={() => limparModal()} data-teste="modal-novo-usuario">
                 {sucessoModal ? (
                     <div className="flex flex-col items-center justify-center py-8">
                         <div className="mb-4">
@@ -373,7 +373,7 @@ export default function AdministrativoPage() {
             </Modal>
 
             {/* Modal de confirmação */}
-            <Modal titulo="Confirmar ação" isOpen={modalAtivo === 'confirmacaoDeletar'} onClose={() => setModalAtivo(null)}>
+            <Modal titulo="Confirmar ação" isOpen={modalAtivo === 'confirmacaoDeletar'} onClose={() => setModalAtivo(null)} data-teste="modal-confirmar-deletar">
                 <p>Deseja realmente deletar este usuario?</p>
                 <p>Esta ação não pode ser desfeita.</p>
                 <div className=" bg-gray-100 p-4 rounded-md flex flex-col gap-2">
@@ -381,10 +381,10 @@ export default function AdministrativoPage() {
                     <span>Email: {usuarioDeletando?.email}</span>
                 </div>
                 <div className="flex justify-end mt-4">
-                    <button onClick={() => setModalAtivo(null)} className="bg-indigo-600 text-white py-2 px-4 rounded-lg cursor-pointer">
+                    <button onClick={() => setModalAtivo(null)} data-teste="btn-cancelar-deletar" className="bg-indigo-600 text-white py-2 px-4 rounded-lg cursor-pointer">
                         Cancelar
                     </button>
-                    <button onClick={() => { deletarUsuario(usuarioDeletando?._id) }} className="bg-red-600 text-white py-2 px-4 rounded-lg ml-2 cursor-pointer">
+                    <button onClick={() => { deletarUsuario(usuarioDeletando?._id) }} data-teste="btn-confirmar-deletar" className="bg-red-600 text-white py-2 px-4 rounded-lg ml-2 cursor-pointer">
                         Deletar
                     </button>
                 </div>
@@ -428,7 +428,7 @@ export default function AdministrativoPage() {
                                     {carregandoUsuarios ? 'Carregando...' : `${totalDocs} usuário(s) cadastrado(s)`}
                                 </p>
 
-                                <button onClick={() => { setModalAtivo('novoUsuario') }} className="bg-green-600 cursor-pointer p-2 rounded-2xl flex flex-row gap-2 text-white"><UserPlus />Novo Usuário</button>
+                                <button onClick={() => { setModalAtivo('novoUsuario') }} data-teste="btn-novo-usuario" className="bg-green-600 cursor-pointer p-2 rounded-2xl flex flex-row gap-2 text-white"><UserPlus />Novo Usuário</button>
                             </div>
                         </div>
 
