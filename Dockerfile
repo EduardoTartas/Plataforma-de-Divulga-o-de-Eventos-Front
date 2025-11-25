@@ -3,14 +3,17 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+ARG NEXT_PUBLIC_AMBIENTE=production
+ENV NEXT_PUBLIC_AMBIENTE=$NEXT_PUBLIC_AMBIENTE
+ARG NEXT_PUBLIC_API_URL=https://api-ifroevents.app.fslab.dev
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 COPY package.json package-lock.json ./
 RUN npm ci --silent
 
 COPY . .
 
 # Build-time args
-ARG NEXT_PUBLIC_API_URL=https://api-ifroevents.app.fslab.dev
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN npm run build
 
@@ -21,6 +24,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_AMBIENTE=$NEXT_PUBLIC_AMBIENTE
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # Criar usuário não-root
 RUN addgroup --system --gid 1001 nodejs && \
