@@ -53,9 +53,9 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
               </FormLabel>
               <FormControl>
                 <Input
+                  data-test="input-titulo"
                   placeholder="Ex: Workshop de Desenvolvimento Web"
                   {...field}
-                  data-test="input-titulo"
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                 />
               </FormControl>
@@ -75,9 +75,9 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
               </FormLabel>
               <FormControl>
                 <Textarea
+                  data-test="input-descricao"
                   placeholder="Conte mais sobre o evento, incluindo objetivos, conteúdo e público-alvo..."
                   {...field}
-                  data-test="input-descricao"
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all resize-none"
                   rows={5}
                 />
@@ -148,9 +148,9 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                 </FormLabel>
                 <FormControl>
                   <Input
+                    data-test="input-local"
                     placeholder="Ex: Auditório Principal - Bloco A"
                     {...field}
-                    data-test="input-local"
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                 </FormControl>
@@ -175,9 +175,9 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                 </FormLabel>
                 <FormControl>
                   <Input
+                    data-test="input-data-inicio"
                     type="datetime-local"
                     {...field}
-                    data-test="input-data-inicio"
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                 </FormControl>
@@ -200,9 +200,9 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                 </FormLabel>
                 <FormControl>
                   <Input
+                    data-test="input-data-fim"
                     type="datetime-local"
                     {...field}
-                    data-test="input-data-fim"
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                 </FormControl>
@@ -226,11 +226,11 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
               </FormLabel>
               <FormControl>
                 <Input
+                  data-test="input-link"
                   type="url"
                   placeholder="https://seu-site.com/inscricoes"
                   {...field}
                   value={field.value || ""}
-                  data-test="input-link"
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                 />
               </FormControl>
@@ -270,6 +270,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                 </FormLabel>
                 <div className="flex gap-2">
                   <Input
+                    data-test="input-tag"
                     type="text"
                     placeholder="Ex: tecnologia, workshop, programação..."
                     value={tagInput}
@@ -280,7 +281,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                         handleAddTag();
                       }
                     }}
-                    data-test="input-tag"
                     className="flex-1 border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
                   <Button 

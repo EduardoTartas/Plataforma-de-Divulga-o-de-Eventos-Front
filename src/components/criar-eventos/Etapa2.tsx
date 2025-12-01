@@ -65,12 +65,12 @@ export function Etapa2UploadImagens({
           }`}
         >
           <input
+            data-test="input-upload-imagens"
             id="fileUpload"
             type="file"
             multiple
             accept="image/*"
             onChange={onFileInputChange}
-            data-test="input-upload-imagens"
             className="hidden"
           />
           <label
