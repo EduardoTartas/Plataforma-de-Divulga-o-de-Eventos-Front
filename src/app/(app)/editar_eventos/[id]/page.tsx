@@ -301,7 +301,7 @@ function EditarEventoContent() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={openPreview}
+                    onClick={() => openPreview(blobUrls)}
                     disabled={loading || (validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0)}
                     data-teste="btn-preview-editar-evento"
                     className="cursor-pointer transition w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -309,7 +309,7 @@ function EditarEventoContent() {
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.923 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                     Preview
                   </Button>

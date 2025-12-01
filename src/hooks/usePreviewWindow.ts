@@ -8,7 +8,7 @@ export function usePreviewWindow() {
     if (blobUrls && blobUrls.length > 0) {
       sessionStorage.setItem('preview-evento-blobs', JSON.stringify(blobUrls));
     }
-    
+
     // Verifica se a janela já existe e está aberta
     if (previewWindow && !previewWindow.closed) {
       // Se existe, apenas foca nela e força reload
