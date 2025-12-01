@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatarDataEvento, formatarHorarioEvento } from "@/lib/utils";
+import { calcularDuracaoPorImagem } from "@/lib/calculadoraDuracao";
 import 'animate.css';
 
 export default function PreviewEvento() {
@@ -26,11 +27,12 @@ export default function PreviewEvento() {
     // Função para carregar os dados do preview
     const carregarDadosPreview = () => {
         const dadosForm = localStorage.getItem('criar_evento_draft');
-        const imagensValidas = localStorage.getItem('criar-evento-images');
-        const imagensData = localStorage.getItem('criar-evento-images-data');
+        
+        // Buscar as imagens do sessionStorage (onde estão os blob URLs)
+        const blobUrlsSession = sessionStorage.getItem('preview-evento-blobs');
 
-        if (!dadosForm || (!imagensValidas && !imagensData)) {
-            //voltar para criar ou editar
+        if (!dadosForm) {
+            // Voltar para criar ou editar
             if (window.opener) {
                 window.close();
             } else {
@@ -43,22 +45,12 @@ export default function PreviewEvento() {
             const form = JSON.parse(dadosForm);
             let imagens: string[] = [];
 
-            if (imagensValidas) {
+            // Tentar carregar os blob URLs do sessionStorage primeiro
+            if (blobUrlsSession) {
                 try {
-                    imagens = JSON.parse(imagensValidas) || [];
+                    imagens = JSON.parse(blobUrlsSession) || [];
                 } catch (e) {
-                    console.warn('Falha ao parsear criar-evento-images, tentando criar-evento-images-data', e);
-                    imagens = [];
-                }
-            }
-
-            if ((!imagens || imagens.length === 0) && imagensData) {
-                try {
-                    const imagesDataParsed = JSON.parse(imagensData);
-                    // imagesDataParsed é um array de { name, data }
-                    imagens = (imagesDataParsed || []).map((i: any) => i.data).filter(Boolean);
-                } catch (e) {
-                    console.warn('Falha ao parsear criar-evento-images-data', e);
+                    console.warn('Falha ao parsear preview-evento-blobs', e);
                     imagens = [];
                 }
             }
@@ -81,6 +73,9 @@ export default function PreviewEvento() {
                 return categorias[cat] || cat.toUpperCase();
             };
             
+            // Calcula a duração baseada na quantidade de imagens
+            const duracaoCalculada = calcularDuracaoPorImagem(imagens.length);
+            
             const previewData = {
                 titulo: form.titulo || "Título do Evento",
                 descricao: form.descricao || "Descrição do evento",
@@ -93,7 +88,8 @@ export default function PreviewEvento() {
                 imagens: imagens,
                 cor: parseInt(form.cor) || 1,
                 animacao: parseInt(form.animacao) || 1,
-                loops: 3, // Padrão para preview
+                duracao: duracaoCalculada, // Duração calculada automaticamente
+                loops: 3, // Padrão para preview (não usado porque não tem outros eventos)
                 link: form.link
             };
             
@@ -114,13 +110,16 @@ export default function PreviewEvento() {
         carregarDadosPreview();
     }, [router]);
 
-    // useEffect para slideshow automático (controle de imagens e repetições similar ao totem)
+    // useEffect para slideshow automático com duração calculada
     useEffect(() => {
         if (!eventoPreview || !eventoPreview.imagens || eventoPreview.imagens.length === 0) return;
 
         const len = eventoPreview.imagens.length;
         const loops = eventoPreview.loops || 3;
-        const duracao = 3000;
+        // Usa a duração calculada do evento (em milissegundos)
+        const duracao = eventoPreview.duracao || 3000;
+
+        console.log(`⏱️ Preview usando duração de ${duracao}ms (${duracao/1000}s) para ${len} imagens`);
 
         const intervalo = setInterval(() => {
             setImagemAtualIndex((prev) => {
@@ -129,11 +128,11 @@ export default function PreviewEvento() {
                     return proxima;
                 }
 
-                // completou um ciclo de imagens
+                // Completou um ciclo de imagens
                 setRepeticoesCompletadas((prevRep) => {
                     const novas = prevRep + 1;
                     if (novas >= loops) {
-                        // resetar contador de repetições
+                        // Resetar contador de repetições
                         return 0;
                     }
                     return novas;
@@ -141,7 +140,7 @@ export default function PreviewEvento() {
 
                 return 0;
             });
-        }, duracao); // 3 segundos por imagem
+        }, duracao);
 
         return () => clearInterval(intervalo);
     }, [eventoPreview]);

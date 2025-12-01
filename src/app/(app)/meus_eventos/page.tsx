@@ -245,7 +245,7 @@ export default function MeusEventosPage() {
                     <button
                         onClick={() => setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" })}
                         data-test="btn-cancel-delete"
-                        className="px-6 py-2.5 bg-white border rounded-lg"
+                        className="px-6 py-2.5 bg-white border rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                     >
                         Cancelar
                     </button>
@@ -253,7 +253,7 @@ export default function MeusEventosPage() {
                     <button
                         onClick={confirmDelete}
                         data-test="btn-confirm-delete"
-                        className="px-6 py-2.5 bg-red-600 text-white rounded-lg"
+                        className="px-6 py-2.5 bg-red-600 text-white rounded-lg cursor-pointer hover:bg-red-700 transition-colors"
                     >
                         Excluir
                     </button>

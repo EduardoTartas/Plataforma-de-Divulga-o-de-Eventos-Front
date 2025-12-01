@@ -13,6 +13,7 @@ import {
 import { fetchData } from "@/services/api";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
+import { calcularDuracaoPorImagem, calcularLoops } from "@/lib/calculadoraDuracao";
 
 const STORAGE_KEY = "criar_evento_draft";
 const STORAGE_STEP_KEY = "criar_evento_step";
@@ -129,20 +130,8 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     reValidateMode: "onChange",
   });
 
-  const restaurarImagens = useCallback(() => {
-    if (isEditMode) return []; // Não restaurar no modo edição
-    const stored = getLocalStorage(STORAGE_IMAGES_DATA_KEY);
-    if (!stored) return [];
-
-    try {
-      const imagesData = JSON.parse(stored);
-      return imagesData.map((img: any) => base64ToFile(img.data, img.name));
-    } catch {
-      return [];
-    }
-  }, [isEditMode]);
-
-  const [validImages, setValidImages] = useState<File[]>(() => restaurarImagens());
+  // As imagens não são mais restauradas do localStorage para evitar QuotaExceededError
+  const [validImages, setValidImages] = useState<File[]>([]);
   const [blobUrls, setBlobUrls] = useState<string[]>([]);
   const [existingMedia, setExistingMedia] = useState<Array<{
     _id: string;
@@ -167,45 +156,18 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     }
   }, [step, isEditMode]);
 
-  // Salvar imagens no localStorage (apenas no modo criação)
-  useEffect(() => {
-    if (isEditMode || typeof window === "undefined") return;
-
-    if (validImages.length === 0) {
-      removeLocalStorage(STORAGE_IMAGES_KEY);
-      removeLocalStorage(STORAGE_IMAGES_DATA_KEY);
-      return;
-    }
-
-    const promises = validImages.map(file => {
-      return new Promise<{ name: string, data: string }>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve({
-            name: file.name,
-            data: reader.result as string
-          });
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    Promise.all(promises).then(imagesData => {
-      setLocalStorage(STORAGE_IMAGES_DATA_KEY, JSON.stringify(imagesData));
-      // salva também as blob urls para visualização imediata
-      setLocalStorage(STORAGE_IMAGES_KEY, JSON.stringify(blobUrls));
-    });
-  }, [validImages, blobUrls, isEditMode]);
+  // Nota: NÃO salvamos as imagens no localStorage porque são muito pesadas (causam QuotaExceededError)
+  // As imagens ficam apenas em memória (validImages e blobUrls) durante a sessão
+  // Se o usuário recarregar a página, precisará fazer upload novamente
 
   const clearStorage = useCallback(() => {
     try {
-      blobUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch {} });
-    } catch {}
+      blobUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch { } });
+    } catch { }
 
     removeLocalStorage(STORAGE_KEY);
     removeLocalStorage(STORAGE_STEP_KEY);
-    removeLocalStorage(STORAGE_IMAGES_KEY);
-    removeLocalStorage(STORAGE_IMAGES_DATA_KEY);
+    // Não precisamos mais limpar STORAGE_IMAGES_KEY e STORAGE_IMAGES_DATA_KEY pois não os usamos mais
   }, [blobUrls]);
 
   const loadEventData = useCallback((evento: any) => {
@@ -271,8 +233,8 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     setValidImages([]);
     // revoga e limpa blob urls
     try {
-      blobUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch {} });
-    } catch {}
+      blobUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch { } });
+    } catch { }
     setBlobUrls([]);
     clearStorage();
   }, [form, clearStorage, blobUrls]);
@@ -331,10 +293,10 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
       }
     }
 
-  // cria object URLs para visualização imediata na sessão
-  const newBlobUrls = valid.map(f => URL.createObjectURL(f));
-  setBlobUrls((prev) => [...prev, ...newBlobUrls]);
-  setValidImages((prev) => [...prev, ...valid]);
+    // cria object URLs para visualização imediata na sessão
+    const newBlobUrls = valid.map(f => URL.createObjectURL(f));
+    setBlobUrls((prev) => [...prev, ...newBlobUrls]);
+    setValidImages((prev) => [...prev, ...valid]);
 
     if (invalid.length > 0) {
       toast.error(`Erro: As seguintes imagens não atendem à resolução mínima de 1024x690:\n${invalid.join("\n")}`);
@@ -345,7 +307,7 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
     setValidImages((prev) => prev.filter((_, i) => i !== index));
     setBlobUrls((prev) => {
       const url = prev[index];
-      try { if (url) URL.revokeObjectURL(url); } catch {}
+      try { if (url) URL.revokeObjectURL(url); } catch { }
       return prev.filter((_, i) => i !== index);
     });
   }, []);
@@ -434,13 +396,37 @@ export function useCriarEvento(params?: UseCriarEventoParams) {
 
   const criarEventoMutation = useMutation({
     mutationFn: async (data: CriarEventoForm) => {
+      // Calcula a quantidade total de imagens que o evento terá
+      // (novas imagens + imagens existentes - imagens marcadas para deletar)
+      const quantidadeImagensNovas = validImages.length;
+      const quantidadeImagensExistentes = existingMedia.length;
+      const quantidadeImagensParaDeletar = mediaToDelete.length;
+      const totalImagens = quantidadeImagensNovas + quantidadeImagensExistentes - quantidadeImagensParaDeletar;
+
+      // Calcula automaticamente a duração e loops baseado na quantidade de imagens
+      const duracaoCalculada = calcularDuracaoPorImagem(totalImagens);
+      const loopsCalculados = calcularLoops();
+
+      console.log('Calculando duracao e loops:', {
+        quantidadeImagensNovas,
+        quantidadeImagensExistentes,
+        quantidadeImagensParaDeletar,
+        totalImagens,
+        duracaoCalculada,
+        loopsCalculados
+      });
+
       const payload = {
         ...data,
         exibDia: data.exibDia.join(","),
         cor: parseInt(data.cor, 10),
         animacao: parseInt(data.animacao, 10),
+        duracao: duracaoCalculada,  // Adiciona a duração calculada
+        loops: loopsCalculados,      // Adiciona os loops calculados (sempre 3)
         ...(!isEditMode && { status: 1 }),
       };
+
+      console.log('Payload enviado para API:', payload);
 
       const endpoint = isEditMode ? `/eventos/${eventId}` : "/eventos";
       const method = isEditMode ? "PATCH" : "POST";
