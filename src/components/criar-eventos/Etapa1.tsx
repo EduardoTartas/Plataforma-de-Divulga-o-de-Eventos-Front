@@ -118,7 +118,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="artisticoCultural">
                       Artistico & Cultural
                     </SelectItem>
-                    <SelectItem value="cientificoTecnologico">Científico & Tecnológico</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="cientificoTecnologico">Científico & Tecnológico</SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="desportivos">
                       Desportivos
                     </SelectItem>
@@ -131,8 +131,8 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="atividadesSociais">
                       Atividades Sociais
                     </SelectItem>
-                    <SelectItem value="gestaoPessoas">Gestão De Pessoas</SelectItem>
-                    <SelectItem value="outro">Outro</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="gestaoPessoas">Gestão De Pessoas</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="outro">Outro</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

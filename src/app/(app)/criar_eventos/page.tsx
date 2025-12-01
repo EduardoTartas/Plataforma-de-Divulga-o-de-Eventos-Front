@@ -40,6 +40,7 @@ export default function CriarEvento() {
     handleFilesChange,
     handleRemoveImage,
     validImages,
+    blobUrls,
     step,
     setStep,
     validateStep,
@@ -173,7 +174,7 @@ export default function CriarEvento() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={openPreview}
+                    onClick={() => openPreview(blobUrls)}
                     disabled={loading || validImages.length === 0}
                     data-teste="btn-preview-evento"
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
