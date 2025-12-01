@@ -204,7 +204,6 @@ function EditarEventoContent() {
             onClick={handleBack}
             data-test="btn-voltar"
             className="flex items-center gap-2 text-[#805AD5] hover:text-[#6B46C1] bg-transparent hover:bg-purple-50 border-none shadow-none">
-          >
             <svg className="cursor-pointer transition w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
