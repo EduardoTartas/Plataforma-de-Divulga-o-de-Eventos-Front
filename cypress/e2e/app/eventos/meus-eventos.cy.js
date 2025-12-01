@@ -53,17 +53,17 @@ describe("Página Meus Eventos", () => {
 
   describe("Renderização da página", () => {
     it("deve carregar todos os elementos principais", () => {
-      cy.get('[data-test="meus-eventos-page"]').should("exist");
-      cy.get('[data-test="hero-banner"]').should("exist");
-      cy.get('[data-test="hero-title"]').should("contain", "Facilidade para os professores");
-      cy.get('[data-test="hero-subtitle"]').should("exist");
-      cy.get('[data-test="btn-criar-evento"]').should("exist").and("be.visible");
+      cy.getByData('meus-eventos-page').should("exist");
+      cy.getByData('hero-banner').should("exist");
+      cy.getByData('hero-title').should("contain", "Facilidade para os professores");
+      cy.getByData('hero-subtitle').should("exist");
+      cy.getByData('btn-criar-evento').should("exist").and("be.visible");
     });
 
     it("deve exibir lista de eventos após carregamento", () => {
       cy.wait('@getEventos');
-      cy.get('[data-test="loading"]', { timeout: 2000 }).should("not.exist");
-      cy.get('[data-test="meus-eventos-page"]').should("exist");
+      cy.getByData('loading', { timeout: 2000 }).should("not.exist");
+      cy.getByData('meus-eventos-page').should("exist");
     });
 
     it("deve renderizar eventos retornados pela API", () => {
@@ -87,7 +87,7 @@ describe("Página Meus Eventos", () => {
 
   describe("Navegação", () => {
     it("deve navegar para criar evento ao clicar no botão", () => {
-      cy.get('[data-test="btn-criar-evento"]').click();
+      cy.getByData('btn-criar-evento').click();
       cy.url({ timeout: 5000 }).should("include", "/criar_eventos");
     });
   });
@@ -98,9 +98,9 @@ describe("Página Meus Eventos", () => {
         const totalPages = interception.response.body?.data?.totalPages || 0;
         
         if (totalPages > 1) {
-          cy.get('[data-test="pagination-info"]').should("exist");
-          cy.get('[data-test="btn-prev-page"]').should("exist");
-          cy.get('[data-test="btn-next-page"]').should("exist");
+          cy.getByData('pagination-info').should("exist");
+          cy.getByData('btn-prev-page').should("exist");
+          cy.getByData('btn-next-page').should("exist");
         }
       });
     });
@@ -110,7 +110,7 @@ describe("Página Meus Eventos", () => {
         const totalPages = interception.response.body?.data?.totalPages || 0;
         
         if (totalPages > 1) {
-          cy.get('[data-test="btn-next-page"]')
+          cy.getByData('btn-next-page')
             .should("not.be.disabled")
             .click();
           
@@ -119,7 +119,7 @@ describe("Página Meus Eventos", () => {
             expect(url.searchParams.get('page')).to.equal('2');
           });
           
-          cy.get('[data-test="page-2"]')
+          cy.getByData('page-2')
             .should("have.class", "bg-indigo-600");
         }
       });
@@ -136,12 +136,12 @@ describe("Página Meus Eventos", () => {
           
           cy.get('.fixed.inset-0.z-50').should('exist');
           cy.contains('Confirmar Exclusão').should('exist');
-          cy.get('[data-test="modal-text"]').should('exist');
+          cy.getByData('modal-text').should('exist');
           
           // validar título do evento no modal
           const primeiroEvento = eventos[0];
           if (primeiroEvento.titulo) {
-            cy.get('[data-test="modal-text"]').should('contain', primeiroEvento.titulo);
+            cy.getByData('modal-text').should('contain', primeiroEvento.titulo);
           }
         }
       });
@@ -153,8 +153,8 @@ describe("Página Meus Eventos", () => {
         
         if (eventos.length > 0) {
           cy.get('button[title="Excluir evento"]').first().click();
-          cy.get('[data-test="btn-cancel-delete"]').click();
-          cy.get('[data-test="delete-modal"]').should("not.exist");
+          cy.getByData('btn-cancel-delete').click();
+          cy.getByData('delete-modal').should("not.exist");
         }
       });
     });
@@ -167,7 +167,7 @@ describe("Página Meus Eventos", () => {
           const primeiroEventoId = eventos[0]._id;
           
           cy.get('button[title="Excluir evento"]').first().click();
-          cy.get('[data-test="btn-confirm-delete"]').click();
+          cy.getByData('btn-confirm-delete').click();
           
           // validar requisição delete com id correto
           cy.wait('@deleteEvento').then((deleteInterception) => {
@@ -287,7 +287,7 @@ describe("Página Meus Eventos", () => {
           
           // verificar paginação quando aplicável
           if (totalPages > 1) {
-            cy.get('[data-test="pagination-info"]').should('exist');
+            cy.getByData('pagination-info').should('exist');
           }
         } else {
           // se não há eventos, verificar mensagem

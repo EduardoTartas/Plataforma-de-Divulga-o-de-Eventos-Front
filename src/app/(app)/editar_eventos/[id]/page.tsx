@@ -197,12 +197,13 @@ function EditarEventoContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl" data-test="editar-evento-page">
       {step > 1 && (
         <div className="mb-8 flex items-center gap-4">
           <Button
             onClick={handleBack}
-            className="flex items-center gap-2 text-[#805AD5] hover:text-[#6B46C1] bg-transparent hover:bg-purple-50 border-none shadow-none"
+            data-test="btn-voltar"
+            className="flex items-center gap-2 text-[#805AD5] hover:text-[#6B46C1] bg-transparent hover:bg-purple-50 border-none shadow-none">
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -277,6 +278,7 @@ function EditarEventoContent() {
                     router.push("/meus_eventos");
                   }}
                   disabled={loading}
+                  data-test="btn-cancelar"
                   className="w-full sm:w-auto px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium"
                 >
                   Cancelar
@@ -301,6 +303,7 @@ function EditarEventoContent() {
                     type="button"
                     onClick={openPreview}
                     disabled={loading || (validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0)}
+                    data-test="btn-preview"
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     title={(validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0) ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
                   >
@@ -317,6 +320,7 @@ function EditarEventoContent() {
                     type="button"
                     onClick={handleContinue}
                     disabled={loading}
+                    data-test="btn-continuar"
                     className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continuar
@@ -325,6 +329,7 @@ function EditarEventoContent() {
                   <Button
                     type="submit"
                     disabled={loading}
+                    data-test="btn-salvar"
                     className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Salvando..." : "Salvar Alterações"}

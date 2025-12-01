@@ -99,7 +99,7 @@ export function Etapa3ConfiguracoesExibicao({
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {diasDaSemana.map((dia) => (
-                      <label key={dia.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
+                      <label key={dia.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test={`checkbox-dia-${dia.value}`}>
                         <input
                           type="checkbox"
                           checked={(field.value || []).includes(dia.value)}
@@ -160,10 +160,11 @@ export function Etapa3ConfiguracoesExibicao({
                 name="exibManha"
                 render={({ field }) => (
                   <FormItem>
-                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
+                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test="checkbox-periodo-manha">
                       <FormControl>
                         <input
                           type="checkbox"
+                          name="exibManha"
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
@@ -184,10 +185,11 @@ export function Etapa3ConfiguracoesExibicao({
                 name="exibTarde"
                 render={({ field }) => (
                   <FormItem>
-                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
+                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test="checkbox-periodo-tarde">
                       <FormControl>
                         <input
                           type="checkbox"
+                          name="exibTarde"
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
@@ -208,10 +210,11 @@ export function Etapa3ConfiguracoesExibicao({
                 name="exibNoite"
                 render={({ field }) => (
                   <FormItem>
-                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
+                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test="checkbox-periodo-noite">
                       <FormControl>
                         <input
                           type="checkbox"
+                          name="exibNoite"
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
