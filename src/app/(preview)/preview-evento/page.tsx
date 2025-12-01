@@ -27,7 +27,7 @@ export default function PreviewEvento() {
     // Função para carregar os dados do preview
     const carregarDadosPreview = () => {
         const dadosForm = localStorage.getItem('criar_evento_draft');
-        
+
         // Buscar as imagens do sessionStorage (onde estão os blob URLs)
         const blobUrlsSession = sessionStorage.getItem('preview-evento-blobs');
 
@@ -59,7 +59,7 @@ export default function PreviewEvento() {
             console.log('Formulário carregado:', form);
             console.log('Imagens carregadas:', imagens);
             console.log('Total de imagens:', imagens.length);
-            
+
             // Formatar categoria para exibição correta
             const formatarCategoria = (cat: string) => {
                 const categorias: Record<string, string> = {
@@ -72,10 +72,10 @@ export default function PreviewEvento() {
                 };
                 return categorias[cat] || cat.toUpperCase();
             };
-            
+
             // Calcula a duração baseada na quantidade de imagens
             const duracaoCalculada = calcularDuracaoPorImagem(imagens.length);
-            
+
             const previewData = {
                 titulo: form.titulo || "Título do Evento",
                 descricao: form.descricao || "Descrição do evento",
@@ -92,7 +92,7 @@ export default function PreviewEvento() {
                 loops: 3, // Padrão para preview (não usado porque não tem outros eventos)
                 link: form.link
             };
-            
+
             console.log('Preview data final:', previewData);
             setEventoPreview(previewData);
         } catch (error) {
@@ -119,7 +119,7 @@ export default function PreviewEvento() {
         // Usa a duração calculada do evento (em milissegundos)
         const duracao = eventoPreview.duracao || 3000;
 
-        console.log(`⏱️ Preview usando duração de ${duracao}ms (${duracao/1000}s) para ${len} imagens`);
+        console.log(`⏱️ Preview usando duração de ${duracao}ms (${duracao / 1000}s) para ${len} imagens`);
 
         const intervalo = setInterval(() => {
             setImagemAtualIndex((prev) => {
@@ -212,17 +212,17 @@ export default function PreviewEvento() {
                 className="cursor-pointer fixed top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-3 flex items-center justify-center shadow-lg transition-all hover:scale-110 group"
                 title="Atualizar preview"
             >
-                <svg 
-                    className="w-5 h-5 transition-transform group-hover:rotate-180 duration-500" 
-                    fill="none" 
-                    stroke="currentColor" 
+                <svg
+                    className="w-5 h-5 transition-transform group-hover:rotate-180 duration-500"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                 >
-                    <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                 </svg>
             </button>
@@ -255,9 +255,8 @@ export default function PreviewEvento() {
                                 {Array.from({ length: eventoPreview.loops || 3 }).map((_, index) => (
                                     <div
                                         key={index}
-                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${
-                                            index <= repeticoesCompletadas ? 'bg-white' : 'bg-white/30'
-                                        }`}
+                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${index <= repeticoesCompletadas ? 'bg-white' : 'bg-white/30'
+                                            }`}
                                     />
                                 ))}
                             </div>
@@ -317,9 +316,9 @@ export default function PreviewEvento() {
                             p-3 sm:p-4 2xl:p-4 flex items-center justify-center 
                             shrink-0 z-10">
                             {qrCodeUrl ? (
-                                <img 
-                                    src={qrCodeUrl} 
-                                    className="h-full w-full object-contain rounded-lg 2xl:rounded-lg" 
+                                <img
+                                    src={qrCodeUrl}
+                                    className="h-full w-full object-contain rounded-lg 2xl:rounded-lg"
                                     alt="QR Code do evento"
                                 />
                             ) : (
