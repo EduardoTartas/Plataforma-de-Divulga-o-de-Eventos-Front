@@ -26,6 +26,8 @@ interface Etapa1InformacoesBasicasProps {
 }
 
 export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps) {
+  const [tagInput, setTagInput] = useState("");
+  
   return (
     <>
       {/* Step 1: Basic Information */}
@@ -112,24 +114,27 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg">
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="empreendedorismoInovacao">
+                      Empreendedorismo & Inovação
+                    </SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="artisticoCultural">
+                      Artistico & Cultural
+                    </SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="cientificoTecnologico">Científico & Tecnológico</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="desportivos">
+                      Desportivos
+                    </SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="palestra">
                       Palestra
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="workshop">
-                      Workshop
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="workshops">
+                      Workshops
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="seminario">
-                      Seminário
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="atividadesSociais">
+                      Atividades Sociais
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="curso">
-                      Curso
-                    </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="esportes">
-                      Esportes
-                    </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="outros">
-                      Outros
-                    </SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="gestaoPessoas">Gestão De Pessoas</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="outro">Outro</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -245,8 +250,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
           control={form.control}
           name="tags"
           render={({ field }) => {
-            const [tagInput, setTagInput] = useState("");
-            
             const handleAddTag = () => {
               if (tagInput.trim() && !field.value.includes(tagInput.trim())) {
                 field.onChange([...field.value, tagInput.trim()]);

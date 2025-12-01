@@ -26,7 +26,7 @@ export default function Modal({ titulo, isOpen, onClose, children }: ModalProps)
                     <h2 className="text-xl md:text-2xl font-bold text-[#111827]">{titulo}</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
+                        className="cursor-pointer transition text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
                         aria-label="Fechar modal"
                     >
                         <X size={24} />

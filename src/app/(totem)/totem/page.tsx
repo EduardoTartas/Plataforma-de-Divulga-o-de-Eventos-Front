@@ -7,6 +7,8 @@ import { formatarDataEvento, formatarHorarioEvento, extrairImagensEvento } from 
 import 'animate.css';
 import { EventoTotem, QrCodeResponse } from "@/types/eventos";
 
+const environment = process.env.NEXT_PUBLIC_AMBIENTE || 'development';
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5015';
 
 export default function EventosPage() {
@@ -267,14 +269,19 @@ export default function EventosPage() {
 
     return (
         <>
-            {/* Imagem de Fundo */}
-            <img
-                key={`${eventoAtualIndex}-${imagemAtualIndex}`}
-                className={`fixed inset-0 object-cover w-full h-full -z-10 ${obterAnimacao()}`}
-                src={imagemAtual}
-                alt="Imagem de fundo do evento"
-                draggable='false'
-            />
+            {/* Wrapper para animação de entrada - usa key para resetar animação ao mudar imagem */}
+            <div
+                key={`wrapper-${eventoAtualIndex}-${imagemAtualIndex}`}
+                className={`fixed inset-0 -z-10 overflow-hidden transition-opacity duration-300 ${obterAnimacao()}`}>
+                {/* Imagem de Fundo com loop de zoom+deslize */}
+                <img
+                    key={`${eventoAtualIndex}-${imagemAtualIndex}`}
+                    className="animate-zoomInSlide w-full h-full object-cover transition-opacity duration-300"
+                    src={imagemAtual}
+                    alt="Imagem de fundo do evento"
+                    draggable='false'
+                />
+            </div>
 
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
             <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch relative">
@@ -294,25 +301,22 @@ export default function EventosPage() {
                                     <span className="text-[20px] text-gray-100">IFRO EVENTS</span>
                                     <img className="w-[60px] h-[30px]" src="/logo_fslab.svg" />
                                 </div>
-                                {/* mostrar a resolução da tela atual */}
-                                {/* <span className="text-red-500 ml-2 text-xs">
-                                    [{screenSize.width}x{screenSize.height}]
-                                    <span className="hidden sm:inline"> SM</span>
-                                    <span className="hidden md:inline"> MD</span>
-                                    <span className="hidden lg:inline"> LG</span>
-                                    <span className="hidden xl:inline"> XL</span>
-                                    <span className="hidden 2xl:inline"> 2XL</span>
-                                </span> */}
+                                {environment === 'development' ? (
+                                    <>
+                                        {/* mostrar a resolução da tela atual */}
+                                        <span className="text-red-500 ml-2 text-xs">
+                                            [{screenSize.width}x{screenSize.height}]
+                                            <span className="hidden sm:inline"> SM</span>
+                                            <span className="hidden md:inline"> MD</span>
+                                            <span className="hidden lg:inline"> LG</span>
+                                            <span className="hidden xl:inline"> XL</span>
+                                            <span className="hidden 2xl:inline"> 2XL</span>
+                                        </span>
+                                    </>
+                                ) : (
+                                    <></>
+                                )}
                             </h1>
-                            <p className="text-xs sm:text-sm md:text-base lg:text-xs font-semiboldrounded-md font-inter">
-                                {/* <span className="font-bold text-white">F</span>
-                                <span className="font-bold text-white">S</span>
-                                <span className="text-white">L</span>
-                                <span className="text-white">a</span>
-                                <span className="text-white">b</span>
-                                <span className="text-green-500">〉</span>
-                                <span className="text-green-500">_</span> */}
-                            </p>
                             <div className="flex gap-1 lg:gap-0.5">
                                 {Array.from({ length: eventoAtual.loops || 3 }).map((_, index) => (
                                     <div

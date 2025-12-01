@@ -110,7 +110,7 @@ export default function MeusEventosPage() {
                         <button
                             onClick={handleCriarEvento}
                             data-test="btn-criar-evento"
-                            className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-lg"
+                            className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-lg cursor-pointer transition"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -173,7 +173,7 @@ export default function MeusEventosPage() {
                                                         if (currentPage > 1) handlePageChange(currentPage - 1);
                                                     }}
                                                     disabled={currentPage === 1}
-                                                    className="px-3 py-2 bg-white border rounded-md text-gray-700"
+                                                    className="cursor-pointer px-3 py-2 bg-white border rounded-md text-gray-700"
                                                 >
                                                     Anterior
                                                 </button>
@@ -197,7 +197,7 @@ export default function MeusEventosPage() {
                                                             data-test={`page-${pageNum}`}
                                                             type="button"
                                                             onClick={() => handlePageChange(pageNum)}
-                                                            className={`px-3 py-2 border rounded-md ${
+                                                            className={`cursor-pointer px-3 py-2 border rounded-md ${
                                                                 currentPage === pageNum
                                                                     ? "bg-indigo-600 text-white"
                                                                     : "bg-white text-gray-700"
@@ -217,7 +217,7 @@ export default function MeusEventosPage() {
                                                         if (currentPage < totalPages) handlePageChange(currentPage + 1);
                                                     }}
                                                     disabled={currentPage === totalPages}
-                                                    className="px-3 py-2 bg-white border rounded-md text-gray-700"
+                                                    className="cursor-pointer px-3 py-2 bg-white border rounded-md text-gray-700"
                                                 >
                                                     Próximo
                                                 </button>
@@ -245,7 +245,7 @@ export default function MeusEventosPage() {
                     <button
                         onClick={() => setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" })}
                         data-test="btn-cancel-delete"
-                        className="px-6 py-2.5 bg-white border rounded-lg"
+                        className="px-6 py-2.5 bg-white border rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                     >
                         Cancelar
                     </button>
@@ -253,7 +253,7 @@ export default function MeusEventosPage() {
                     <button
                         onClick={confirmDelete}
                         data-test="btn-confirm-delete"
-                        className="px-6 py-2.5 bg-red-600 text-white rounded-lg"
+                        className="px-6 py-2.5 bg-red-600 text-white rounded-lg cursor-pointer hover:bg-red-700 transition-colors"
                     >
                         Excluir
                     </button>

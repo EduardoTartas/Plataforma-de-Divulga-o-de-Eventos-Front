@@ -13,42 +13,42 @@ describe("Tela de Nova Senha", () => {
   });
 
   it("deve renderizar todos os elementos da tela", () => {
-    cy.get('[data-test="reset-container"]').should("exist");
-    cy.get('[data-test="reset-card"]').should("exist");
+    cy.getByData('reset-container').should("exist");
+    cy.getByData('reset-card').should("exist");
 
-    cy.get('[data-test="reset-back"]').should("exist");
-    cy.get('[data-test="reset-title"]').should("contain", "Definir Nova Senha");
-    cy.get('[data-test="reset-subtitle"]').should("exist");
+    cy.getByData('reset-back').should("exist");
+    cy.getByData('reset-title').should("contain", "Definir Nova Senha");
+    cy.getByData('reset-subtitle').should("exist");
 
-    cy.get('[data-test="reset-form"]').should("exist");
-    cy.get('[data-test="input-password"]').should("exist");
-    cy.get('[data-test="input-confirm"]').should("exist");
+    cy.getByData('reset-form').should("exist");
+    cy.getByData('input-password').should("exist");
+    cy.getByData('input-confirm').should("exist");
 
-    cy.get('[data-test="btn-reset"]').should("exist");
+    cy.getByData('btn-reset').should("exist");
   });
 
   it("deve preencher as senhas corretamente", () => {
-    cy.get('[data-test="input-password"]')
+    cy.getByData('input-password')
       .type("123456")
       .should("have.value", "123456");
 
-    cy.get('[data-test="input-confirm"]')
+    cy.getByData('input-confirm')
       .type("123456")
       .should("have.value", "123456");
   });
 
   it("deve exibir erro quando as senhas são diferentes", () => {
-    cy.get('[data-test="input-password"]').type("123456");
-    cy.get('[data-test="input-confirm"]').type("abcdef");
-    cy.get('[data-test="btn-reset"]').click();
+    cy.getByData('input-password').type("123456");
+    cy.getByData('input-confirm').type("abcdef");
+    cy.getByData('btn-reset').click();
 
     cy.contains("As senhas não coincidem").should("exist");
   });
 
   it("deve exibir erro quando senha tem menos de 6 caracteres", () => {
-    cy.get('[data-test="input-password"]').type("123");
-    cy.get('[data-test="input-confirm"]').type("123");
-    cy.get('[data-test="btn-reset"]').click();
+    cy.getByData('input-password').type("123");
+    cy.getByData('input-confirm').type("123");
+    cy.getByData('btn-reset').click();
 
     cy.contains("A senha deve ter no mínimo 6 caracteres").should("exist");
   });
@@ -61,14 +61,14 @@ describe("Tela de Nova Senha", () => {
       },
     }).as("resetRequest");
 
-    cy.get('[data-test="input-password"]').type("123456");
-    cy.get('[data-test="input-confirm"]').type("123456");
+    cy.getByData('input-password').type("123456");
+    cy.getByData('input-confirm').type("123456");
 
-    cy.get('[data-test="btn-reset"]').click();
+    cy.getByData('btn-reset').click();
 
     cy.wait("@resetRequest");
 
-    cy.get('[data-test="reset-error"]').should("exist");
+    cy.getByData('reset-error').should("exist");
     cy.contains("Token inválido").should("exist");
   });
 
@@ -82,9 +82,9 @@ describe("Tela de Nova Senha", () => {
       },
     }).as("resetRequest");
 
-    cy.get('[data-test="input-password"]').type("123456");
-    cy.get('[data-test="input-confirm"]').type("123456");
-    cy.get('[data-test="btn-reset"]').click();
+    cy.getByData('input-password').type("123456");
+    cy.getByData('input-confirm').type("123456");
+    cy.getByData('btn-reset').click();
 
     cy.wait("@resetRequest");
 

@@ -489,7 +489,7 @@ export function Etapa3ConfiguracoesExibicao({
                       Back In Down (Voltar de Cima)
                     </SelectItem>
                     <SelectItem 
-                      className="text-[#2D3748] cursor-pointer" 
+                      className="cursor-pointer transition text-[#2D3748] cursor-pointer" 
                       value="10"
                       onMouseEnter={() => {
                         onAnimacaoPreview({ nome: 'Back In Up', classe: 'animate__backInUp' });

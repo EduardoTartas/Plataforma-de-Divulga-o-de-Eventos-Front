@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatarDataEvento, formatarHorarioEvento } from "@/lib/utils";
+import { calcularDuracaoPorImagem } from "@/lib/calculadoraDuracao";
 import 'animate.css';
 
 export default function PreviewEvento() {
@@ -26,11 +27,12 @@ export default function PreviewEvento() {
     // Função para carregar os dados do preview
     const carregarDadosPreview = () => {
         const dadosForm = localStorage.getItem('criar_evento_draft');
-        const imagensValidas = localStorage.getItem('criar-evento-images');
-        const imagensData = localStorage.getItem('criar-evento-images-data');
 
-        if (!dadosForm || (!imagensValidas && !imagensData)) {
-            //voltar para criar ou editar
+        // Buscar as imagens do sessionStorage (onde estão os blob URLs)
+        const blobUrlsSession = sessionStorage.getItem('preview-evento-blobs');
+
+        if (!dadosForm) {
+            // Voltar para criar ou editar
             if (window.opener) {
                 window.close();
             } else {
@@ -43,22 +45,12 @@ export default function PreviewEvento() {
             const form = JSON.parse(dadosForm);
             let imagens: string[] = [];
 
-            if (imagensValidas) {
+            // Tentar carregar os blob URLs do sessionStorage primeiro
+            if (blobUrlsSession) {
                 try {
-                    imagens = JSON.parse(imagensValidas) || [];
+                    imagens = JSON.parse(blobUrlsSession) || [];
                 } catch (e) {
-                    console.warn('Falha ao parsear criar-evento-images, tentando criar-evento-images-data', e);
-                    imagens = [];
-                }
-            }
-
-            if ((!imagens || imagens.length === 0) && imagensData) {
-                try {
-                    const imagesDataParsed = JSON.parse(imagensData);
-                    // imagesDataParsed é um array de { name, data }
-                    imagens = (imagesDataParsed || []).map((i: any) => i.data).filter(Boolean);
-                } catch (e) {
-                    console.warn('Falha ao parsear criar-evento-images-data', e);
+                    console.warn('Falha ao parsear preview-evento-blobs', e);
                     imagens = [];
                 }
             }
@@ -67,7 +59,7 @@ export default function PreviewEvento() {
             console.log('Formulário carregado:', form);
             console.log('Imagens carregadas:', imagens);
             console.log('Total de imagens:', imagens.length);
-            
+
             // Formatar categoria para exibição correta
             const formatarCategoria = (cat: string) => {
                 const categorias: Record<string, string> = {
@@ -80,7 +72,10 @@ export default function PreviewEvento() {
                 };
                 return categorias[cat] || cat.toUpperCase();
             };
-            
+
+            // Calcula a duração baseada na quantidade de imagens
+            const duracaoCalculada = calcularDuracaoPorImagem(imagens.length);
+
             const previewData = {
                 titulo: form.titulo || "Título do Evento",
                 descricao: form.descricao || "Descrição do evento",
@@ -93,10 +88,11 @@ export default function PreviewEvento() {
                 imagens: imagens,
                 cor: parseInt(form.cor) || 1,
                 animacao: parseInt(form.animacao) || 1,
-                loops: 3, // Padrão para preview
+                duracao: duracaoCalculada, // Duração calculada automaticamente
+                loops: 3, // Padrão para preview (não usado porque não tem outros eventos)
                 link: form.link
             };
-            
+
             console.log('Preview data final:', previewData);
             setEventoPreview(previewData);
         } catch (error) {
@@ -114,13 +110,16 @@ export default function PreviewEvento() {
         carregarDadosPreview();
     }, [router]);
 
-    // useEffect para slideshow automático (controle de imagens e repetições similar ao totem)
+    // useEffect para slideshow automático com duração calculada
     useEffect(() => {
         if (!eventoPreview || !eventoPreview.imagens || eventoPreview.imagens.length === 0) return;
 
         const len = eventoPreview.imagens.length;
         const loops = eventoPreview.loops || 3;
-        const duracao = 3000;
+        // Usa a duração calculada do evento (em milissegundos)
+        const duracao = eventoPreview.duracao || 3000;
+
+        console.log(`⏱️ Preview usando duração de ${duracao}ms (${duracao / 1000}s) para ${len} imagens`);
 
         const intervalo = setInterval(() => {
             setImagemAtualIndex((prev) => {
@@ -129,11 +128,11 @@ export default function PreviewEvento() {
                     return proxima;
                 }
 
-                // completou um ciclo de imagens
+                // Completou um ciclo de imagens
                 setRepeticoesCompletadas((prevRep) => {
                     const novas = prevRep + 1;
                     if (novas >= loops) {
-                        // resetar contador de repetições
+                        // Resetar contador de repetições
                         return 0;
                     }
                     return novas;
@@ -141,7 +140,7 @@ export default function PreviewEvento() {
 
                 return 0;
             });
-        }, duracao); // 3 segundos por imagem
+        }, duracao);
 
         return () => clearInterval(intervalo);
     }, [eventoPreview]);
@@ -210,20 +209,20 @@ export default function PreviewEvento() {
             {/* Botão de atualizar no canto superior direito */}
             <button
                 onClick={() => window.location.reload()}
-                className="fixed top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-3 flex items-center justify-center shadow-lg transition-all hover:scale-110 group"
+                className="cursor-pointer fixed top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-3 flex items-center justify-center shadow-lg transition-all hover:scale-110 group"
                 title="Atualizar preview"
             >
-                <svg 
-                    className="w-5 h-5 transition-transform group-hover:rotate-180 duration-500" 
-                    fill="none" 
-                    stroke="currentColor" 
+                <svg
+                    className="w-5 h-5 transition-transform group-hover:rotate-180 duration-500"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                 >
-                    <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                 </svg>
             </button>
@@ -256,9 +255,8 @@ export default function PreviewEvento() {
                                 {Array.from({ length: eventoPreview.loops || 3 }).map((_, index) => (
                                     <div
                                         key={index}
-                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${
-                                            index <= repeticoesCompletadas ? 'bg-white' : 'bg-white/30'
-                                        }`}
+                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${index <= repeticoesCompletadas ? 'bg-white' : 'bg-white/30'
+                                            }`}
                                     />
                                 ))}
                             </div>
@@ -318,9 +316,9 @@ export default function PreviewEvento() {
                             p-3 sm:p-4 2xl:p-4 flex items-center justify-center 
                             shrink-0 z-10">
                             {qrCodeUrl ? (
-                                <img 
-                                    src={qrCodeUrl} 
-                                    className="h-full w-full object-contain rounded-lg 2xl:rounded-lg" 
+                                <img
+                                    src={qrCodeUrl}
+                                    className="h-full w-full object-contain rounded-lg 2xl:rounded-lg"
                                     alt="QR Code do evento"
                                 />
                             ) : (

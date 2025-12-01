@@ -44,7 +44,7 @@ export function Etapa2UploadImagens({
               Imagens do Evento
             </h2>
             <p className="text-sm text-[#718096] mt-1">
-              Resolução mínima: <strong>1280x720 pixels</strong>
+              Resolução mínima: <strong>1024x690 pixels</strong>
             </p>
           </div>
           <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg border border-purple-200">

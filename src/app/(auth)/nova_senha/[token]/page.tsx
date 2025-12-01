@@ -84,7 +84,7 @@ export default function NovaSenhaPage({ params }: PageProps) {
 
             setTimeout(() => {
                 router.push("/login");
-            }, 5000);
+            }, 1500);
         } catch (error: any) {
             let mensagem = "Erro ao redefinir senha";
 
