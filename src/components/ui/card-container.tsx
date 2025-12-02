@@ -92,12 +92,12 @@ export default function CardContainer({
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-test="card-container">
       {/* Título */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{titulo}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6" data-test="card-container-title">{titulo}</h1>
 
       {/* Barra de busca e filtros */}
-      <form onSubmit={handleSearch} className="mb-6">
+      <form onSubmit={handleSearch} className="mb-6" data-test="search-form">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
           {/* Campo de busca */}
           <div className="flex-1 relative">
@@ -108,12 +108,13 @@ export default function CardContainer({
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="w-full pl-10 py-3 border-2 border-[#E2E8F0] rounded-lg text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white"
+              data-test="search-input"
             />
           </div>
 
           {/* Filtro de status */}
           <div className="w-full md:w-48">
-            <Select value={statusFilter} onValueChange={handleStatusChange}>
+            <Select value={statusFilter} onValueChange={handleStatusChange} data-test="filter-status">
               <SelectTrigger className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
@@ -127,7 +128,7 @@ export default function CardContainer({
 
           {/* Filtro de categoria */}
           <div className="w-full md:w-52">
-            <Select value={categoryFilter} onValueChange={handleCategoryChange}>
+            <Select value={categoryFilter} onValueChange={handleCategoryChange} data-test="filter-category">
               <SelectTrigger className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all bg-white">
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
@@ -148,7 +149,7 @@ export default function CardContainer({
 
       {/* Grid de cards */}
       {eventos.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-test="events-grid">
           {eventos.map((evento) => (
             <EventCard
               key={evento._id}
@@ -160,7 +161,7 @@ export default function CardContainer({
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
+        <div className="text-center py-12" data-test="empty-state">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
             fill="none"
