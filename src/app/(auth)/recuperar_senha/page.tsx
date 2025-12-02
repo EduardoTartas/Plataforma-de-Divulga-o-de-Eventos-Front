@@ -74,11 +74,12 @@ export default function RecuperarSenhaPage() {
     }
 
     return (
-        <div className="w-full max-w-md">
-            <div className="bg-white rounded-lg shadow-xl pt-4 pb-6 pl-6 pr-6 space-y-4">
+        <div className="w-full max-w-md" data-test="recover-container">
+            <div className="bg-white rounded-lg shadow-xl pt-4 pb-6 pl-6 pr-6 space-y-4" data-test="recover-card">
                 <Link
                     href="/login"
                     className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                    data-test="recover-back"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +98,7 @@ export default function RecuperarSenhaPage() {
                 <img src="/ifro-events-icon.svg" alt="Ifro Events" className="mx-auto h-24 w-24" draggable='false' />
 
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Recuperar Senha</h1>
+                    <h1 className="text-3xl font-bold text-gray-900" data-test="recover-title">Recuperar Senha</h1>
                     <p className="mt-3 text-sm text-gray-600">
                         Enviaremos um link de verificação para o seu e-mail para redefinir sua senha.
                     </p>
@@ -111,6 +112,7 @@ export default function RecuperarSenhaPage() {
                         <input
                             id="email"
                             type="email"
+                            data-test="input-email-recover"
                             className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg 
                                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                      placeholder:text-gray-400 transition-all"
@@ -132,6 +134,7 @@ export default function RecuperarSenhaPage() {
                     <button
                         type="submit"
                         disabled={isLoading}
+                        data-test="btn-enviar-recover"
                         className={`w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium
                                  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 
                                  focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg
