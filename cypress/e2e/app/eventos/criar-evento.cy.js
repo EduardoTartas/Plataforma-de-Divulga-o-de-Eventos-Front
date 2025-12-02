@@ -185,7 +185,7 @@ describe("Criar Evento", () => {
     it("deve renderizar área de upload", () => {
       cy.contains("Upload de Mídia").should("exist");
       cy.contains("Resolução mínima").should("exist");
-      cy.getByData('area-upload-imagens').should("exist");
+      cy.getByData('drop-zone').should("exist");
       cy.getByData('input-upload-imagens').should("exist");
       
       // Botões de navegação
@@ -216,7 +216,7 @@ describe("Criar Evento", () => {
         cy.wait(1000);
         
         // Verificar se a imagem foi adicionada
-        cy.get('[data-test="area-upload-imagens"]').within(() => {
+        cy.getByData('drop-zone').within(() => {
           cy.get('img').should('have.length.at.least', 1);
         });
       });
@@ -234,7 +234,7 @@ describe("Criar Evento", () => {
       cy.wait(1000);
 
       // Encontrar e clicar no botão de remover
-      cy.get('button[title*="Remover"]').first().click();
+      cy.getByData('btn-remove-new-image').first().click();
       
       // Verificar que a imagem foi removida
       cy.wait(500);
@@ -328,11 +328,11 @@ describe("Criar Evento", () => {
     });
 
     it("deve selecionar períodos do dia", () => {
-      cy.getByData('checkbox-periodo-manha').check({ force: true });
-      cy.getByData('checkbox-periodo-tarde').check({ force: true });
+      cy.getByData('checkbox-manha').check({ force: true });
+      cy.getByData('checkbox-tarde').check({ force: true });
       
-      cy.getByData('checkbox-periodo-manha').should('be.checked');
-      cy.getByData('checkbox-periodo-tarde').should('be.checked');
+      cy.getByData('checkbox-manha').should('be.checked');
+      cy.getByData('checkbox-tarde').should('be.checked');
     });
 
     it("deve selecionar cor do card", () => {
@@ -399,8 +399,8 @@ describe("Criar Evento", () => {
       
       cy.getByData('checkbox-dia-segunda').check({ force: true });
       cy.getByData('checkbox-dia-terca').check({ force: true });
-      cy.getByData('checkbox-periodo-manha').check({ force: true });
-      cy.getByData('checkbox-periodo-tarde').check({ force: true });
+      cy.getByData('checkbox-manha').check({ force: true });
+      cy.getByData('checkbox-tarde').check({ force: true });
       cy.getByData('input-exib-inicio').type(eventoData.exibInicio);
       cy.getByData('input-exib-fim').type(eventoData.exibFim);
       

@@ -100,7 +100,7 @@ export function Etapa3ConfiguracoesExibicao({
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {diasDaSemana.map((dia) => (
-                      <label key={dia.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test={`checkbox-dia-${dia.value}`}>
+                      <label key={dia.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
                         <input
                           type="checkbox"
                           checked={(field.value || []).includes(dia.value)}

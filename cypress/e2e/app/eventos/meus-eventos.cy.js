@@ -72,14 +72,14 @@ describe("Página Meus Eventos", () => {
         
         if (eventos.length > 0) {
           // verificar se os cards foram renderizados
-          cy.get('.grid').should('exist');
+          cy.getByData('events-grid').should('exist');
 
           const primeiroEvento = eventos[0];
           if (primeiroEvento.titulo) {
             cy.contains(primeiroEvento.titulo).should('exist');
           }
         } else {
-          cy.contains('Nenhum evento encontrado').should('exist');
+          cy.getByData('empty-state').should('exist');
         }
       });
     });
@@ -132,7 +132,7 @@ describe("Página Meus Eventos", () => {
         const eventos = interception.response.body?.data?.docs || [];
         
         if (eventos.length > 0) {
-          cy.get('button[title="Excluir evento"]').first().click();
+          cy.getByData('event-delete-button').first().click();
           
           cy.get('.fixed.inset-0.z-50').should('exist');
           cy.contains('Confirmar Exclusão').should('exist');
@@ -152,7 +152,7 @@ describe("Página Meus Eventos", () => {
         const eventos = interception.response.body?.data?.docs || [];
         
         if (eventos.length > 0) {
-          cy.get('button[title="Excluir evento"]').first().click();
+          cy.getByData('event-delete-button').first().click();
           cy.getByData('btn-cancel-delete').click();
           cy.getByData('delete-modal').should("not.exist");
         }
@@ -166,7 +166,7 @@ describe("Página Meus Eventos", () => {
         if (eventos.length > 0) {
           const primeiroEventoId = eventos[0]._id;
           
-          cy.get('button[title="Excluir evento"]').first().click();
+          cy.getByData('event-delete-button').first().click();
           cy.getByData('btn-confirm-delete').click();
           
           // validar requisição delete com id correto
@@ -206,7 +206,7 @@ describe("Página Meus Eventos", () => {
       });
       
       // testar campo de busca
-      cy.get('input[placeholder="Buscar eventos..."]')
+      cy.getByData('search-input')
         .scrollIntoView()
         .should('exist')
         .clear()
@@ -234,7 +234,7 @@ describe("Página Meus Eventos", () => {
       });
       
       // Validar que select de status existe e pode ser aberto
-      cy.get('button[role="combobox"]').first().scrollIntoView().should('exist');
+      cy.getByData('filter-status').scrollIntoView().should('exist');
     });
 
     it("deve validar que eventos têm categoria e renderizam corretamente", () => {
@@ -249,7 +249,7 @@ describe("Página Meus Eventos", () => {
           });
           
           // Validar renderização no frontend
-          cy.get('.grid').should('exist');
+          cy.getByData('events-grid').should('exist');
           
           // verificar que um título está visível
           cy.contains(eventos[0].titulo).should('exist');
@@ -257,7 +257,7 @@ describe("Página Meus Eventos", () => {
       });
       
       // Validar que select de categoria existe
-      cy.get('button[role="combobox"]').eq(1).scrollIntoView().should('exist');
+      cy.getByData('filter-category').scrollIntoView().should('exist');
     });
 
     it("deve validar consistência entre API e Frontend", () => {
@@ -305,7 +305,7 @@ describe("Página Meus Eventos", () => {
         if (eventos.length > 0) {
           const primeiroEventoId = eventos[0]._id;
           
-          cy.get('button[title*="evento"]').first().click();
+          cy.getByData('event-toggle-status').first().click();
           
           // Validar requisição PATCH
           cy.wait('@toggleStatus', { timeout: 10000 }).then((statusInterception) => {

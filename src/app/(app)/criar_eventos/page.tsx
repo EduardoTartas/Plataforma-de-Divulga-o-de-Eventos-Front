@@ -220,7 +220,7 @@ export default function CriarEvento() {
         titulo="Cancelar criação do evento?"
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
-        data-teste="modal-cancelar-criacao"
+        data-test="modal-cancelar-criacao"
       >
         <p className="text-gray-700 mb-4">
           Os dados preenchidos serão perdidos. Tem certeza que deseja cancelar?
