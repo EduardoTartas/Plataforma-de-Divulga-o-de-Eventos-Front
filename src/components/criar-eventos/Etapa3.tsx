@@ -32,7 +32,7 @@ export function Etapa3ConfiguracoesExibicao({
   return (
     <>
       {/* Step 3: Display Settings */}
-      <div className="space-y-6">
+      <div className="space-y-6" data-test="etapa3-container">
         <div>
           <h2 className="text-xl font-bold text-[#1A202C] flex items-center gap-2">
             <svg className="w-6 h-6 text-[#805AD5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,6 +94,7 @@ export function Etapa3ConfiguracoesExibicao({
                       checked={todosSelecionados}
                       onChange={handleToggleTodos}
                       className="h-4 w-4 text-[#805AD5] focus:ring-[#805AD5] border-gray-300 rounded accent-[#805AD5]"
+                      data-test="checkbox-todos-dias"
                     />
                     <span className="text-sm font-medium text-[#805AD5]">Todos os dias da semana</span>
                   </label>
@@ -105,6 +106,7 @@ export function Etapa3ConfiguracoesExibicao({
                           checked={(field.value || []).includes(dia.value)}
                           onChange={() => handleToggle(dia.value)}
                           className="h-4 w-4 text-[#805AD5] focus:ring-[#805AD5] border-gray-300 rounded accent-[#805AD5]"
+                          data-test={`checkbox-dia-${dia.value}`}
                         />
                         <span className="text-sm text-[#2D3748]">{dia.label}</span>
                       </label>
@@ -150,6 +152,7 @@ export function Etapa3ConfiguracoesExibicao({
                 }
                 readOnly
                 className="h-4 w-4 text-[#805AD5] focus:ring-[#805AD5] border-gray-300 rounded accent-[#805AD5] pointer-events-none"
+                data-test="checkbox-todos-periodos"
               />
               <span className="text-sm font-medium text-[#805AD5]">Todos os períodos</span>
             </label>
@@ -168,6 +171,7 @@ export function Etapa3ConfiguracoesExibicao({
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
+                          data-test="checkbox-manha"
                         />
                       </FormControl>
                       <div className="text-center">
@@ -193,6 +197,7 @@ export function Etapa3ConfiguracoesExibicao({
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
+                          data-test="checkbox-tarde"
                         />
                       </FormControl>
                       <div className="text-center">
@@ -218,6 +223,7 @@ export function Etapa3ConfiguracoesExibicao({
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
+                          data-test="checkbox-noite"
                         />
                       </FormControl>
                       <div className="text-center">
@@ -253,6 +259,7 @@ export function Etapa3ConfiguracoesExibicao({
                     type="date"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
+                    data-test="input-exib-inicio"
                   />
                 </FormControl>
                 <FormMessage />
@@ -278,6 +285,7 @@ export function Etapa3ConfiguracoesExibicao({
                     type="date"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
+                    data-test="input-exib-fim"
                   />
                 </FormControl>
                 <FormMessage />

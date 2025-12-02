@@ -56,6 +56,7 @@ export function LoginForm({
                 placeholder="seu@email.com"
                 required
                 className="!text-2xl py-5 rounded-lg border-2 border-gray-300 dark:border-gray-700 focus:ring-indigo-500 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-400"
+                data-test="input-email-form"
               />
             </div>
 
@@ -73,12 +74,14 @@ export function LoginForm({
                 required
                 placeholder="Digite sua senha"
                 className="!text-2xl py-5 rounded-lg border-2 border-gray-300 dark:border-gray-700 focus:ring-indigo-500 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-400 pr-20"
+                data-test="input-senha-form"
               />
               {/* Botão ver/ocultar */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-lg"
+                data-test="btn-toggle-senha"
               >
                 {showPassword ? "Ocultar" : "Mostrar"}
               </button>
@@ -87,6 +90,7 @@ export function LoginForm({
               <a
                 href="#"
                 className="self-end text-blue-600 dark:text-blue-400 hover:underline text-xl mt-2"
+                data-test="link-esqueceu-senha"
               >
                 Esqueceu a senha?
               </a>
@@ -98,6 +102,7 @@ export function LoginForm({
                 id="remember"
                 type="checkbox"
                 className="h-7 w-7 rounded border-gray-300 dark:border-gray-600 dark:checked:bg-indigo-600 focus:ring-indigo-500"
+                data-test="checkbox-lembrar"
               />
               <Label
                 htmlFor="remember"
@@ -111,6 +116,7 @@ export function LoginForm({
             <Button
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 py-7 text-3xl rounded-lg mt-10"
+              data-test="btn-entrar-form"
             >
               Entrar
             </Button>
@@ -121,6 +127,7 @@ export function LoginForm({
               <a
                 href="#"
                 className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                data-test="link-criar-conta"
               >
                 Criar conta
               </a>

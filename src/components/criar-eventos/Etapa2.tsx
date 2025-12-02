@@ -34,7 +34,7 @@ export function Etapa2UploadImagens({
   return (
     <>
       {/* Step 2: Image Upload */}
-      <div className="space-y-4">
+      <div className="space-y-4" data-test="etapa2-container">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-[#1A202C] flex items-center gap-2">
@@ -57,7 +57,7 @@ export function Etapa2UploadImagens({
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
-          data-test="area-upload-imagens"
+          data-test="drop-zone"
           className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
             isDragging
               ? "border-[#805AD5] bg-purple-50 scale-[1.02]"
@@ -72,6 +72,7 @@ export function Etapa2UploadImagens({
             accept="image/*"
             onChange={onFileInputChange}
             className="hidden"
+            data-test="file-input"
           />
           <label
             htmlFor="fileUpload"
@@ -102,7 +103,7 @@ export function Etapa2UploadImagens({
               {isDragging ? "Solte as imagens aqui!" : "Arraste e solte suas imagens"}
             </span>
             <span className="text-sm text-[#718096] mb-3">ou</span>
-            <span className="px-6 py-2.5 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg font-medium transition-colors shadow-sm">
+            <span className="px-6 py-2.5 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg font-medium transition-colors shadow-sm" data-test="btn-selecionar-arquivos">
               Selecionar Arquivos
             </span>
             <span className="text-xs text-[#A0AEC0] mt-4">PNG, JPG, JPEG (máx. 6 imagens)</span>
@@ -136,6 +137,7 @@ export function Etapa2UploadImagens({
                         <img
                           src={media.midiLink}
                           alt="Mídia existente"
+                          data-test="existing-image"
                           className={`w-full h-24 object-cover transition-all ${
                             isMarkedForDeletion ? 'grayscale' : ''
                           }`}
@@ -144,6 +146,7 @@ export function Etapa2UploadImagens({
                           <button
                             type="button"
                             onClick={() => onRemoveExistingMedia(media._id)}
+                            data-test="btn-remove-existing-image"
                             className={`absolute top-2 right-2 text-white rounded-full w-7 h-7 flex items-center justify-center transition-all font-bold shadow-md ${
                               isMarkedForDeletion
                                 ? 'bg-yellow-500 hover:bg-yellow-600 opacity-100'
@@ -196,12 +199,14 @@ export function Etapa2UploadImagens({
                         src={URL.createObjectURL(file)}
                         alt={file.name}
                         className="w-full h-24 object-cover"
+                        data-test="new-image"
                       />
                       <button
                         type="button"
                         onClick={() => onRemoveImage(idx)}
                         className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 font-bold shadow-md"
                         title="Remover imagem"
+                        data-test="btn-remove-new-image"
                       >
                         ×
                       </button>
