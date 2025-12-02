@@ -1,174 +1,99 @@
-# Plano de Teste — Plataforma de Divulgação de Eventos (Front)
+# Plano de Teste
 
-**Versão:** 1.0  
-**Data:** 07/11/2025
+**IFRO Events - Plataforma de Divulgação de Eventos**
 
-## Histórico das alterações
+## 1 - Introdução
 
-| Data       | Versão | Descrição                                                              | Autor(a) |
-|------------|--------|------------------------------------------------------------------------|----------|
-| 07/11/2025 | 1.0    | Plano de Teste inicial adaptado ao projeto 'plataforma-de-divulgacao' | Equipe   |
+O IFRO Events é um sistema web para gerenciamento e divulgação de eventos institucionais. A principal finalidade é exibir esses eventos de forma interativa e automatizada em totens digitais espalhados pelo campus, além de oferecer um painel administrativo para gestão completa.
 
----
+## 2 - Arquitetura
 
-## 1 — Introdução
+O sistema utiliza Next.js 15 com App Router como framework principal para o frontend, que possui uma arquitetura orientada a componentes com React 19. A aplicação implementa Server-Side Rendering (SSR) e Client-Side Rendering (CSR) conforme necessário.
 
-Este documento descreve o Plano de Teste para o front-end Next.js do projeto "Plataforma de Divulgação de Eventos".
-O objetivo é definir requisitos, casos de teste (unitários, integração e manuais), critérios de aceitação e recomendações de execução para garantir qualidade funcional e técnica.
+**Stack Tecnológica:**
+- **Frontend:** Next.js 15, React 19, TypeScript
+- **Estilização:** TailwindCSS 4
+- **Gerenciamento de Estado:** React Query (TanStack Query v5)
+- **Validação de Formulários:** React Hook Form + Zod
+- **Autenticação:** NextAuth.js v4
+- **UI Components:** Radix UI
+- **Notificações:** React Toastify
+- **Testes E2E:** Cypress
+- **Containerização:** Docker
 
-Escopo: autenticação (login/cadastro), gestão de eventos (listar, criar, editar, excluir, ativar/desativar), filtros/pesquisa, paginação, totem público e integração com a API (via `fetchData` / `NEXT_PUBLIC_API_URL`).
+Para o armazenamento, consulta e alteração de dados da aplicação, o sistema consome uma API REST (Node.js/Express) que disponibiliza endpoints para eventos, usuários e uploads. A comunicação é feita através de requisições HTTP com autenticação via Bearer Token (JWT), retornando dados em formato JSON. O armazenamento de arquivos é feito via MinIO e o banco de dados é MongoDB.
 
----
+**Fluxo de Arquitetura:**
+1. Cliente (Next.js App) → Requisição HTTP com Token JWT (Painel) ou Pública (Totem)
+2. API REST → Processa, valida requisição e gerencia arquivos no MinIO
+3. Retorna resposta JSON com dados paginados
+4. Cliente atualiza estado e UI usando React Query
 
-## 2 — Resumo da Arquitetura (relevante para testes)
+## 3 - Categorização dos Requisitos em Funcionais x Não Funcionais
 
-- Framework: Next.js (App Router em `src/app/`), React 19, TypeScript.
-- Autenticação: `next-auth` (API route em `src/app/api/auth/[...nextauth]/route.ts`).
-- Client HTTP: `src/services/api.ts` (função `fetchData` usa `NEXT_PUBLIC_API_URL` e tenta obter token via `getSession()`).
-- Estado/Busca: React Query (`@tanstack/react-query`) com hooks em `src/hooks/` (ex.: `useEventos`).
-- Principais componentes de UI: `src/components/login-form.tsx`, `src/components/ui/*`.
-- Rotas importantes: `src/app/(auth)/`, `src/app/(app)/`, `src/app/(totem)/`.
+Requisito Funcional    | Requisito Não Funcional |
+-----------|--------|
+RF001 – O sistema deve permitir o login de administradores via matrícula e senha. | NF001 – O sistema deve exibir mensagens de feedback (toast notifications) para ações de sucesso ou erro.
+RF002 – O sistema deve permitir cadastrar eventos com título, descrição, datas, local e configurações de exibição (dias/horários). | NF002 – O sistema deve implementar proteção de rotas administrativas (middleware).
+RF003 – O sistema deve permitir o upload de mídias (imagens e vídeos) para os eventos. | NF003 – O sistema deve ser responsivo e otimizado para telas de Totem (Full HD vertical/horizontal).
+RF004 – O sistema deve gerar automaticamente um QR Code para o link de inscrição do evento. | NF004 – O tempo de resposta da API para listagem no Totem deve ser baixo para não travar a exibição.
+RF005 – O sistema deve listar eventos no Totem filtrando apenas os ativos e dentro do período de exibição. | 
+RF006 – O sistema deve permitir editar e excluir eventos existentes (apenas pelo dono ou admin).
+RF007 – O sistema deve permitir visualizar um preview do evento antes de publicar.
+RF008 – O sistema deve permitir filtrar eventos no painel por título, status e categoria.
+RF009 – O sistema deve permitir o cadastro de novos usuários administrativos (apenas por admins), informando nome e e-mail.
+RF010 – O sistema deve permitir alterar o status (ativo/inativo) e permissões de administrador de usuários existentes.
+RF011 – O sistema deve permitir a exclusão de usuários mediante confirmação.
 
-Observação: alguns arquivos `page.tsx` podem estar vazios (ex.: `criar_eventos/page.tsx`). Ajustar conforme necessário antes de testar fluxos que dependem dessas páginas.
+### Casos de Teste
 
----
+| Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite |
+| :--- | :--- | :--- | :--- |
+| **Login Administrativo** | ● Ao digitar email e senha corretos, o usuário deve acessar o painel administrativo.<br>● Ao falhar, deve exibir mensagem de erro. | ● Login com credenciais válidas<br>● Login com senha incorreta<br>● Tentativa de acesso a rota protegida sem login | ● Redirecionamento para `/administrativo` após sucesso.<br>● Bloqueio de acesso sem token válido. |
+| **Criar Evento** | ● O usuário deve preencher o formulário em 3 etapas (Dados, Mídia, Configuração).<br>● Deve validar datas (Início < Fim) e campos obrigatórios. | ● Preenchimento completo com sucesso<br>● Validação de campos obrigatórios (Zod)<br>● Validação de datas inconsistentes<br>● Upload de imagem/vídeo válido | ● Evento criado e listado em "Meus Eventos".<br>● Feedback visual de sucesso. |
+| **Editar Evento** | ● O usuário deve conseguir alterar os dados de um evento existente.<br>● O formulário deve vir preenchido com os dados atuais.<br>● Deve validar as alterações conforme as regras de criação. | ● Carregamento dos dados corretos no formulário<br>● Edição de campos obrigatórios e opcionais<br>● Validação de datas na edição<br>● Substituição de mídia (imagem/vídeo) | ● Alterações salvas e refletidas na listagem e no totem.<br>● Feedback visual de sucesso após salvar. |
+| **Listagem de Eventos** | ● O painel deve listar os eventos com paginação.<br>● Deve permitir filtrar por título ou status. | ● Carregamento da lista inicial<br>● Funcionamento da paginação<br>● Filtro por título retornando resultados corretos | ● Exibição correta dos cards de evento.<br>● Navegação fluida entre páginas. |
+| **Totem de Exibição** | ● A rota `/totem` deve exibir apenas eventos ativos e válidos para o momento.<br>● Deve alternar entre os eventos automaticamente (se houver carrossel/animação). | ● Acesso à rota pública `/totem`<br>● Verificar se eventos inativos aparecem (não devem)<br>● Exibição de QR Code se houver link | ● Interface limpa sem controles administrativos.<br>● Loop de exibição funcionando. |
+| **Gerenciamento de Usuários** | ● O admin deve conseguir cadastrar novos usuários (Nome/Email).<br>● O admin deve conseguir alternar status (Ativo/Inativo) e permissão de Admin.<br>● O admin deve conseguir excluir usuários. | ● Cadastro de usuário com email válido<br>● Tentativa de cadastro com email duplicado<br>● Toggle de status (Ativo/Inativo)<br>● Toggle de permissão Admin<br>● Exclusão com modal de confirmação | ● Novo usuário listado após cadastro.<br>● Alterações de status/admin refletidas na tabela.<br>● Usuário removido da lista após exclusão. |
 
-## 3 — Requisitos (mapeados ao projeto)
+## 4 - Estratégia de Teste
 
-### Funcionais
+●	Escopo de Testes
 
-| Código | Requisito                                                                 | Detalhe / Regra de Negócio |
-|--------|---------------------------------------------------------------------------|----------------------------|
-| RF001  | Listar eventos (meus_eventos)                                            | Paginação, filtros por título, status e categoria (params: `page`, `limite`, `titulo`, `status`, `categoria`). |
-| RF002  | Criar evento                                                              | Campos obrigatórios: `titulo`, `descricao`, `local`, `dataInicio`, `dataFim`, `categoria`. Validações conforme `src/validor/validacao.ts`.
-| RF003  | Editar evento                                                             | Mesmas validações da criação; alterações persistidas via API.
-| RF004  | Excluir evento com confirmação                                            | Modal de confirmação; DELETE /eventos/:id.
-| RF005  | Ativar / desativar evento                                                 | PATCH /eventos/:id com `status` (0/1); toast de sucesso.
-| RF006  | Login (LoginForm)                                                         | Validações por campo (email, senha); integração com next-auth; erros mostrados ao usuário.
-| RF007  | Cadastro de usuário                                                       | Validações por campo; feedback de sucesso/erro.
-| RF008  | Totem público                                                             | Página `/totem` exibe eventos públicos/ativos.
-| RF009  | Tratamento de erros da API                                                 | `fetchData` deve exibir mensagens amigáveis e redirecionar para `/login` em 498.
+O plano de testes abrange as funcionalidades de gestão de eventos (CRUD), autenticação administrativa e visualização no Totem.
 
-### Não Funcionais
+Serão executados testes em todos os níveis conforme a descrição abaixo.
 
-- RNF001: Compatibilidade com navegadores modernos (Chrome/Firefox/Edge).
-- RNF002: Latência percebida < 2s em operações comuns (listagem, paginação).
-- RNF003: Código modular, testável (hooks, services, validators).
-- RNF004: Mensagens em pt-BR consistentes.
-- RNF005: Acessibilidade mínima (labels, foco em modais, navegação por teclado).
+Testes Unitários: Focados nas regras de negócio do Backend (Services/Models) e validações do Frontend (Schemas Zod).
+Testes de Integração: Testes dos endpoints da API (Controllers/Routes) garantindo a comunicação correta com o Banco de Dados e MinIO.
+Testes Automatizados (E2E): Fluxos críticos no Frontend (Login -> Criar Evento -> Visualizar no Totem) usando Cypress.
+Testes Manuais: Validação de UX/UI, responsividade do Totem e casos de borda não cobertos por automação.
 
----
+●	Ambiente e Ferramentas
 
-## 4 — Casos de Teste (detalhados)
+Os testes serão executados em ambiente de desenvolvimento/homologação (Dockerizado).
 
-### A — Autenticação
+As seguintes ferramentas serão utilizadas no teste:
 
-- CT-LOGIN-01 — Login válido: preencher email/senha válidos → next-auth signin → sessão ativa (verificar `getSession()` ou cookie) e UI atualizada.
-- CT-LOGIN-02 — Login inválido: credenciais incorretas → mensagem de erro apropriada.
-- CT-LOGIN-03 — Validação de formulário: e-mail inválido / senha curta → mensagens por campo .
-- CT-CAD-01 — Cadastro válido: preencher campos obrigatórios → sucesso + feedback.
-- CT-CAD-02 — Cadastro inválido: mostrar erros por campo.
+Ferramenta | 	Time |	Descrição 
+-----------|--------|--------
+Jest | Desenvolvimento | Framework para testes unitários e de integração (Backend).
+Cypress | Qualidade/Dev | Ferramenta para testes End-to-End (Frontend).
+Postman | Qualidade | Ferramenta para testes manuais de API.
+React Testing Library | Desenvolvimento | Testes de componentes React (se aplicável).
 
-### B — Listagem e Filtros de Eventos
+## 5 - Classificação de Bugs
 
-- CT-LIST-01 — Carregar `meus_eventos`: GET /eventos → exibe lista com títulos, datas, local, status e paginação.
-- CT-LIST-02 — Filtro por busca: enviar `titulo` → lista filtrada.
-- CT-LIST-03 — Filtro por status: selecionar `active` / `all` → resultados corretos.
-- CT-LIST-04 — Filtro por categoria: selecionar categoria → resultados corretos.
-- CT-LIST-05 — Paginação: navegar entre páginas → atualização correta da lista.
+Os Bugs serão classificados com as seguintes severidades:
 
-### C — Criar / Editar Evento
+ID 	|Nivel de Severidade |	Descrição 
+-----------|--------|--------
+1	|Blocker |	●	Bug que impede o funcionamento do Totem ou Login. <br>●	Crash da aplicação. <br>●	Perda de dados.
+2	|Grave |	●	Funcionalidade principal com erro (ex: não salva evento, QR Code errado).
+3	|Moderada |	●	Falha em validações não críticas, filtros não funcionando perfeitamente.
+4	|Pequena |	●	Erros ortográficos, alinhamento visual, melhorias de UX.
 
-- CT-CREATE-01 — Criação válida: preencher formulário do criar_eventos → POST /eventos → sucesso + aparece na listagem.
-- CT-CREATE-02 — Validações: título curto, descrição curta, dataFim < dataInicio, link inválido, tags inválidas → erros por campo .
-- CT-EDIT-01 — Edição válida: alterar e salvar → alterações refletidas via API.
-- CT-EDIT-02 — Edição com erro na API → mensagem amigável e formulário permanece.
-
-### D — Ações sobre Eventos
-
-- CT-ACT-01 — Toggle status: alternar status → PATCH /eventos/:id → toast de sucesso e atualização da lista.
-- CT-ACT-02 — Excluir evento: confirmar no modal → DELETE /eventos/:id → remoção da lista + toast.
-- CT-ACT-03 — Falha ao excluir (500) → mensagem de erro e sem remoção no UI.
-
-### E — Totem e Visualização Pública
-
-- CT-TOTEM-01 — Acessar `/totem`: exibir apenas eventos ativos; layout adequado.
-- CT-TOTEM-02 — Evento com mídia: exibir mídias listadas em `midia`.
-
-### F — Integração com API e erros
-
-- CT-API-01 — API offline (fetch falha): mostrar 'Erro de conexão' e opção de retry.
-- CT-API-02 — 401/498: redirecionar para `/login` quando aplicável (ver `fetchData`).
-- CT-API-03 — Resposta não-JSON: mensagem apropriada (tratada em `fetchData`).
-
-### G — UI / Acessibilidade
-
-- CT-UI-01 — Modais acessíveis: foco inicial, ESC para fechar, tab-order correto.
-- CT-UI-02 — Inputs com `label` vinculados.
-- CT-UI-03 — Responsividade: testar em breakpoints (mobile/tablet/desktop).
-
----
-
-## 5 — Estratégia de Teste e Ferramentas
-
-- Unitários (Jest + React Testing Library)
-  - Testar: `src/validor/validacao.ts`, hooks (`useEventos` com mock do `fetchData`), `fetchData` (mock global `fetch`), componentes pequenos.
-  - Meta: cobertura mínima 70% nas camadas utilitárias e hooks.
-
-- Integração (MSW)
-  - Mockar `NEXT_PUBLIC_API_URL` endpoints e testar listagem, criação e ações com React Query.
-
-- E2E (Cypress — recomendado)
-  - Fluxos: login → criar evento → verificar lista → toggle status → acessar totem.
-
-- Manuais
-  - Testes exploratórios com Postman/Insomnia e testes de UI.
-
----
-
-## 6 — Ambiente e Execução
-
-- Variáveis importantes:
-  - `NEXT_PUBLIC_API_URL` — URL base da API (definir em `.env.local`).
-  - `NEXTAUTH_URL`, `NEXTAUTH_SECRET` — para next-auth (dev).
-
-- Como rodar local:
-
-```bash
-npm install
-# configurar .env.local com NEXT_PUBLIC_API_URL=http://localhost:8000 (ou porta do backend)
-npm run dev
-```
-
-
-## 7 — Priorização de Testes
-
-- Alta: autenticação, listagem de eventos, criação/validação de evento, tratamento de erros (CT-LOGIN-01, CT-LIST-01, CT-CREATE-01/02, CT-API-01).
-- Média: edição/exclusão de eventos, totem.
-- Baixa: testes de layout e casos extremos.
-
----
-
-## 8 — Classificação de Bugs
-
-| ID | Severidade  | Descrição |
-|----|-------------|-----------|
-| 1  | Blocker     | Impede uso da funcionalidade principal (ex.: `/` 404, login quebrado).
-| 2  | Grave       | Erro lógico crítico (ex.: evento criado sem campos obrigatórios).
-| 3  | Moderado    | Problema com workaround (ex.: filtro que não retorna resultados esperados).
-| 4  | Pequeno     | Ajustes de UI/texto/estilo.
-
----
-
-## 9 — Definição de Pronto
-
-Uma funcionalidade será considerada pronta quando:
-
-- Passar todos os casos de teste aplicáveis.
-- Não apresentar bugs Blocker/Grave.
-- UI revisada em pt-BR e acessibilidade mínima atendida.
-- Documentação atualizada.
-
----
+### 6 - 	Definição de Pronto 
+Será considerada pronta as funcionalidades que passarem pelas verificações e testes descritas nestes planos de testes, não apresentarem bugs com a severidade acima de Minor, e passarem por uma validação de negócio de responsabilidade do time de produto.
 
 
