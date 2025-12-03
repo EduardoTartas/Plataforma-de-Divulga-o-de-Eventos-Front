@@ -57,7 +57,7 @@ export function Etapa2UploadImagens({
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
-          data-test="drop-zone"
+          data-test="area-upload-imagens"
           className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
             isDragging
               ? "border-[#805AD5] bg-purple-50 scale-[1.02]"

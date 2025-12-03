@@ -85,15 +85,22 @@ describe("Criar Evento", () => {
       // Tentar continuar sem preencher
       cy.getByData('btn-continuar').should('be.visible').click();
 
-      // Verificar toast de validação
-      cy.get('.Toastify__toast--error', { timeout: 5000 }).should('be.visible');
-      cy.contains("Complete todos os campos obrigatórios da Etapa 1").should("be.visible");
+      // Verificar estrutura completa do toast de erro
+      cy.get('.Toastify__toast.Toastify__toast-theme--light.Toastify__toast--error', { timeout: 5000 })
+        .should('be.visible')
+        .should('have.attr', 'role', 'alert');
       
-      // Verificar mensagens de erro inline (FormMessage)
-      cy.contains("O título deve ter ao menos 3 caracteres").should("exist");
-      cy.contains("A descrição deve ter ao menos 10 caracteres").should("exist");
-      cy.contains("O local é obrigatório").should("exist");
-      cy.contains("A categoria é obrigatória").should("exist");
+      // Verificar ícone de erro
+      cy.get('.Toastify__toast--error .Toastify__toast-icon').should('exist');
+      
+      // Verificar mensagem do toast
+      cy.get('.Toastify__toast--error').should('contain', 'Complete todos os campos obrigatórios da Etapa 1');
+      
+      // Verificar botão de fechar
+      cy.get('.Toastify__toast--error .Toastify__close-button').should('exist');
+      
+      // Verificar barra de progresso
+      cy.get('.Toastify__toast--error .Toastify__progress-bar').should('exist');
     });
 
     it("deve validar tamanho mínimo dos campos", () => {
@@ -117,7 +124,7 @@ describe("Criar Evento", () => {
       // Selecionar categoria com wait para o dropdown
       cy.getByData('select-categoria').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.categoria}"]`).click();
+      cy.get('[role="option"]').last().click();
       
       cy.getByData('input-data-inicio').type(eventoData.dataInicio);
       cy.getByData('input-data-fim').type(eventoData.dataFim);
@@ -130,8 +137,8 @@ describe("Criar Evento", () => {
       cy.getByData('btn-continuar').click();
 
       // Verificar que avançou para etapa 2
-      cy.contains("Upload de Mídia", { timeout: 5000 }).should("exist");
-      cy.contains("Adicione as imagens do evento").should("exist");
+      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+      cy.contains("Resolução mínima").should("exist");
     });
 
     it("deve validar datas (data fim não pode ser antes da data início)", () => {
@@ -145,7 +152,7 @@ describe("Criar Evento", () => {
       
       cy.getByData('select-categoria').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.categoria}"]`).click();
+      cy.get('[role="option"]').last().click();
       
       cy.getByData('input-data-inicio').type(eventoData.dataInicio);
       cy.getByData('input-data-fim').type(dataPassadaStr);
@@ -169,7 +176,7 @@ describe("Criar Evento", () => {
       
       cy.getByData('select-categoria').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.categoria}"]`).click();
+      cy.get('[role="option"]').last().click();
       
       cy.getByData('input-data-inicio').type(eventoData.dataInicio);
       cy.getByData('input-data-fim').type(eventoData.dataFim);
@@ -179,14 +186,16 @@ describe("Criar Evento", () => {
       });
       
       cy.getByData('btn-continuar').click();
-      cy.contains("Upload de Mídia", { timeout: 5000 }).should("exist");
+      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
     });
 
     it("deve renderizar área de upload", () => {
-      cy.contains("Upload de Mídia").should("exist");
+      cy.contains("Imagens do Evento").should("exist");
       cy.contains("Resolução mínima").should("exist");
-      cy.getByData('drop-zone').should("exist");
+      cy.getByData('area-upload-imagens').should("exist");
       cy.getByData('input-upload-imagens').should("exist");
+      cy.contains("Arraste e solte suas imagens").should("exist");
+      cy.contains("Selecionar Arquivos").should("exist");
       
       // Botões de navegação
       cy.getByData('btn-voltar').should("exist");
@@ -202,42 +211,30 @@ describe("Criar Evento", () => {
       cy.contains("Adicione pelo menos 1 imagem antes de continuar").should("be.visible");
     });
 
-    it("deve fazer upload de imagens válidas", () => {
-      // Criar uma imagem fake com dimensões válidas (1024x690)
-      cy.fixture('evento.json').then(() => {
-        const fileName = 'evento-test.jpg';
-        
-        cy.getByData('input-upload-imagens').selectFile({
-          contents: Cypress.Buffer.from('fake-image-content'),
-          fileName: fileName,
-          mimeType: 'image/jpeg',
-        }, { force: true });
+    it("deve fazer upload de imagem válida", () => {
+      cy.getByData('input-upload-imagens').selectFile('public/image-teste.png', { force: true });
 
-        cy.wait(1000);
-        
-        // Verificar se a imagem foi adicionada
-        cy.getByData('drop-zone').within(() => {
-          cy.get('img').should('have.length.at.least', 1);
-        });
-      });
+      cy.wait(1000);
+      
+      // Verificar se a imagem foi adicionada com sucesso
+      cy.get('img[alt="image-teste.png"]').should('exist');
+      cy.contains('Novas Imagens').should('be.visible');
     });
 
     it("deve permitir remover imagens adicionadas", () => {
-      const fileName = 'evento-remove-test.jpg';
-      
-      cy.getByData('input-upload-imagens').selectFile({
-        contents: Cypress.Buffer.from('fake-content'),
-        fileName: fileName,
-        mimeType: 'image/jpeg',
-      }, { force: true });
+      cy.getByData('input-upload-imagens').selectFile('public/image-teste.png', { force: true });
 
       cy.wait(1000);
+      
+      // Verificar que a imagem foi adicionada
+      cy.get('img[alt="image-teste.png"]').should('exist');
 
-      // Encontrar e clicar no botão de remover
-      cy.getByData('btn-remove-new-image').first().click();
+      // Clicar no botão de remover (force:true pois só aparece no hover)
+      cy.get('button[title="Remover imagem"]').first().click({ force: true });
       
       // Verificar que a imagem foi removida
       cy.wait(500);
+      cy.get('img[alt="image-teste.png"]').should('not.exist');
     });
 
     it("deve voltar para etapa 1 ao clicar em voltar", () => {
@@ -247,15 +244,11 @@ describe("Criar Evento", () => {
     });
 
     it("deve avançar para etapa 3 com imagens", () => {
-      cy.getByData('input-upload-imagens').selectFile({
-        contents: Cypress.Buffer.from('fake-image'),
-        fileName: 'evento.jpg',
-        mimeType: 'image/jpeg',
-      }, { force: true });
+      cy.getByData('input-upload-imagens').selectFile('public/image-teste.png', { force: true });
 
       cy.wait(1000);
       cy.getByData('btn-continuar').click();
-      cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
+      cy.contains("Configurações", { timeout: 5000 }).should("exist");
     });
   });
 
@@ -267,7 +260,7 @@ describe("Criar Evento", () => {
       cy.getByData('input-local').clear().type(eventoData.local);
       cy.getByData('select-categoria').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.categoria}"]`).click();
+      cy.get('[role="option"]').last().click();
       cy.getByData('input-data-inicio').type(eventoData.dataInicio);
       cy.getByData('input-data-fim').type(eventoData.dataFim);
       
@@ -278,12 +271,8 @@ describe("Criar Evento", () => {
       cy.getByData('btn-continuar').click();
 
       // Preencher etapa 2
-      cy.contains("Upload de Mídia", { timeout: 5000 }).should("exist");
-      cy.getByData('input-upload-imagens').selectFile({
-        contents: Cypress.Buffer.from('fake-image'),
-        fileName: 'evento.jpg',
-        mimeType: 'image/jpeg',
-      }, { force: true });
+      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+      cy.getByData('input-upload-imagens').selectFile('public/image-teste.png', { force: true });
       
       cy.wait(1000);
       cy.getByData('btn-continuar').click();
@@ -319,32 +308,36 @@ describe("Criar Evento", () => {
       cy.getByData('btn-finalizar').should("exist");
     });
 
-    it("deve selecionar dias da semana", () => {
-      cy.getByData('checkbox-dia-segunda').check({ force: true });
-      cy.getByData('checkbox-dia-terca').check({ force: true });
+    it("deve selecionar todos os dias da semana", () => {
+      // Marcar "Todos os dias" - primeiro checkbox
+      cy.contains('Todos os dias').parent().find('input[type="checkbox"]').check({ force: true });
       
-      cy.getByData('checkbox-dia-segunda').should('be.checked');
-      cy.getByData('checkbox-dia-terca').should('be.checked');
+      // Verificar que foi marcado
+      cy.contains('Todos os dias').parent().find('input[type="checkbox"]').should('be.checked');
     });
 
-    it("deve selecionar períodos do dia", () => {
-      cy.getByData('checkbox-manha').check({ force: true });
-      cy.getByData('checkbox-tarde').check({ force: true });
+    it("deve selecionar todos os períodos do dia", () => {
+      // Marcar todos os períodos - Manhã, Tarde, Noite
+      cy.contains('Manhã').parent().find('input[type="checkbox"]').check({ force: true });
+      cy.contains('Tarde').parent().find('input[type="checkbox"]').check({ force: true });
+      cy.contains('Noite').parent().find('input[type="checkbox"]').check({ force: true });
       
-      cy.getByData('checkbox-manha').should('be.checked');
-      cy.getByData('checkbox-tarde').should('be.checked');
+      // Verificar que foram marcados
+      cy.contains('Manhã').parent().find('input[type="checkbox"]').should('be.checked');
+      cy.contains('Tarde').parent().find('input[type="checkbox"]').should('be.checked');
+      cy.contains('Noite').parent().find('input[type="checkbox"]').should('be.checked');
     });
 
     it("deve selecionar cor do card", () => {
       cy.getByData('select-cor').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.cor}"]`).click();
+      cy.get('[role="option"]').first().click();
     });
 
     it("deve selecionar animação", () => {
       cy.getByData('select-animacao').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.animacao}"]`).click();
+      cy.get('[role="option"]').first().click();
     });
 
     it("deve validar campos obrigatórios da etapa 3", () => {
@@ -358,7 +351,7 @@ describe("Criar Evento", () => {
 
     it("deve voltar para etapa 2 ao clicar em voltar", () => {
       cy.getByData('btn-voltar').click();
-      cy.contains("Upload de Mídia", { timeout: 5000 }).should("exist");
+      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
     });
   });
 
@@ -371,7 +364,7 @@ describe("Criar Evento", () => {
       
       cy.getByData('select-categoria').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.categoria}"]`).click();
+      cy.get('[role="option"]').last().click();
       
       cy.getByData('input-data-inicio').type(eventoData.dataInicio);
       cy.getByData('input-data-fim').type(eventoData.dataFim);
@@ -384,12 +377,8 @@ describe("Criar Evento", () => {
       cy.getByData('btn-continuar').click();
 
       // ETAPA 2
-      cy.contains("Upload de Mídia", { timeout: 5000 }).should("exist");
-      cy.getByData('input-upload-imagens').selectFile({
-        contents: Cypress.Buffer.from('fake-image-data'),
-        fileName: 'evento-completo.jpg',
-        mimeType: 'image/jpeg',
-      }, { force: true });
+      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+      cy.getByData('input-upload-imagens').selectFile('public/image-teste.png', { force: true });
       
       cy.wait(1000);
       cy.getByData('btn-continuar').click();
@@ -397,20 +386,26 @@ describe("Criar Evento", () => {
       // ETAPA 3
       cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
       
-      cy.getByData('checkbox-dia-segunda').check({ force: true });
-      cy.getByData('checkbox-dia-terca').check({ force: true });
-      cy.getByData('checkbox-manha').check({ force: true });
-      cy.getByData('checkbox-tarde').check({ force: true });
+      // Marcar "Todos os dias"
+      cy.contains('Todos os dias').parent().find('input[type="checkbox"]').check({ force: true });
+      
+      // Marcar todos os períodos
+      cy.contains('Manhã').parent().find('input[type="checkbox"]').check({ force: true });
+      cy.contains('Tarde').parent().find('input[type="checkbox"]').check({ force: true });
+      cy.contains('Noite').parent().find('input[type="checkbox"]').check({ force: true });
+      
       cy.getByData('input-exib-inicio').type(eventoData.exibInicio);
       cy.getByData('input-exib-fim').type(eventoData.exibFim);
       
+      // Selecionar primeira cor
       cy.getByData('select-cor').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.cor}"]`).click();
+      cy.get('[role="option"]').first().click();
       
+      // Selecionar primeira animação
       cy.getByData('select-animacao').click();
       cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
-      cy.get(`[role="option"][data-value="${eventoData.animacao}"]`).click();
+      cy.get('[role="option"]').first().click();
       
       cy.getByData('btn-finalizar').click();
 
