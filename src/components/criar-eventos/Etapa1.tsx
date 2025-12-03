@@ -114,13 +114,13 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg">
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="empreendedorismoInovacao">
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="empreendedorismo/Inovacao">
                       Empreendedorismo & Inovação
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="artisticoCultural">
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="artistico/Cultural">
                       Artistico & Cultural
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="cientificoTecnologico">Científico & Tecnológico</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="cientifico/Tecnologico">Científico & Tecnológico</SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="desportivos">
                       Desportivos
                     </SelectItem>
@@ -130,10 +130,10 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="workshops">
                       Workshops
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="atividadesSociais">
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="atividades/Sociais">
                       Atividades Sociais
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="gestaoPessoas">Gestão De Pessoas</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="gestao/Pessoas">Gestão De Pessoas</SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="outro">Outro</SelectItem>
                   </SelectContent>
                 </Select>
