@@ -100,7 +100,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   Categoria
                 </FormLabel>
                 <Select 
-                  onValueChange={(value) => {
+                  onValueChange={(value: string) => {
                     field.onChange(value);
                     // Revalida o campo após mudança
                     setTimeout(() => form.trigger("categoria"), 0);
@@ -251,15 +251,15 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
           name="tags"
           render={({ field }) => {
             const handleAddTag = () => {
-              if (tagInput.trim() && !field.value.includes(tagInput.trim())) {
-                field.onChange([...field.value, tagInput.trim()]);
+              if (tagInput.trim() && !field.value?.includes(tagInput.trim())) {
+                field.onChange([...(field.value ?? []), tagInput.trim()]);
                 setTagInput("");
                 setTimeout(() => form.trigger("tags"), 0);
               }
             };
             
             const handleRemoveTag = (index: number) => {
-              field.onChange(field.value.filter((_: string, i: number) => i !== index));
+              field.onChange((field.value ?? []).filter((_: string, i: number) => i !== index));
               setTimeout(() => form.trigger("tags"), 0);
             };
             
@@ -298,7 +298,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {field.value.map((tag: string, index: number) => (
+                  {field.value?.map((tag: string, index: number) => (
                     <span
                       key={index}
                       className="bg-purple-100 text-[#553C9A] px-4 py-2 rounded-full text-sm flex items-center gap-2 font-medium"
