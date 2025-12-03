@@ -134,12 +134,15 @@ export default function CardContainer({
               </SelectTrigger>
               <SelectContent className="bg-white">
                   <SelectItem value="all" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Todas as categorias</SelectItem>
+                  <SelectItem value="empreendedorismo - Inovacao" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Empreendedorismo & Inovação</SelectItem>
+                  <SelectItem value="artistico - Cultural" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Artistico & Cultural</SelectItem>
+                  <SelectItem value="cientifico - Tecnologico" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Científico & Tecnológico</SelectItem>
+                  <SelectItem value="desportivos" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Desportivos</SelectItem>
                   <SelectItem value="palestra" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Palestra</SelectItem>
-                  <SelectItem value="seminario" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Seminário</SelectItem>
-                  <SelectItem value="workshop" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Workshop</SelectItem>
-                  <SelectItem value="curso" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Curso</SelectItem>
-                  <SelectItem value="esportivo" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Esportivo</SelectItem>
-                  <SelectItem value="outros" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Outros</SelectItem>
+                  <SelectItem value="workshops" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Workshops</SelectItem>
+                  <SelectItem value="atividades - Sociais" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Atividades Sociais</SelectItem>
+                  <SelectItem value="gestao - Pessoas" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Gestão de Pessoas</SelectItem>
+                  <SelectItem value="outro" className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer">Outro</SelectItem>
               </SelectContent>
             </Select>
           </div>
