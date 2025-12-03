@@ -27,7 +27,7 @@ interface Etapa1InformacoesBasicasProps {
 
 export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps) {
   const [tagInput, setTagInput] = useState("");
-  
+
   return (
     <>
       {/* Step 1: Basic Information */}
@@ -99,12 +99,12 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                 <FormLabel className="text-sm font-semibold text-[#2D3748]">
                   Categoria
                 </FormLabel>
-                <Select 
-                  onValueChange={(value) => {
+                <Select
+                  onValueChange={(value: string) => {
                     field.onChange(value);
                     // Revalida o campo após mudança
                     setTimeout(() => form.trigger("categoria"), 0);
-                  }} 
+                  }}
                   value={field.value}
                   defaultValue={field.value}
                 >
@@ -114,13 +114,15 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-white border border-[#CBD5E0] rounded-lg shadow-lg">
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="empreendedorismoInovacao">
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="empreendedorismo - Inovacao">
                       Empreendedorismo & Inovação
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="artisticoCultural">
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="artistico - Cultural">
                       Artistico & Cultural
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="cientificoTecnologico">Científico & Tecnológico</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="cientifico - Tecnologico">
+                      Científico & Tecnológico
+                    </SelectItem>
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="desportivos">
                       Desportivos
                     </SelectItem>
@@ -130,11 +132,15 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="workshops">
                       Workshops
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="atividadesSociais">
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="atividades - Sociais">
                       Atividades Sociais
                     </SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="gestaoPessoas">Gestão De Pessoas</SelectItem>
-                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer"  value="outro">Outro</SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="gestao - Pessoas">
+                      Gestão De Pessoas
+                    </SelectItem>
+                    <SelectItem className="text-[#2D3748] hover:bg-[#F7FAFC] hover:text-[#805AD5] cursor-pointer" value="outro">
+                      Outro
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -251,18 +257,18 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
           name="tags"
           render={({ field }) => {
             const handleAddTag = () => {
-              if (tagInput.trim() && !field.value.includes(tagInput.trim())) {
-                field.onChange([...field.value, tagInput.trim()]);
+              if (tagInput.trim() && !field.value?.includes(tagInput.trim())) {
+                field.onChange([...(field.value ?? []), tagInput.trim()]);
                 setTagInput("");
                 setTimeout(() => form.trigger("tags"), 0);
               }
             };
-            
+
             const handleRemoveTag = (index: number) => {
-              field.onChange(field.value.filter((_: string, i: number) => i !== index));
+              field.onChange((field.value ?? []).filter((_: string, i: number) => i !== index));
               setTimeout(() => form.trigger("tags"), 0);
             };
-            
+
             return (
               <FormItem>
                 <FormLabel className="text-sm font-semibold text-[#2D3748] flex items-center gap-2">
@@ -286,8 +292,8 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     }}
                     className="flex-1 border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
                   />
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     onClick={handleAddTag}
                     className="px-6 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm"
                     data-test="btn-adicionar-tag"
@@ -298,7 +304,7 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {field.value.map((tag: string, index: number) => (
+                  {field.value?.map((tag: string, index: number) => (
                     <span
                       key={index}
                       className="bg-purple-100 text-[#553C9A] px-4 py-2 rounded-full text-sm flex items-center gap-2 font-medium"
