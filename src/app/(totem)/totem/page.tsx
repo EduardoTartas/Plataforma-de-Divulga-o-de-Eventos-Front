@@ -286,6 +286,35 @@ export default function EventosPage() {
             {/* Container do Conteúdo (Overlay + Barra Lateral) */}
             <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch relative">
 
+                {/* Indicadores de Imagem */}
+                <div className="flex flex-col gap-3 absolute bottom-4 left-20 transform -translate-x-1/2 sm:bottom-6 md:bottom-8 lg:bottom-10 xl:bottom-12 2xl:bottom-10">
+                    <div className="flex gap-1 lg:gap-0.5">
+                        {Array.from({ length: eventoAtual.imagens.length || 3 }).map((_, index) => (
+                            <div
+                                key={index}
+                                className={`h-4.5 w-4.5 sm:h-5 sm:w-5 lg:h-4 lg:w-4 rounded-full transition-all ${index === imagemAtualIndex
+                                    ? 'bg-white'
+                                    : 'bg-white/30'
+                                    }`}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Barra de Progresso de Loops */}
+                    <div className="w-20 sm:w-24 lg:w-20 h-1 sm:h-1.5 lg:h-1 bg-white/30 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-white rounded-full transition-all duration-300"
+                            style={{
+                                width: `${(() => {
+                                    // Usa o mesmo fallback do useEffect (padrão: 3)
+                                    const loops = eventoAtual.loops || 3;
+                                    return ((repeticoesCompletadas + 1) / loops) * 100;
+                                })()}%`
+                            }}
+                        />
+                    </div>
+                </div>
+
                 {/* Barra Lateral de Informações */}
                 <div className={`relative h-auto sm:h-full w-full sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:max-w-2xl
                     p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 2xl:p-10
@@ -303,7 +332,7 @@ export default function EventosPage() {
                                 </div>
                                 {environment === 'development' ? (
                                     <>
-                                        {/* mostrar a resolução da tela atual */}
+                                        {/* mostrar a resolução da tela atual - APENAS EM DESENVOLVIMENTO*/}
                                         <span className="text-red-500 ml-2 text-xs">
                                             [{screenSize.width}x{screenSize.height}]
                                             <span className="hidden sm:inline"> SM</span>
@@ -317,17 +346,6 @@ export default function EventosPage() {
                                     <></>
                                 )}
                             </h1>
-                            <div className="flex gap-1 lg:gap-0.5">
-                                {Array.from({ length: eventoAtual.loops || 3 }).map((_, index) => (
-                                    <div
-                                        key={index}
-                                        className={`h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-1 lg:w-1 rounded-full transition-all ${index <= repeticoesCompletadas
-                                            ? 'bg-white'
-                                            : 'bg-white/30'
-                                            }`}
-                                    />
-                                ))}
-                            </div>
                         </div>
                         <h1 className="text-gray-100 text-2xl sm:text-3xl md:text-4xl lg:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-3 font-inter leading-tight">
                             {eventoAtual.titulo}
