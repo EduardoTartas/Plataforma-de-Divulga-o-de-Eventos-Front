@@ -1,3 +1,348 @@
 /// <reference types="cypress" />
+import { faker } from '@faker-js/faker/locale/pt_BR';
 
-// Testes E2E - Editar Evento
+Cypress.on("uncaught:exception", () => false);
+
+describe("Editar Evento", () => {
+  // Variáveis compartilhadas entre todos os testes
+  let tituloOriginal;
+  let eventoData;
+  let eventoEditado;
+
+  before(() => {
+    // Gerar dados uma única vez
+    const today = new Date();
+    const todayFormatted = today.toISOString().slice(0, 16);
+    
+    tituloOriginal = 'CypressEdit ' + faker.music.songName().substring(0, 15) + ' ' + Date.now();
+    
+    eventoData = {
+      titulo: tituloOriginal,
+      descricao: "Evento para testes de EDIÇÃO - " + todayFormatted,
+      local: faker.location.streetAddress(),
+      dataInicio: todayFormatted,
+      dataFim: new Date(today.getTime() + 3 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      link: faker.internet.url(),
+      tags: [faker.word.noun(), faker.word.adjective()],
+      exibInicio: today.toISOString().split('T')[0],
+      exibFim: faker.date.future().toISOString().split('T')[0],
+    };
+
+    eventoEditado = {
+      titulo: "EDITADO " + Date.now(),
+      descricao: "Descrição EDITADA - " + todayFormatted,
+      local: "Local EDITADO - " + faker.location.city(),
+    };
+
+    // Salvar no Cypress.env para uso em outros hooks
+    Cypress.env('tituloOriginal', tituloOriginal);
+    Cypress.env('eventoEditado', eventoEditado);
+
+    cy.intercept('POST', '**/eventos').as('createEvento');
+
+    // Login e criar evento
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/criar_eventos`);
+    cy.url().should('include', '/criar_eventos');
+    cy.contains('Criar Novo Evento').should('be.visible');
+    cy.getByData('input-titulo').should('be.visible');
+
+    // Etapa 1
+    cy.getByData('input-titulo').type(eventoData.titulo);
+    cy.getByData('input-descricao').type(eventoData.descricao);
+    cy.getByData('input-local').type(eventoData.local);
+    cy.getByData('select-categoria').click();
+    cy.get('[role="listbox"]').should('be.visible');
+    cy.get('[role="option"]').last().click();
+    cy.getByData('input-data-inicio').type(eventoData.dataInicio);
+    cy.getByData('input-data-fim').type(eventoData.dataFim);
+    cy.getByData('input-link').type(eventoData.link);
+    eventoData.tags.forEach((tag) => {
+      cy.getByData('input-tag').type(`${tag}{enter}`);
+    });
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Continuar').click();
+
+    // Etapa 2
+    cy.getByData('drop-zone').should('be.visible');
+    cy.getByData('file-input').selectFile('public/image-teste.png', { force: true });
+    cy.get('img[alt="image-teste.png"]', { timeout: 10000 }).should('exist');
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Continuar').click();
+
+    // Etapa 3
+    cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
+    cy.getByData('checkbox-todos-dias').check({ force: true });
+    cy.getByData('checkbox-manha').check({ force: true });
+    cy.getByData('checkbox-tarde').check({ force: true });
+    cy.getByData('checkbox-noite').check({ force: true });
+    cy.getByData('input-exib-inicio').type(eventoData.exibInicio);
+    cy.getByData('input-exib-fim').type(eventoData.exibFim);
+    cy.getByData('select-cor').click();
+    cy.get('[role="listbox"]').should('be.visible');
+    cy.get('[role="option"]').first().click();
+    cy.get('[role="listbox"]').should('not.exist');
+    cy.getByData('select-animacao').click();
+    cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
+    cy.get('[role="option"]').first().click();
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Finalizar').click();
+
+    // Verificar criação
+    cy.wait('@createEvento').then((interception) => {
+      expect([200, 201]).to.include(interception.response.statusCode);
+    });
+
+    cy.get('.Toastify__toast', { timeout: 10000 }).should('be.visible');
+    cy.url().should("include", "/meus_eventos");
+  });
+
+  beforeEach(() => {
+    cy.intercept('PUT', '**/eventos/*').as('updateEvento');
+    cy.intercept('GET', '**/eventos/*').as('getEvento');
+
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/meus_eventos`);
+    cy.url().should('include', '/meus_eventos');
+    cy.getByData('card-container').should('be.visible');
+  });
+
+  // Helper para navegar até a edição do evento
+  const navegarParaEdicao = (busca) => {
+    cy.getByData('search-input').clear().type(busca);
+    cy.wait(1000);
+    cy.getByData('event-card').first().within(() => {
+      cy.getByData('event-edit-button').click();
+    });
+    cy.url().should('include', '/editar_eventos/');
+    cy.contains('Editar Evento', { timeout: 10000 }).should('be.visible');
+  };
+
+  // Helper para salvar alterações (sem imagem)
+  const salvarAlteracoes = () => {
+    cy.scrollTo('bottom');
+    cy.getByData('btn-salvar-alteracoes').click();
+    cy.wait('@updateEvento');
+    cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
+    cy.get('.Toastify__toast--success').should('contain.text', 'Evento atualizado com sucesso!');
+    cy.url().should("include", "/meus_eventos");
+  };
+
+  // Helper para salvar alterações (com imagem)
+  const salvarAlteracoesComImagem = () => {
+    cy.scrollTo('bottom');
+    cy.getByData('btn-salvar-alteracoes').click();
+    cy.wait('@updateEvento');
+    cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
+    cy.get('.Toastify__toast--success').should('contain.text', 'imagens atualizados com sucesso!');
+    cy.url().should("include", "/meus_eventos");
+  };
+
+  // Helper para avançar até etapa 3
+  const avancarParaEtapa3 = () => {
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Continuar').click();
+    cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Continuar').click();
+    cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
+  };
+
+  describe("Acesso à Edição via Meus Eventos", () => {
+    it("deve navegar para edição ao clicar no botão editar do card", () => {
+      const titulo = Cypress.env('tituloOriginal');
+      navegarParaEdicao(titulo.substring(0, 15));
+    });
+  });
+
+  describe("Etapa 1 - Edição de Informações Básicas", () => {
+    it("deve carregar dados existentes nos campos", () => {
+      const titulo = Cypress.env('tituloOriginal');
+      navegarParaEdicao(titulo.substring(0, 15));
+      
+      cy.getByData('input-titulo').should('not.have.value', '');
+      cy.getByData('input-descricao').should('not.have.value', '');
+      cy.getByData('input-local').should('not.have.value', '');
+    });
+
+    it("deve editar o título e salvar com sucesso", () => {
+      const titulo = Cypress.env('tituloOriginal');
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(titulo.substring(0, 15));
+      
+      cy.getByData('input-titulo').clear().type(editado.titulo);
+      avancarParaEtapa3();
+      salvarAlteracoes();
+    });
+
+    it("deve editar a descrição e salvar com sucesso", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('input-descricao').clear().type(editado.descricao);
+      avancarParaEtapa3();
+      salvarAlteracoes();
+    });
+
+    it("deve editar o local e salvar com sucesso", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('input-local').clear().type(editado.local);
+      avancarParaEtapa3();
+      salvarAlteracoes();
+    });
+
+    it("deve alterar a categoria e salvar com sucesso", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('select-categoria').click();
+      cy.get('[role="listbox"]').should('be.visible');
+      cy.get('[role="option"]').first().click();
+      avancarParaEtapa3();
+      salvarAlteracoes();
+    });
+  });
+
+  describe("Etapa 2 - Edição de Imagens", () => {
+    it("deve exibir área de upload", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.scrollTo('bottom');
+      cy.contains('button', 'Continuar').click();
+      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+      cy.getByData('drop-zone').should('be.visible');
+    });
+
+    it("deve adicionar nova imagem e salvar com sucesso", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.scrollTo('bottom');
+      cy.contains('button', 'Continuar').click();
+      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+      
+      cy.getByData('file-input').selectFile('public/image-teste.png', { force: true });
+      cy.get('img[alt="image-teste.png"]', { timeout: 10000 }).should('exist');
+      
+      cy.scrollTo('bottom');
+      cy.contains('button', 'Continuar').click();
+      cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
+      salvarAlteracoesComImagem();
+    });
+  });
+
+  describe("Etapa 3 - Edição de Configurações", () => {
+    it("deve exibir configurações de exibição", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      avancarParaEtapa3();
+      
+      cy.contains("Configurações de Exibição no Totem").should("exist");
+      cy.contains("Segunda-feira").should("exist");
+      cy.contains("Manhã").should("exist");
+    });
+
+    it("deve alterar dias de exibição e salvar com sucesso", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      avancarParaEtapa3();
+      
+      cy.getByData('checkbox-todos-dias').uncheck({ force: true });
+      cy.getByData('checkbox-todos-dias').check({ force: true });
+      salvarAlteracoes();
+    });
+
+    it("deve alterar turnos de exibição e salvar com sucesso", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      avancarParaEtapa3();
+      
+      cy.getByData('checkbox-manha').check({ force: true });
+      cy.getByData('checkbox-tarde').check({ force: true });
+      salvarAlteracoes();
+    });
+
+    it("deve alterar cor do card e salvar com sucesso", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      avancarParaEtapa3();
+      
+      cy.getByData('select-cor').click();
+      cy.get('[role="listbox"]').should('be.visible');
+      cy.get('[role="option"]').eq(1).click();
+      salvarAlteracoes();
+    });
+  });
+
+  describe("Compartilhar Permissões", () => {
+    it("deve exibir seção de compartilhar permissões", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('compartilhar-permissoes').should('exist');
+      cy.contains("Compartilhar Evento").should("exist");
+    });
+
+    it("deve exibir campo para adicionar email", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('input-compartilhar-email').should('be.visible');
+    });
+
+    it("deve validar email inválido", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('input-compartilhar-email').type('email-invalido');
+      cy.getByData('input-compartilhar-email').type('{enter}');
+      cy.get('.Toastify__toast--error', { timeout: 5000 }).should('be.visible');
+    });
+
+    it("deve impedir compartilhar consigo mesmo", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('input-compartilhar-email').type('admin@admin.com');
+      cy.getByData('input-compartilhar-email').type('{enter}');
+      cy.get('.Toastify__toast--error', { timeout: 5000 }).should('be.visible');
+    });
+  });
+
+  describe("Modal de Cancelamento na Edição", () => {
+    it("deve abrir modal ao clicar em cancelar", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.scrollTo('bottom');
+      cy.contains('button', 'Cancelar').click();
+      cy.contains("Cancelar").should("exist");
+    });
+
+    it("deve fechar modal ao clicar em voltar", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.scrollTo('bottom');
+      cy.contains('button', 'Cancelar').click();
+      cy.getByData('btn-voltar-modal').click();
+      cy.contains('Editar Evento').should('be.visible');
+    });
+
+    it("deve redirecionar ao confirmar cancelamento", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      cy.getByData('input-titulo').clear().type("Alteração descartada");
+      cy.scrollTo('bottom');
+      cy.contains('button', 'Cancelar').click();
+      cy.getByData('btn-confirmar-cancelar').click();
+      cy.url().should("include", "/meus_eventos");
+    });
+  });
+});
