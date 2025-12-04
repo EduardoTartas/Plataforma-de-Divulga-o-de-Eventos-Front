@@ -305,10 +305,11 @@ export default function EventosPage() {
                         <div
                             className="h-full bg-white rounded-full transition-all duration-300"
                             style={{
-                                width: `${eventoAtual.loops && eventoAtual.loops > 0
-                                    ? ((repeticoesCompletadas + 1) / eventoAtual.loops) * 100
-                                    : 0
-                                    }%`
+                                width: `${(() => {
+                                    // Usa o mesmo fallback do useEffect (padrão: 3)
+                                    const loops = eventoAtual.loops || 3;
+                                    return ((repeticoesCompletadas + 1) / loops) * 100;
+                                })()}%`
                             }}
                         />
                     </div>
