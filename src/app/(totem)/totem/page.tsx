@@ -287,7 +287,8 @@ export default function EventosPage() {
             <main className="h-screen w-screen overflow-hidden bg-black/15 flex justify-end items-center sm:items-stretch relative">
 
                 {/* Indicadores de Imagem */}
-                    <div className="flex gap-1 lg:gap-0.5 absolute bottom-4 left-20 transform -translate-x-1/2 sm:bottom-6 md:bottom-8 lg:bottom-10 xl:bottom-12 2xl:bottom-10">
+                <div className="flex flex-col gap-3 absolute bottom-4 left-20 transform -translate-x-1/2 sm:bottom-6 md:bottom-8 lg:bottom-10 xl:bottom-12 2xl:bottom-10">
+                    <div className="flex gap-1 lg:gap-0.5">
                         {Array.from({ length: eventoAtual.imagens.length || 3 }).map((_, index) => (
                             <div
                                 key={index}
@@ -298,7 +299,19 @@ export default function EventosPage() {
                             />
                         ))}
                     </div>
-                <div className="">
+
+                    {/* Barra de Progresso de Loops */}
+                    <div className="w-20 sm:w-24 lg:w-20 h-1 sm:h-1.5 lg:h-1 bg-white/30 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-white rounded-full transition-all duration-300"
+                            style={{
+                                width: `${eventoAtual.loops && eventoAtual.loops > 0
+                                    ? ((repeticoesCompletadas + 1) / eventoAtual.loops) * 100
+                                    : 0
+                                    }%`
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {/* Barra Lateral de Informações */}
