@@ -174,7 +174,7 @@ export default function CriarEvento() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={() => openPreview(blobUrls)}
+                    onClick={async () => await openPreview(blobUrls)}
                     disabled={loading || validImages.length === 0}
                     data-test="btn-preview"
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"

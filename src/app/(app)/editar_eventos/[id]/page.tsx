@@ -300,13 +300,13 @@ function EditarEventoContent() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       // Combinar imagens existentes (não deletadas) com as novas
                       const existingUrls = existingMedia
                         .filter(m => !mediaToDelete.includes(m._id))
                         .map(m => m.midiLink);
                       const allImages = [...existingUrls, ...blobUrls];
-                      openPreview(allImages);
+                      await openPreview(allImages);
                     }}
                     disabled={loading || (validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0)}
                     data-test="btn-preview"
