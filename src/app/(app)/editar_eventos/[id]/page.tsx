@@ -300,7 +300,14 @@ function EditarEventoContent() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={() => openPreview(blobUrls)}
+                    onClick={() => {
+                      // Combinar imagens existentes (não deletadas) com as novas
+                      const existingUrls = existingMedia
+                        .filter(m => !mediaToDelete.includes(m._id))
+                        .map(m => m.midiLink);
+                      const allImages = [...existingUrls, ...blobUrls];
+                      openPreview(allImages);
+                    }}
                     disabled={loading || (validImages.length === 0 && existingMedia.filter(m => !mediaToDelete.includes(m._id)).length === 0)}
                     data-test="btn-preview"
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"

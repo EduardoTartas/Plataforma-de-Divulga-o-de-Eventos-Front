@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatarDataEvento, formatarHorarioEvento } from "@/lib/utils";
 import { calcularDuracaoPorImagem } from "@/lib/calculadoraDuracao";
@@ -10,26 +10,17 @@ export default function PreviewEvento() {
     const router = useRouter();
     const [eventoPreview, setEventoPreview] = useState<any>(null);
     const [imagemAtualIndex, setImagemAtualIndex] = useState(0);
-    const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
     const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
     const [repeticoesCompletadas, setRepeticoesCompletadas] = useState(0);
 
-    // useEffect para capturar o tamanho da tela
-    useEffect(() => {
-        const updateSize = () => {
-            setScreenSize({ width: window.innerWidth, height: window.innerHeight });
-        };
-        updateSize();
-        window.addEventListener('resize', updateSize);
-        return () => window.removeEventListener('resize', updateSize);
-    }, []);
-
     // Função para carregar os dados do preview
-    const carregarDadosPreview = () => {
+    const carregarDadosPreview = useCallback(() => {
         const dadosForm = localStorage.getItem('criar_evento_draft');
 
-        // Buscar as imagens do sessionStorage (onde estão os blob URLs)
-        const blobUrlsSession = sessionStorage.getItem('preview-evento-blobs');
+        // Buscar as imagens do localStorage (sessionStorage não é compartilhado entre janelas)
+        const blobUrlsStorage = localStorage.getItem('preview-evento-blobs');
+        // Fallback: tentar também do criar-evento-images (onde as imagens existentes são salvas)
+        const existingImagesStorage = localStorage.getItem('criar-evento-images');
 
         if (!dadosForm) {
             // Voltar para criar ou editar
@@ -45,12 +36,22 @@ export default function PreviewEvento() {
             const form = JSON.parse(dadosForm);
             let imagens: string[] = [];
 
-            // Tentar carregar os blob URLs do sessionStorage primeiro
-            if (blobUrlsSession) {
+            // Tentar carregar os blob URLs do localStorage primeiro
+            if (blobUrlsStorage) {
                 try {
-                    imagens = JSON.parse(blobUrlsSession) || [];
+                    imagens = JSON.parse(blobUrlsStorage) || [];
                 } catch (e) {
                     console.warn('Falha ao parsear preview-evento-blobs', e);
+                    imagens = [];
+                }
+            }
+
+            // Se não tiver blob URLs, tentar usar as imagens existentes (modo edição)
+            if (imagens.length === 0 && existingImagesStorage) {
+                try {
+                    imagens = JSON.parse(existingImagesStorage) || [];
+                } catch (e) {
+                    console.warn('Falha ao parsear criar-evento-images', e);
                     imagens = [];
                 }
             }
@@ -103,12 +104,12 @@ export default function PreviewEvento() {
                 router.push('/criar_eventos');
             }
         }
-    };
+    }, [router]);
 
     // Carrega os dados do localStorage quando a página é montada
     useEffect(() => {
         carregarDadosPreview();
-    }, [router]);
+    }, [carregarDadosPreview]);
 
     // useEffect para slideshow automático com duração calculada
     useEffect(() => {

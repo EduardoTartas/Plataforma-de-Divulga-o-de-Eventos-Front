@@ -1,15 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import Header from "@/components/ui/header";
 import CardContainer from "@/components/ui/card-container";
 import Modal from "@/components/ui/modal";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
 } from "@/components/ui/pagination";
 import { useEventos, useToggleEventStatus, useDeleteEvent } from "@/hooks/useEventos";
 import { ThreeDot } from "react-loading-indicators";
@@ -20,7 +17,6 @@ const ITEMS_PER_PAGE = 8;
 export default function MeusEventosPage() {
     const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
-    const queryClient = useQueryClient();
 
     const [filters, setFilters] = useState({
         search: "",
@@ -34,14 +30,14 @@ export default function MeusEventosPage() {
         eventTitle: "",
     });
 
-    const { data, isLoading, isError, error } = useEventos({
+    const { data, isLoading, isError } = useEventos({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         filters,
     });
 
-    const { toggleStatus, isPending: toggleStatusIsPending } = useToggleEventStatus();
-    const { deleteEvent, isPending: deleteEventIsPending } = useDeleteEvent();
+    const { toggleStatus } = useToggleEventStatus();
+    const { deleteEvent } = useDeleteEvent();
 
     const eventos = data?.data?.docs || [];
     const totalPages = data?.data?.totalPages || 0;
@@ -74,7 +70,7 @@ export default function MeusEventosPage() {
         try {
             await deleteEvent(deleteModal.eventId);
             setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" });
-        } catch (error) {
+        } catch (_error) {
             setDeleteModal({ isOpen: false, eventId: "", eventTitle: "" });
         }
     };
@@ -84,7 +80,7 @@ export default function MeusEventosPage() {
 
         try {
             await toggleStatus({ eventId, newStatus });
-        } catch (error) {}
+        } catch (_error) {}
     };
 
     const handleCriarEvento = () => {
@@ -139,7 +135,7 @@ export default function MeusEventosPage() {
                                 Erro ao carregar eventos
                             </h3>
                             <p className="text-red-600">
-                                {error instanceof Error ? error.message : "Ocorreu um erro desconhecido"}
+                                Ocorreu um erro ao carregar os eventos. Tente novamente.
                             </p>
                         </div>
                     )}

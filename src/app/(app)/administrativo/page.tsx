@@ -1,8 +1,8 @@
 "use client"
 
 import { Table, TableHead, TableHeader, TableRow, TableBody, TableCell } from "@/components/ui/table"
-import { Usuario, UsuarioApi, UsuariosApiResponse } from "@/types/eventos"
-import { useState, useEffect } from "react"
+import { Usuario, UsuarioApi } from "@/types/eventos"
+import { useState, useEffect, useCallback } from "react"
 import { ToggleLeft, ToggleRight, Trash2, UserPlus, CheckCircle, XCircle } from 'lucide-react'
 import { fetchData } from "@/services/api"
 import Modal from "@/components/ui/modal"
@@ -151,7 +151,7 @@ export default function AdministrativoPage() {
         }
     }
 
-    const buscarUsuarios = async () => {
+    const buscarUsuarios = useCallback(async () => {
         try {
             setCarregandoUsuarios(true);
             setErroUsuarios(null);
@@ -202,7 +202,7 @@ export default function AdministrativoPage() {
         } finally {
             setCarregandoUsuarios(false);
         }
-    }
+    }, [currentPage]);
 
     const cadastrarUsuario = async () => {
         try {
@@ -239,13 +239,13 @@ export default function AdministrativoPage() {
         }
     }
 
-    const limparModal = async () => {
-        setModalAtivo(null),
-            setSucessoModal(false),
-            setCarregandoModal(false),
-            setErroModal(null),
-            setNovoUsuarioNome(''),
-            setNovoUsuarioEmail('')
+    const limparModal = () => {
+        setModalAtivo(null);
+        setSucessoModal(false);
+        setCarregandoModal(false);
+        setErroModal(null);
+        setNovoUsuarioNome('');
+        setNovoUsuarioEmail('');
     }
 
     const handlePageChange = (page: number) => {
@@ -259,7 +259,7 @@ export default function AdministrativoPage() {
 
     useEffect(() => {
         buscarUsuarios();
-    }, [])
+    }, [buscarUsuarios])
 
     // Atualiza a página quando currentPage muda (exceto na montagem inicial)
     useEffect(() => {
