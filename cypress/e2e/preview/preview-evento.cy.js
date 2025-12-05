@@ -111,7 +111,7 @@ describe("Preview de Evento", () => {
 
       // Abrir preview em nova janela e verificar conteúdo
       cy.window().then((win) => {
-        const blobUrls = win.sessionStorage.getItem("preview-evento-blobs");
+        const blobUrls = win.localStorage.getItem("preview-evento-blobs");
         const draftData = win.localStorage.getItem("criar_evento_draft");
 
         // Visitar diretamente a página de preview (simula o que window.open faz)
@@ -119,7 +119,7 @@ describe("Preview de Evento", () => {
           onBeforeLoad(previewWin) {
             previewWin.localStorage.setItem("criar_evento_draft", draftData);
             if (blobUrls) {
-              previewWin.sessionStorage.setItem("preview-evento-blobs", blobUrls);
+              previewWin.localStorage.setItem("preview-evento-blobs", blobUrls);
             }
           },
         });
@@ -162,7 +162,7 @@ describe("Preview de Evento", () => {
       cy.visit(`${baseUrl}/preview-evento`, {
         onBeforeLoad(win) {
           win.localStorage.setItem("criar_evento_draft", JSON.stringify(draftData));
-          win.sessionStorage.setItem(
+          win.localStorage.setItem(
             "preview-evento-blobs",
             JSON.stringify(["/image-teste.png"])
           );
@@ -201,7 +201,10 @@ describe("Preview de Evento", () => {
     });
 
     it("deve exibir imagem de fundo", () => {
-      cy.get('img[alt="Imagem de fundo do evento"]', { timeout: 10000 }).should("be.visible");
+      cy.get('img[alt="Imagem de fundo do evento"]', { timeout: 10000 })
+        .should("exist")
+        .and("have.attr", "src")
+        .and("include", "image-teste");
     });
 
     it("deve exibir botão de atualizar preview", () => {
@@ -221,7 +224,7 @@ describe("Preview de Evento", () => {
       cy.visit(`${baseUrl}/preview-evento`, {
         onBeforeLoad(win) {
           win.localStorage.removeItem("criar_evento_draft");
-          win.sessionStorage.removeItem("preview-evento-blobs");
+          win.localStorage.removeItem("preview-evento-blobs");
         },
       });
 
@@ -250,7 +253,7 @@ describe("Preview de Evento", () => {
       cy.visit(`${baseUrl}/preview-evento`, {
         onBeforeLoad(win) {
           win.localStorage.setItem("criar_evento_draft", JSON.stringify(draftDataSemLink));
-          win.sessionStorage.setItem(
+          win.localStorage.setItem(
             "preview-evento-blobs",
             JSON.stringify(["/image-teste.png"])
           );
@@ -292,7 +295,7 @@ describe("Preview de Evento", () => {
         cy.visit(`${baseUrl}/preview-evento`, {
           onBeforeLoad(win) {
             win.localStorage.setItem("criar_evento_draft", JSON.stringify(draftData));
-            win.sessionStorage.setItem(
+            win.localStorage.setItem(
               "preview-evento-blobs",
               JSON.stringify(["/image-teste.png"])
             );
