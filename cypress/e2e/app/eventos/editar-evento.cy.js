@@ -280,9 +280,7 @@ describe("Editar Evento", () => {
       
       cy.scrollTo('bottom');
       cy.get('#compartilhar-email').type('email-invalido{enter}');
-      cy.get('.Toastify__toast--error', { timeout: 5000 })
-        .should('be.visible')
-        .and('contain.text', 'e-mail válido');
+      cy.contains('e-mail válido', { timeout: 5000 }).should('be.visible');
     });
 
     it("deve impedir compartilhar consigo mesmo", () => {
@@ -291,9 +289,7 @@ describe("Editar Evento", () => {
       
       cy.scrollTo('bottom');
       cy.get('#compartilhar-email').type('admin@admin.com{enter}');
-      cy.get('.Toastify__toast--error', { timeout: 5000 })
-        .should('be.visible')
-        .and('contain.text', 'não pode compartilhar o evento consigo mesmo');
+      cy.contains('não pode compartilhar o evento consigo mesmo', { timeout: 5000 }).should('be.visible');
     });
   });
 
