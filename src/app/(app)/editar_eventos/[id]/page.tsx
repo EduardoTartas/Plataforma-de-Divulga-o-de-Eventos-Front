@@ -142,6 +142,9 @@ function EditarEventoContent() {
     const ok = await submit(data);
     if (ok) {
       closePreview();
+      // Limpar localStorage após salvar com sucesso
+      localStorage.removeItem('criar_evento_draft');
+      localStorage.removeItem('criar-evento-images');
       router.push("/meus_eventos");
     }
   };
@@ -274,6 +277,9 @@ function EditarEventoContent() {
                   type="button"
                   onClick={() => {
                     closePreview();
+                    // Limpar localStorage ao cancelar edição para não interferir na criação de novos eventos
+                    localStorage.removeItem('criar_evento_draft');
+                    localStorage.removeItem('criar-evento-images');
                     router.push("/meus_eventos");
                   }}
                   disabled={loading}
