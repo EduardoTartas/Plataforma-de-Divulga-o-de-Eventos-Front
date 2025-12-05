@@ -121,7 +121,7 @@ export function CompartilharPermissoes({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-test="compartilhar-permissoes">
       <div>
         <Label className="text-sm font-semibold text-[#2D3748] flex items-center gap-2">
           <svg className="w-5 h-5 text-[#805AD5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,6 +137,7 @@ export function CompartilharPermissoes({
       <div className="flex gap-2">
         <Input
           id="compartilhar-email"
+          data-test="input-compartilhar-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -154,6 +155,7 @@ export function CompartilharPermissoes({
           type="button"
           onClick={() => handleAdicionarUsuario()}
           disabled={isLoading || !email.trim()}
+          data-test="btn-adicionar-usuario"
           className="px-6 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,10 +164,11 @@ export function CompartilharPermissoes({
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mt-3">
+      <div className="flex flex-wrap gap-2 mt-3" data-test="lista-usuarios-compartilhados">
         {usuariosCompartilhados.map((usuario) => (
           <span
             key={usuario._id}
+            data-test={`usuario-compartilhado-${usuario._id}`}
             className="bg-purple-100 text-[#553C9A] px-4 py-2 rounded-full text-sm flex items-center gap-2 font-medium"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,6 +179,7 @@ export function CompartilharPermissoes({
               type="button"
               onClick={() => handleRemoverUsuario(usuario._id, usuario.email)}
               disabled={isLoading}
+              data-test={`btn-remover-usuario-${usuario._id}`}
               className="text-[#553C9A] hover:text-[#44337A] font-bold text-lg disabled:opacity-50"
               title="Remover permissão"
             >

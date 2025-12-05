@@ -163,10 +163,11 @@ export function Etapa3ConfiguracoesExibicao({
                 name="exibManha"
                 render={({ field }) => (
                   <FormItem>
-                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
+                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test="checkbox-periodo-manha">
                       <FormControl>
                         <input
                           type="checkbox"
+                          name="exibManha"
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
@@ -188,10 +189,11 @@ export function Etapa3ConfiguracoesExibicao({
                 name="exibTarde"
                 render={({ field }) => (
                   <FormItem>
-                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
+                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test="checkbox-periodo-tarde">
                       <FormControl>
                         <input
                           type="checkbox"
+                          name="exibTarde"
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
@@ -213,10 +215,11 @@ export function Etapa3ConfiguracoesExibicao({
                 name="exibNoite"
                 render={({ field }) => (
                   <FormItem>
-                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all">
+                    <label className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-[#805AD5] transition-all" data-test="checkbox-periodo-noite">
                       <FormControl>
                         <input
                           type="checkbox"
+                          name="exibNoite"
                           checked={field.value}
                           onChange={field.onChange}
                           className="h-4 w-4 text-[#805AD5] border-gray-300 rounded focus:ring-[#805AD5] accent-[#805AD5]"
@@ -252,10 +255,10 @@ export function Etapa3ConfiguracoesExibicao({
                 </FormLabel>
                 <FormControl>
                   <Input
+                    data-test="input-exib-inicio"
                     type="date"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                    data-test="input-exib-inicio"
                   />
                 </FormControl>
                 <FormMessage />
@@ -277,10 +280,10 @@ export function Etapa3ConfiguracoesExibicao({
                 </FormLabel>
                 <FormControl>
                   <Input
+                    data-test="input-exib-fim"
                     type="date"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                    data-test="input-exib-fim"
                   />
                 </FormControl>
                 <FormMessage />

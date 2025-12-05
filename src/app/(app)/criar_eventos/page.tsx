@@ -106,12 +106,12 @@ export default function CriarEvento() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl" data-teste="criar-evento-container">
+    <div className="container mx-auto px-4 py-8 max-w-4xl" data-test="criar-evento-page">
       {step > 1 && (
         <div className="mb-8 flex items-center gap-4">
           <Button
             onClick={handleBack}
-            data-teste="btn-voltar-etapas"
+            data-test="btn-voltar"
             className="flex items-center gap-2 text-[#805AD5] hover:text-[#6B46C1] bg-transparent hover:bg-purple-50 border-none shadow-none"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,8 +164,8 @@ export default function CriarEvento() {
                 type="button"
                 onClick={handleCancel}
                 disabled={loading}
-                data-teste="btn-cancelar-criacao"
-                className="cursor-pointer transition w-full sm:w-auto px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium order-2 sm:order-1"
+                data-test="btn-cancelar"
+                className="w-full sm:w-auto px-6 py-3 bg-white border border-[#CBD5E0] text-[#4A5568] rounded-lg hover:bg-[#F7FAFC] transition-colors font-medium order-2 sm:order-1"
               >
                 Cancelar
               </Button>
@@ -174,9 +174,9 @@ export default function CriarEvento() {
                 {step === 3 && (
                   <Button
                     type="button"
-                    onClick={() => openPreview(blobUrls)}
+                    onClick={async () => await openPreview(blobUrls)}
                     disabled={loading || validImages.length === 0}
-                    data-teste="btn-preview-evento"
+                    data-test="btn-preview"
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     title={validImages.length === 0 ? "Adicione imagens para visualizar o preview" : "Ver preview do evento"}
                   >
@@ -193,8 +193,8 @@ export default function CriarEvento() {
                     type="button"
                     onClick={handleContinue}
                     disabled={loading}
-                    data-teste="btn-continuar-etapa"
-                    className="cursor-pointer transition w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    data-test="btn-continuar"
+                    className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continuar
                   </Button>
@@ -202,7 +202,7 @@ export default function CriarEvento() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    data-teste="btn-finalizar-evento"
+                    data-test="btn-finalizar"
                     className="w-full sm:w-auto px-8 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Carregando..." : "Finalizar"}
@@ -220,23 +220,23 @@ export default function CriarEvento() {
         titulo="Cancelar criação do evento?"
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
-        data-teste="modal-cancelar-criacao"
+        data-test="modal-cancelar-criacao"
       >
         <p className="text-gray-700 mb-4">
           Os dados preenchidos serão perdidos. Tem certeza que deseja cancelar?
         </p>
         <div className="flex justify-end gap-3 mt-6">
-          <button
-            onClick={() => setShowCancelModal(false)}
-            data-teste="btn-voltar-modal"
-            className="cursor-pointer transition px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          <button 
+            onClick={() => setShowCancelModal(false)} 
+            data-test="modal-btn-voltar"
+            className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
             Voltar
           </button>
-          <button
-            onClick={confirmCancel}
-            data-teste="btn-confirmar-cancelar"
-            className="cursor-pointer transition px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+          <button 
+            onClick={confirmCancel} 
+            data-test="modal-btn-confirmar-cancelar"
+            className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
           >
             Sim, cancelar
           </button>

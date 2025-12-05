@@ -7,12 +7,8 @@ Cypress.on("uncaught:exception", () => {
 describe("Tela de Nova Senha", () => {
 
   beforeEach(() => {
-    cy.intercept("PATCH", "/password/reset/token*", (req) => {
-      req.reply((res) => {
-        res.send({}); // configurado individualmente nos testes
-      });
-    }).as("resetRequest");
-
+    // Garantir que o usuário não está autenticado
+    cy.logout();
     cy.visit("http://localhost:3000/nova_senha/abc123"); // exemplo de rota
   });
 

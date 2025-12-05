@@ -1,5 +1,3 @@
-import QueryProvider from "@/providers/queryProvider";
-
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-indigo-50 to-blue-100">

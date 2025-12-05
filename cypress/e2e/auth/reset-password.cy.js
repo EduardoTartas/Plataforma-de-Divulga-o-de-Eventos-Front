@@ -1,5 +1,10 @@
 describe("Redefinir senha", () => {
 
+  beforeEach(() => {
+    // Garantir que o usuário não está autenticado
+    cy.logout();
+  });
+  
   it("deve exibir erro quando as senhas não coincidem", () => {
     cy.visit("/nova_senha/abc123token");
 

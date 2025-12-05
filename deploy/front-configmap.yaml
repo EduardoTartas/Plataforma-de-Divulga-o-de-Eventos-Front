@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eventos-front-env
+  labels:
+    io.kompose.service: eventos-front
+
+data:
+  # Environment
+  NODE_ENV: "production"
+  
+  # API URLs
+  # Server side (comunicação interna entre pods)
+  API_URL_SERVER_SIDED: "http://api-ifroevents:80"
+  
+  # Client-side (chamadas do navegador - URL pública)
+  NEXT_PUBLIC_API_URL: "https://api-ifroevents.app.fslab.dev"
+  
+  # NextAuth Configuration
+  NEXTAUTH_URL: "https://ifroevents.app.fslab.dev"
+  AUTH_TRUST_HOST: "true"
+  
+  # NEXTAUTH_SECRET gerado com: openssl rand -base64 48
+  NEXTAUTH_SECRET: "ULtrqxKkoXVsBWZ3+hoj5ABTzr+SeW+ZqHo/VRHVPok="
+  
+  # Ambiente
+  NEXT_PUBLIC_AMBIENTE: "production"
