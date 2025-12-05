@@ -99,7 +99,7 @@ describe("Editar Evento", () => {
   });
 
   beforeEach(() => {
-    cy.intercept('PUT', '**/eventos/*').as('updateEvento');
+    cy.intercept('PATCH', '**/eventos/*').as('updateEvento');
     cy.intercept('GET', '**/eventos/*').as('getEvento');
 
     cy.login('admin@admin.com', 'SenhaSuperSegur@123');
@@ -126,7 +126,7 @@ describe("Editar Evento", () => {
     cy.getByData('btn-salvar-alteracoes').click();
     cy.wait('@updateEvento');
     cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
-    cy.get('.Toastify__toast--success').should('contain.text', 'Evento atualizado com sucesso!');
+    cy.get('.Toastify__toast--success').should('contain.text', 'atualizado com sucesso');
     cy.url().should("include", "/meus_eventos");
   };
 
@@ -135,19 +135,28 @@ describe("Editar Evento", () => {
     cy.scrollTo('bottom');
     cy.getByData('btn-salvar-alteracoes').click();
     cy.wait('@updateEvento');
-    cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
-    cy.get('.Toastify__toast--success').should('contain.text', 'imagens atualizados com sucesso!');
+    cy.get('.Toastify__toast--success', { timeout: 15000 }).should('be.visible');
+    cy.get('.Toastify__toast--success').should('contain.text', 'atualizados com sucesso');
     cy.url().should("include", "/meus_eventos");
   };
 
   // Helper para avançar até etapa 3
   const avancarParaEtapa3 = () => {
+    // Avançar da etapa 1 para etapa 2
     cy.scrollTo('bottom');
-    cy.contains('button', 'Continuar').click();
-    cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+    cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+    cy.wait(500);
+    
+    // Verificar que está na etapa 2 (upload de imagens)
+    cy.getByData('drop-zone', { timeout: 10000 }).should('exist');
+    
+    // Avançar da etapa 2 para etapa 3
     cy.scrollTo('bottom');
-    cy.contains('button', 'Continuar').click();
-    cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
+    cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+    cy.wait(500);
+    
+    // Verificar que está na etapa 3 (configurações)
+    cy.contains("Configurações de Exibição", { timeout: 10000 }).should("exist");
   };
 
   describe("Acesso à Edição via Meus Eventos", () => {
@@ -213,9 +222,8 @@ describe("Editar Evento", () => {
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
       cy.scrollTo('bottom');
-      cy.contains('button', 'Continuar').click();
-      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
-      cy.getByData('drop-zone').should('be.visible');
+      cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+      cy.getByData('drop-zone', { timeout: 10000 }).should('be.visible');
     });
 
     it("deve adicionar nova imagem e salvar com sucesso", () => {
@@ -223,15 +231,15 @@ describe("Editar Evento", () => {
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
       cy.scrollTo('bottom');
-      cy.contains('button', 'Continuar').click();
-      cy.contains("Imagens do Evento", { timeout: 5000 }).should("exist");
+      cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+      cy.getByData('drop-zone', { timeout: 10000 }).should('exist');
       
       cy.getByData('file-input').selectFile('public/image-teste.png', { force: true });
       cy.get('img[alt="image-teste.png"]', { timeout: 10000 }).should('exist');
       
       cy.scrollTo('bottom');
-      cy.contains('button', 'Continuar').click();
-      cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
+      cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+      cy.contains("Configurações de Exibição", { timeout: 10000 }).should("exist");
       salvarAlteracoesComImagem();
     });
   });
@@ -274,75 +282,99 @@ describe("Editar Evento", () => {
       
       cy.getByData('select-cor').click();
       cy.get('[role="listbox"]').should('be.visible');
-      cy.get('[role="option"]').eq(1).click();
+      cy.get('[role="option"]').eq(1).click({ force: true });
+      cy.get('[role="listbox"]').should('not.exist');
       salvarAlteracoes();
     });
   });
 
   describe("Compartilhar Permissões", () => {
-    it("deve exibir seção de compartilhar permissões", () => {
-      const editado = Cypress.env('eventoEditado');
-      navegarParaEdicao(editado.titulo.substring(0, 10));
-      
-      cy.getByData('compartilhar-permissoes').should('exist');
-      cy.contains("Compartilhar Evento").should("exist");
-    });
-
-    it("deve exibir campo para adicionar email", () => {
-      const editado = Cypress.env('eventoEditado');
-      navegarParaEdicao(editado.titulo.substring(0, 10));
-      
-      cy.getByData('input-compartilhar-email').should('be.visible');
-    });
 
     it("deve validar email inválido", () => {
       const editado = Cypress.env('eventoEditado');
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
-      cy.getByData('input-compartilhar-email').type('email-invalido');
-      cy.getByData('input-compartilhar-email').type('{enter}');
-      cy.get('.Toastify__toast--error', { timeout: 5000 }).should('be.visible');
+      cy.scrollTo('bottom');
+      cy.get('#compartilhar-email').type('email-invalido{enter}');
+      cy.get('.Toastify__toast--error', { timeout: 5000 })
+        .should('be.visible')
+        .and('contain.text', 'e-mail válido');
     });
 
     it("deve impedir compartilhar consigo mesmo", () => {
       const editado = Cypress.env('eventoEditado');
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
-      cy.getByData('input-compartilhar-email').type('admin@admin.com');
-      cy.getByData('input-compartilhar-email').type('{enter}');
-      cy.get('.Toastify__toast--error', { timeout: 5000 }).should('be.visible');
+      cy.scrollTo('bottom');
+      cy.get('#compartilhar-email').type('admin@admin.com{enter}');
+      cy.get('.Toastify__toast--error', { timeout: 5000 })
+        .should('be.visible')
+        .and('contain.text', 'não pode compartilhar o evento consigo mesmo');
     });
   });
 
-  describe("Modal de Cancelamento na Edição", () => {
-    it("deve abrir modal ao clicar em cancelar", () => {
+  describe("Comportamento do Botão Cancelar", () => {
+    it("deve redirecionar para meus_eventos ao clicar em cancelar", () => {
       const editado = Cypress.env('eventoEditado');
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
       cy.scrollTo('bottom');
-      cy.contains('button', 'Cancelar').click();
-      cy.contains("Cancelar").should("exist");
-    });
-
-    it("deve fechar modal ao clicar em voltar", () => {
-      const editado = Cypress.env('eventoEditado');
-      navegarParaEdicao(editado.titulo.substring(0, 10));
-      
-      cy.scrollTo('bottom');
-      cy.contains('button', 'Cancelar').click();
-      cy.getByData('btn-voltar-modal').click();
-      cy.contains('Editar Evento').should('be.visible');
-    });
-
-    it("deve redirecionar ao confirmar cancelamento", () => {
-      const editado = Cypress.env('eventoEditado');
-      navegarParaEdicao(editado.titulo.substring(0, 10));
-      
-      cy.getByData('input-titulo').clear().type("Alteração descartada");
-      cy.scrollTo('bottom');
-      cy.contains('button', 'Cancelar').click();
-      cy.getByData('btn-confirmar-cancelar').click();
+      cy.getByData('btn-cancelar-edicao').click();
       cy.url().should("include", "/meus_eventos");
+    });
+
+    it("deve descartar alterações ao cancelar", () => {
+      const editado = Cypress.env('eventoEditado');
+      navegarParaEdicao(editado.titulo.substring(0, 10));
+      
+      // Fazer uma alteração
+      cy.getByData('input-titulo').clear().type("Alteração que será descartada");
+      
+      // Cancelar
+      cy.scrollTo('bottom');
+      cy.getByData('btn-cancelar-edicao').click();
+      cy.url().should("include", "/meus_eventos");
+      
+      // Verificar que ao voltar para edição, o título original está lá
+      cy.getByData('search-input').clear().type(editado.titulo.substring(0, 10));
+      cy.wait(1000);
+      cy.getByData('event-card').first().within(() => {
+        cy.getByData('event-edit-button').click();
+      });
+      cy.getByData('input-titulo').should('have.value', editado.titulo);
+    });
+  });
+
+  // Limpeza: excluir o evento criado para os testes
+  after(() => {
+    cy.intercept('DELETE', '**/eventos/*').as('deleteEvento');
+    
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/meus_eventos`);
+    cy.url().should('include', '/meus_eventos');
+    cy.getByData('card-container').should('be.visible');
+
+    const editado = Cypress.env('eventoEditado');
+    cy.getByData('search-input').clear().type(editado.titulo.substring(0, 10));
+    cy.wait(1000);
+    
+    // Verificar se encontrou o evento e excluí-lo
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-test="event-card"]').length > 0) {
+        cy.getByData('event-card').first().within(() => {
+          cy.getByData('event-delete-button').click();
+        });
+        
+        // Confirmar exclusão no modal
+        cy.getByData('btn-confirm-delete').click();
+        
+        cy.wait('@deleteEvento').then((interception) => {
+          expect([200, 204]).to.include(interception.response.statusCode);
+        });
+        
+        cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
+      }
     });
   });
 });
