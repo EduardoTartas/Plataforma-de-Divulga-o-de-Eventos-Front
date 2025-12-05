@@ -5,6 +5,7 @@ Cypress.on("uncaught:exception", () => false);
 
 describe("Criar Evento", () => {
   let eventoData;
+  let tituloEventoCriado = null;
 
   beforeEach(() => {
     const today = new Date();
@@ -275,8 +276,12 @@ describe("Criar Evento", () => {
   // FLUXO COMPLETO - Criação de evento
   describe("Fluxo Completo", () => {
     it("deve criar evento completo com sucesso", () => {
+      // Gerar título único para poder excluir depois
+      const tituloUnico = 'CypressCriar ' + Date.now();
+      Cypress.env('tituloEventoCriado', tituloUnico);
+      
       // ETAPA 1 - Informações Básicas
-      cy.getByData('input-titulo').type(eventoData.titulo);
+      cy.getByData('input-titulo').type(tituloUnico);
       cy.getByData('input-descricao').type(eventoData.descricao);
       cy.getByData('input-local').type(eventoData.local);
       cy.getByData('select-categoria').click();
@@ -350,6 +355,43 @@ describe("Criar Evento", () => {
       cy.contains('button', 'Cancelar').click();
       cy.getByData('btn-confirmar-cancelar').click();
       cy.url().should("include", "/meus_eventos");
+    });
+  });
+
+  // Limpeza: excluir o evento criado no teste de fluxo completo
+  after(() => {
+    const tituloEvento = Cypress.env('tituloEventoCriado');
+    
+    // Só executa se um evento foi criado no fluxo completo
+    if (!tituloEvento) return;
+    
+    cy.intercept('DELETE', '**/eventos/*').as('deleteEvento');
+    
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/meus_eventos`);
+    cy.url().should('include', '/meus_eventos');
+    cy.getByData('card-container').should('be.visible');
+
+    cy.getByData('search-input').clear().type(tituloEvento.substring(0, 15));
+    cy.wait(1000);
+    
+    // Verificar se encontrou o evento e excluí-lo
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-test="event-card"]').length > 0) {
+        cy.getByData('event-card').first().within(() => {
+          cy.getByData('event-delete-button').click();
+        });
+        
+        // Confirmar exclusão no modal
+        cy.getByData('btn-confirm-delete').click();
+        
+        cy.wait('@deleteEvento').then((interception) => {
+          expect([200, 204]).to.include(interception.response.statusCode);
+        });
+        
+        cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
+      }
     });
   });
 });
