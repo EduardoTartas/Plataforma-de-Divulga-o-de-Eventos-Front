@@ -345,7 +345,7 @@ describe("Criar Evento", () => {
       cy.scrollTo('bottom');
       cy.contains('button', 'Cancelar').click();
       cy.contains("Cancelar criação do evento?").should("exist");
-      cy.getByData('btn-voltar-modal').click();
+      cy.getByData('modal-btn-voltar').click();
       cy.contains("Cancelar criação do evento?").should("not.exist");
     });
 
@@ -353,7 +353,7 @@ describe("Criar Evento", () => {
       cy.getByData('input-titulo').type(eventoData.titulo);
       cy.scrollTo('bottom');
       cy.contains('button', 'Cancelar').click();
-      cy.getByData('btn-confirmar-cancelar').click();
+      cy.getByData('modal-btn-confirmar-cancelar').click();
       cy.url().should("include", "/meus_eventos");
     });
   });
