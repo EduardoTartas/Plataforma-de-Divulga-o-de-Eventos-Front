@@ -113,7 +113,7 @@ describe("Editar Evento", () => {
 
   const salvarAlteracoes = () => {
     cy.scrollTo('bottom');
-    cy.getByData('btn-salvar-alteracoes').click();
+    cy.getByData('btn-salvar').click();
     cy.wait('@updateEvento');
     cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
     cy.get('.Toastify__toast--success').should('contain.text', 'atualizado com sucesso');
@@ -122,7 +122,7 @@ describe("Editar Evento", () => {
 
   const salvarAlteracoesComImagem = () => {
     cy.scrollTo('bottom');
-    cy.getByData('btn-salvar-alteracoes').click();
+    cy.getByData('btn-salvar').click();
     cy.wait('@updateEvento');
     cy.get('.Toastify__toast--success', { timeout: 15000 }).should('be.visible');
     cy.get('.Toastify__toast--success').should('contain.text', 'atualizados com sucesso');
@@ -131,12 +131,13 @@ describe("Editar Evento", () => {
 
   const avancarParaEtapa3 = () => {
     cy.scrollTo('bottom');
-    cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+    cy.getByData('btn-continuar').should('be.visible').click();
     cy.wait(500);
-    cy.getByData('drop-zone', { timeout: 10000 }).should('exist');
+    // Verifica se a Etapa 2 carregou - procura pelo título ou pelo drop-zone
+    cy.contains("Imagens do Evento", { timeout: 10000 }).should("be.visible");
     
     cy.scrollTo('bottom');
-    cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+    cy.getByData('btn-continuar').should('be.visible').click();
     cy.wait(500);
     cy.contains("Configurações de Exibição", { timeout: 10000 }).should("exist");
   };
@@ -204,8 +205,9 @@ describe("Editar Evento", () => {
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
       cy.scrollTo('bottom');
-      cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
-      cy.getByData('drop-zone', { timeout: 10000 }).should('be.visible');
+      cy.getByData('btn-continuar').should('be.visible').click();
+      cy.contains("Imagens do Evento", { timeout: 10000 }).should("be.visible");
+      cy.getByData('drop-zone').should('be.visible');
     });
 
     it("deve adicionar nova imagem e salvar com sucesso", () => {
@@ -213,14 +215,14 @@ describe("Editar Evento", () => {
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
       cy.scrollTo('bottom');
-      cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
-      cy.getByData('drop-zone', { timeout: 10000 }).should('exist');
+      cy.getByData('btn-continuar').should('be.visible').click();
+      cy.contains("Imagens do Evento", { timeout: 10000 }).should("be.visible");
       
       cy.getByData('file-input').selectFile('public/image-teste.png', { force: true });
       cy.get('img[alt="image-teste.png"]', { timeout: 10000 }).should('exist');
       
       cy.scrollTo('bottom');
-      cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
+      cy.getByData('btn-continuar').should('be.visible').click();
       cy.contains("Configurações de Exibição", { timeout: 10000 }).should("exist");
       salvarAlteracoesComImagem();
     });
@@ -301,7 +303,7 @@ describe("Editar Evento", () => {
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
       cy.scrollTo('bottom');
-      cy.getByData('btn-cancelar-edicao').click();
+      cy.getByData('btn-cancelar').click();
       cy.url().should("include", "/meus_eventos");
     });
 
@@ -311,7 +313,7 @@ describe("Editar Evento", () => {
       
       cy.getByData('input-titulo').clear().type("Alteração que será descartada");
       cy.scrollTo('bottom');
-      cy.getByData('btn-cancelar-edicao').click();
+      cy.getByData('btn-cancelar').click();
       cy.url().should("include", "/meus_eventos");
       
       cy.getByData('search-input').clear().type(editado.titulo.substring(0, 10));
