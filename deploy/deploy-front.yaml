@@ -24,7 +24,7 @@ spec:
       
       containers:
         - name: front-ifroevents
-          image: ruanlopes1350/front-ifroevents:latest
+          image: eduardotartas/front-ifroevents:latest
           imagePullPolicy: Always
           
           ports:
