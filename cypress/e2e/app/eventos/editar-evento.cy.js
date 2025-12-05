@@ -4,13 +4,11 @@ import { faker } from '@faker-js/faker/locale/pt_BR';
 Cypress.on("uncaught:exception", () => false);
 
 describe("Editar Evento", () => {
-  // Variáveis compartilhadas entre todos os testes
   let tituloOriginal;
   let eventoData;
   let eventoEditado;
 
   before(() => {
-    // Gerar dados uma única vez
     const today = new Date();
     const todayFormatted = today.toISOString().slice(0, 16);
     
@@ -34,13 +32,11 @@ describe("Editar Evento", () => {
       local: "Local EDITADO - " + faker.location.city(),
     };
 
-    // Salvar no Cypress.env para uso em outros hooks
     Cypress.env('tituloOriginal', tituloOriginal);
     Cypress.env('eventoEditado', eventoEditado);
 
     cy.intercept('POST', '**/eventos').as('createEvento');
 
-    // Login e criar evento
     cy.login('admin@admin.com', 'SenhaSuperSegur@123');
     const baseUrl = Cypress.env('NEXTAUTH_URL');
     cy.visit(`${baseUrl}/criar_eventos`);
@@ -48,7 +44,6 @@ describe("Editar Evento", () => {
     cy.contains('Criar Novo Evento').should('be.visible');
     cy.getByData('input-titulo').should('be.visible');
 
-    // Etapa 1
     cy.getByData('input-titulo').type(eventoData.titulo);
     cy.getByData('input-descricao').type(eventoData.descricao);
     cy.getByData('input-local').type(eventoData.local);
@@ -64,14 +59,12 @@ describe("Editar Evento", () => {
     cy.scrollTo('bottom');
     cy.contains('button', 'Continuar').click();
 
-    // Etapa 2
     cy.getByData('drop-zone').should('be.visible');
     cy.getByData('file-input').selectFile('public/image-teste.png', { force: true });
     cy.get('img[alt="image-teste.png"]', { timeout: 10000 }).should('exist');
     cy.scrollTo('bottom');
     cy.contains('button', 'Continuar').click();
 
-    // Etapa 3
     cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
     cy.getByData('checkbox-todos-dias').check({ force: true });
     cy.getByData('checkbox-manha').check({ force: true });
@@ -89,7 +82,6 @@ describe("Editar Evento", () => {
     cy.scrollTo('bottom');
     cy.contains('button', 'Finalizar').click();
 
-    // Verificar criação
     cy.wait('@createEvento').then((interception) => {
       expect([200, 201]).to.include(interception.response.statusCode);
     });
@@ -109,7 +101,6 @@ describe("Editar Evento", () => {
     cy.getByData('card-container').should('be.visible');
   });
 
-  // Helper para navegar até a edição do evento
   const navegarParaEdicao = (busca) => {
     cy.getByData('search-input').clear().type(busca);
     cy.wait(1000);
@@ -120,7 +111,6 @@ describe("Editar Evento", () => {
     cy.contains('Editar Evento', { timeout: 10000 }).should('be.visible');
   };
 
-  // Helper para salvar alterações (sem imagem)
   const salvarAlteracoes = () => {
     cy.scrollTo('bottom');
     cy.getByData('btn-salvar-alteracoes').click();
@@ -130,7 +120,6 @@ describe("Editar Evento", () => {
     cy.url().should("include", "/meus_eventos");
   };
 
-  // Helper para salvar alterações (com imagem)
   const salvarAlteracoesComImagem = () => {
     cy.scrollTo('bottom');
     cy.getByData('btn-salvar-alteracoes').click();
@@ -140,22 +129,15 @@ describe("Editar Evento", () => {
     cy.url().should("include", "/meus_eventos");
   };
 
-  // Helper para avançar até etapa 3
   const avancarParaEtapa3 = () => {
-    // Avançar da etapa 1 para etapa 2
     cy.scrollTo('bottom');
     cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
     cy.wait(500);
-    
-    // Verificar que está na etapa 2 (upload de imagens)
     cy.getByData('drop-zone', { timeout: 10000 }).should('exist');
     
-    // Avançar da etapa 2 para etapa 3
     cy.scrollTo('bottom');
     cy.getByData('btn-continuar-editar-etapa').should('be.visible').click();
     cy.wait(500);
-    
-    // Verificar que está na etapa 3 (configurações)
     cy.contains("Configurações de Exibição", { timeout: 10000 }).should("exist");
   };
 
@@ -327,15 +309,11 @@ describe("Editar Evento", () => {
       const editado = Cypress.env('eventoEditado');
       navegarParaEdicao(editado.titulo.substring(0, 10));
       
-      // Fazer uma alteração
       cy.getByData('input-titulo').clear().type("Alteração que será descartada");
-      
-      // Cancelar
       cy.scrollTo('bottom');
       cy.getByData('btn-cancelar-edicao').click();
       cy.url().should("include", "/meus_eventos");
       
-      // Verificar que ao voltar para edição, o título original está lá
       cy.getByData('search-input').clear().type(editado.titulo.substring(0, 10));
       cy.wait(1000);
       cy.getByData('event-card').first().within(() => {
@@ -345,7 +323,6 @@ describe("Editar Evento", () => {
     });
   });
 
-  // Limpeza: excluir o evento criado para os testes
   after(() => {
     cy.intercept('DELETE', '**/eventos/*').as('deleteEvento');
     
@@ -359,14 +336,12 @@ describe("Editar Evento", () => {
     cy.getByData('search-input').clear().type(editado.titulo.substring(0, 10));
     cy.wait(1000);
     
-    // Verificar se encontrou o evento e excluí-lo
     cy.get('body').then(($body) => {
       if ($body.find('[data-test="event-card"]').length > 0) {
         cy.getByData('event-card').first().within(() => {
           cy.getByData('event-delete-button').click();
         });
         
-        // Confirmar exclusão no modal
         cy.getByData('btn-confirm-delete').click();
         
         cy.wait('@deleteEvento').then((interception) => {
