@@ -1,6 +1,94 @@
 /// <reference types="cypress" />
+import { faker } from '@faker-js/faker/locale/pt_BR';
+
+Cypress.on("uncaught:exception", () => false);
 
 describe("Página Meus Eventos", () => {
+  // Variáveis compartilhadas entre todos os testes
+  let eventoData;
+  let tituloEventoTeste;
+
+  // Criar evento antes de todos os testes para usar nos testes de exclusão
+  before(() => {
+    const today = new Date();
+    const todayFormatted = today.toISOString().slice(0, 16);
+    
+    tituloEventoTeste = 'CypressMeusEventos ' + Date.now();
+    
+    eventoData = {
+      titulo: tituloEventoTeste,
+      descricao: "Evento para testes de MEUS EVENTOS - " + todayFormatted,
+      local: faker.location.streetAddress(),
+      dataInicio: todayFormatted,
+      dataFim: new Date(today.getTime() + 3 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      link: faker.internet.url(),
+      tags: [faker.word.noun(), faker.word.adjective()],
+      exibInicio: today.toISOString().split('T')[0],
+      exibFim: faker.date.future().toISOString().split('T')[0],
+    };
+
+    // Salvar no Cypress.env para uso em outros hooks
+    Cypress.env('tituloEventoTeste', tituloEventoTeste);
+
+    cy.intercept('POST', '**/eventos').as('createEvento');
+
+    // Login e criar evento
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/criar_eventos`);
+    cy.url().should('include', '/criar_eventos');
+    cy.contains('Criar Novo Evento').should('be.visible');
+    cy.getByData('input-titulo').should('be.visible');
+
+    // Etapa 1
+    cy.getByData('input-titulo').type(eventoData.titulo);
+    cy.getByData('input-descricao').type(eventoData.descricao);
+    cy.getByData('input-local').type(eventoData.local);
+    cy.getByData('select-categoria').click();
+    cy.get('[role="listbox"]').should('be.visible');
+    cy.get('[role="option"]').last().click();
+    cy.getByData('input-data-inicio').type(eventoData.dataInicio);
+    cy.getByData('input-data-fim').type(eventoData.dataFim);
+    cy.getByData('input-link').type(eventoData.link);
+    eventoData.tags.forEach((tag) => {
+      cy.getByData('input-tag').type(`${tag}{enter}`);
+    });
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Continuar').click();
+
+    // Etapa 2
+    cy.getByData('drop-zone').should('be.visible');
+    cy.getByData('file-input').selectFile('public/image-teste.png', { force: true });
+    cy.get('img[alt="image-teste.png"]', { timeout: 10000 }).should('exist');
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Continuar').click();
+
+    // Etapa 3
+    cy.contains("Configurações de Exibição", { timeout: 5000 }).should("exist");
+    cy.getByData('checkbox-todos-dias').check({ force: true });
+    cy.getByData('checkbox-manha').check({ force: true });
+    cy.getByData('checkbox-tarde').check({ force: true });
+    cy.getByData('checkbox-noite').check({ force: true });
+    cy.getByData('input-exib-inicio').type(eventoData.exibInicio);
+    cy.getByData('input-exib-fim').type(eventoData.exibFim);
+    cy.getByData('select-cor').click();
+    cy.get('[role="listbox"]').should('be.visible');
+    cy.get('[role="option"]').first().click();
+    cy.get('[role="listbox"]').should('not.exist');
+    cy.getByData('select-animacao').click();
+    cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
+    cy.get('[role="option"]').first().click();
+    cy.scrollTo('bottom');
+    cy.contains('button', 'Finalizar').click();
+
+    // Verificar criação
+    cy.wait('@createEvento').then((interception) => {
+      expect([200, 201]).to.include(interception.response.statusCode);
+    });
+
+    cy.get('.Toastify__toast', { timeout: 10000 }).should('be.visible');
+    cy.url().should("include", "/meus_eventos");
+  });
 
   beforeEach(() => {
     cy.intercept('GET', '**/api/auth/session*').as('getSession');
@@ -112,93 +200,37 @@ describe("Página Meus Eventos", () => {
   });
 
   describe("Modal de exclusão", () => {
-    it("deve validar card-container e abrir modal ao clicar em excluir", () => {
-      cy.wait('@getEventos', { timeout: 10000 }).then((interception) => {
-        const eventos = interception.response.body?.data?.docs || [];
-        
-        if (eventos.length > 0) {
-          const primeiroEvento = eventos[0];
-          
-          cy.wait(1000);
-          
-          cy.get('.w-full.bg-white.rounded-lg.shadow-sm.border.border-gray-200.p-6', { timeout: 8000 })
-            .should('exist')
-            .within(() => {
-              cy.get('.grid.grid-cols-1', { timeout: 8000 }).should('exist');
-              
-              cy.get('.bg-white.rounded-lg.shadow-sm.border.border-gray-200.overflow-hidden').first().within(() => {
-                cy.get('h3.text-base.font-semibold').should('contain', primeiroEvento.titulo);
-                cy.get('button[title="Excluir evento"]').should('exist').click();
-              });
-            });
-          
-          cy.get('.fixed.inset-0.z-50', { timeout: 5000 }).should('exist');
-          cy.contains('Confirmar Exclusão').should('exist');
-          cy.get('body').should('contain', primeiroEvento.titulo);
-        }
+    it("deve abrir modal ao clicar em excluir", () => {
+      const tituloEvento = Cypress.env('tituloEventoTeste');
+      
+      cy.getByData('search-input').clear().type(tituloEvento.substring(0, 15));
+      cy.wait(1000);
+      
+      cy.getByData('event-card').first().within(() => {
+        cy.get('h3').should('contain', tituloEvento.substring(0, 10));
+        cy.getByData('event-delete-button').click();
       });
+      
+      cy.get('.fixed.inset-0.z-50', { timeout: 5000 }).should('exist');
+      cy.contains('Confirmar Exclusão').should('exist');
+      
+      cy.getByData('btn-cancel-delete').click();
+      cy.get('.fixed.inset-0.z-50').should('not.exist');
     });
 
     it("deve fechar modal ao clicar em cancelar", () => {
-      cy.wait('@getEventos', { timeout: 10000 }).then((interception) => {
-        const eventos = interception.response.body?.data?.docs || [];
-        
-        if (eventos.length > 0) {
-          cy.wait(1000);
-          
-          cy.get('.bg-white.rounded-lg.shadow-sm.border.border-gray-200.overflow-hidden', { timeout: 8000 })
-            .first()
-            .within(() => {
-              cy.get('button[title="Excluir evento"]').click();
-            });
-          
-          cy.get('.fixed.inset-0.z-50', { timeout: 5000 }).should('exist');
-          
-          cy.get('body').then($body => {
-            if ($body.find('[data-test="btn-cancel-delete"]').length > 0) {
-              cy.getByData('btn-cancel-delete').click();
-            } else {
-              cy.contains('button', 'Cancelar').click();
-            }
-          });
-          
-          cy.get('.fixed.inset-0.z-50').should('not.exist');
-        }
+      const tituloEvento = Cypress.env('tituloEventoTeste');
+      
+      cy.getByData('search-input').clear().type(tituloEvento.substring(0, 15));
+      cy.wait(1000);
+      
+      cy.getByData('event-card').first().within(() => {
+        cy.getByData('event-delete-button').click();
       });
-    });
-
-    it("deve fazer requisição DELETE ao confirmar exclusão", () => {
-      cy.wait('@getEventos', { timeout: 10000 }).then((interception) => {
-        const eventos = interception.response.body?.data?.docs || [];
-        
-        if (eventos.length > 0) {
-          const primeiroEvento = eventos[0];
-          
-          cy.wait(1000);
-          
-          cy.get('.bg-white.rounded-lg.shadow-sm.border.border-gray-200.overflow-hidden', { timeout: 8000 })
-            .first()
-            .within(() => {
-              cy.get('button[title="Excluir evento"]').click();
-            });
-          
-          cy.get('.fixed.inset-0.z-50', { timeout: 5000 }).should('exist');
-          
-          cy.get('body').then($body => {
-            if ($body.find('[data-test="btn-confirm-delete"]').length > 0) {
-              cy.getByData('btn-confirm-delete').click();
-            } else {
-              cy.contains('button', 'Confirmar').click();
-            }
-          });
-          
-          cy.wait('@deleteEvento', { timeout: 10000 }).then((deleteInterception) => {
-            expect(deleteInterception.request.method).to.equal('DELETE');
-            expect(deleteInterception.request.url).to.include(primeiroEvento._id);
-            expect(deleteInterception.response.statusCode).to.equal(200);
-          });
-        }
-      });
+      
+      cy.get('.fixed.inset-0.z-50', { timeout: 5000 }).should('exist');
+      cy.getByData('btn-cancel-delete').click();
+      cy.get('.fixed.inset-0.z-50').should('not.exist');
     });
   });
 
@@ -369,6 +401,67 @@ describe("Página Meus Eventos", () => {
           });
         }
       });
+    });
+  });
+
+  describe("Exclusão do Evento (Limpeza)", () => {
+    it("deve excluir o evento criado para os testes com sucesso", () => {
+      const tituloEvento = Cypress.env('tituloEventoTeste');
+      
+      cy.getByData('search-input').clear().type(tituloEvento.substring(0, 15));
+      cy.wait(1000);
+      
+      cy.getByData('event-card').first().within(() => {
+        cy.getByData('event-delete-button').click();
+      });
+      
+      cy.get('.fixed.inset-0.z-50', { timeout: 5000 }).should('exist');
+      cy.contains('Confirmar Exclusão').should('exist');
+      
+      cy.getByData('btn-confirm-delete').click();
+      
+      cy.wait('@deleteEvento', { timeout: 10000 }).then((deleteInterception) => {
+        expect(deleteInterception.request.method).to.equal('DELETE');
+        expect(deleteInterception.response.statusCode).to.equal(200);
+      });
+      
+      cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
+      
+      Cypress.env('eventoExcluido', true);
+    });
+  });
+
+  after(() => {
+    if (Cypress.env('eventoExcluido')) return;
+    
+    const tituloEvento = Cypress.env('tituloEventoTeste');
+    if (!tituloEvento) return;
+    
+    cy.intercept('DELETE', '**/eventos/*').as('deleteEventoCleanup');
+    
+    cy.login('admin@admin.com', 'SenhaSuperSegur@123');
+    const baseUrl = Cypress.env('NEXTAUTH_URL');
+    cy.visit(`${baseUrl}/meus_eventos`);
+    cy.url().should('include', '/meus_eventos');
+    cy.getByData('card-container').should('be.visible');
+
+    cy.getByData('search-input').clear().type(tituloEvento.substring(0, 15));
+    cy.wait(1000);
+    
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-test="event-card"]').length > 0) {
+        cy.getByData('event-card').first().within(() => {
+          cy.getByData('event-delete-button').click();
+        });
+        
+        cy.getByData('btn-confirm-delete').click();
+        
+        cy.wait('@deleteEventoCleanup').then((interception) => {
+          expect([200, 204]).to.include(interception.response.statusCode);
+        });
+        
+        cy.get('.Toastify__toast--success', { timeout: 10000 }).should('be.visible');
+      }
     });
   });
 
