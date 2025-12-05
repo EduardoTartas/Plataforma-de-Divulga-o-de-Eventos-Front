@@ -57,7 +57,7 @@ export function Etapa2UploadImagens({
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
-          data-test="area-upload-imagens"
+          data-test="drop-zone"
           className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
             isDragging
               ? "border-[#805AD5] bg-purple-50 scale-[1.02]"
@@ -65,14 +65,13 @@ export function Etapa2UploadImagens({
           }`}
         >
           <input
-            data-test="input-upload-imagens"
+            data-test="file-input"
             id="fileUpload"
             type="file"
             multiple
             accept="image/*"
             onChange={onFileInputChange}
             className="hidden"
-            data-test="file-input"
           />
           <label
             htmlFor="fileUpload"

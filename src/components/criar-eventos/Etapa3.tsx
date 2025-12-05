@@ -259,7 +259,6 @@ export function Etapa3ConfiguracoesExibicao({
                     type="date"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                    data-test="input-exib-inicio"
                   />
                 </FormControl>
                 <FormMessage />
@@ -285,7 +284,6 @@ export function Etapa3ConfiguracoesExibicao({
                     type="date"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                    data-test="input-exib-fim"
                   />
                 </FormControl>
                 <FormMessage />

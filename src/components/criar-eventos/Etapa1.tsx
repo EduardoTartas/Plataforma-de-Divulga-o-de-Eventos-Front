@@ -59,7 +59,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   placeholder="Ex: Workshop de Desenvolvimento Web"
                   {...field}
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                  data-test="input-titulo"
                 />
               </FormControl>
               <FormMessage />
@@ -83,7 +82,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   {...field}
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all resize-none"
                   rows={5}
-                  data-test="input-descricao"
                 />
               </FormControl>
               <FormMessage />
@@ -165,7 +163,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     placeholder="Ex: Auditório Principal - Bloco A"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                    data-test="input-local"
                   />
                 </FormControl>
                 <FormMessage />
@@ -193,7 +190,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     type="datetime-local"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                    data-test="input-data-inicio"
                   />
                 </FormControl>
                 <FormMessage />
@@ -219,7 +215,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     type="datetime-local"
                     {...field}
                     className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                    data-test="input-data-fim"
                   />
                 </FormControl>
                 <FormMessage />
@@ -248,7 +243,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                   {...field}
                   value={field.value || ""}
                   className="w-full border-2 border-[#E2E8F0] rounded-lg px-4 py-3 text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none focus:border-[#805AD5] focus:ring-4 focus:ring-[#E9D8FD] transition-all"
-                  data-test="input-link"
                 />
               </FormControl>
               <p className="text-xs text-[#718096] mt-1">Este link será convertido em QR Code no totem</p>
@@ -290,7 +284,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     placeholder="Ex: tecnologia, workshop, programação..."
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
-                    data-test="input-tag"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -304,7 +297,6 @@ export function Etapa1InformacoesBasicas({ form }: Etapa1InformacoesBasicasProps
                     onClick={handleAddTag}
                     data-test="btn-adicionar-tag"
                     className="px-6 py-3 bg-[#805AD5] hover:bg-[#6B46C1] text-white rounded-lg transition-colors font-medium shadow-sm"
-                    data-test="btn-adicionar-tag"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
