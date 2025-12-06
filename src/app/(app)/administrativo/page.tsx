@@ -11,6 +11,7 @@ import {
     PaginationContent,
     PaginationItem,
 } from "@/components/ui/pagination"
+import { useSession } from "next-auth/react"
 
 const ITEMS_PER_PAGE = 10;
 
@@ -31,6 +32,7 @@ export default function AdministrativoPage() {
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(0)
     const [totalDocs, setTotalDocs] = useState(0)
+    const { data: session } = useSession();
 
     const alterarStatus = async (id: string, status: string) => {
         const novoStatus: 'ativo' | 'inativo' = status === 'inativo' ? 'ativo' : 'inativo';
@@ -504,55 +506,68 @@ export default function AdministrativoPage() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex flex-row items-center gap-2.5">
-                                                        <button
-                                                            onClick={() => alterarAdmin(usuario._id, usuario.admin)}
-                                                            disabled={atualizandoAdmin === usuario._id}
-                                                            className="transition-transform hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            title={usuario.admin === true ? 'Retirar Admin' : 'Atribuir Admin'}
-                                                        >
-                                                            {atualizandoAdmin === usuario._id ? (
-                                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
-                                                            ) : usuario.admin === true ? (
-                                                                <div className="flex flex-row gap-2.5">
-                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                                        Sim
-                                                                    </span>
-                                                                    <ToggleRight className="text-blue-800 w-5 h-5" />
-                                                                </div>
-                                                            ) : (
-                                                                <div className="flex flex-row gap-2">
-                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                                        Não
-                                                                    </span>
-                                                                    <ToggleLeft className="text-gray-800 w-5 h-5" />
-                                                                </div>
-                                                            )}
-                                                        </button>
+                                                        {session?.user?._id !== usuario._id && (
+                                                            <button
+                                                                onClick={() => alterarAdmin(usuario._id, usuario.admin)}
+                                                                disabled={atualizandoAdmin === usuario._id}
+                                                                className="transition-transform hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                title={usuario.admin === true ? 'Retirar Admin' : 'Atribuir Admin'}
+                                                            >
+                                                                {atualizandoAdmin === usuario._id ? (
+                                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                                                ) : usuario.admin === true ? (
+                                                                    <div className="flex flex-row gap-2.5">
+                                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                            Sim
+                                                                        </span>
+                                                                        <ToggleRight className="text-blue-800 w-5 h-5" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex flex-row gap-2">
+                                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                                            Não
+                                                                        </span>
+                                                                        <ToggleLeft className="text-gray-800 w-5 h-5" />
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                        {session?.user?._id === usuario._id && (
+                                                            <div className="flex flex-row gap-2.5">
+                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                    Você
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center justify-center gap-3">
-                                                        <button
-                                                            onClick={() => alterarStatus(usuario._id, usuario.status)}
-                                                            disabled={atualizandoStatus === usuario._id}
-                                                            className="transition-transform hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            title={usuario.status === 'ativo' ? 'Desativar usuário' : 'Ativar usuário'}
-                                                        >
-                                                            {atualizandoStatus === usuario._id ? (
-                                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
-                                                            ) : usuario.status === 'ativo' ? (
-                                                                <ToggleRight className="text-green-600 w-5 h-5" />
-                                                            ) : (
-                                                                <ToggleLeft className="text-gray-400 w-5 h-5" />
-                                                            )}
-                                                        </button>
-                                                        <button
-                                                            className="transition-transform hover:scale-110 cursor-pointer"
-                                                            title="Excluir usuário"
-                                                            onClick={() => { setUsuarioDeletando(usuario); setModalAtivo('confirmacaoDeletar'); }}
-                                                        >
-                                                            <Trash2 className="text-red-600 w-5 h-5" />
-                                                        </button>
+                                                        {session?.user?._id !== usuario._id && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => alterarStatus(usuario._id, usuario.status)}
+                                                                    disabled={atualizandoStatus === usuario._id}
+                                                                    className="transition-transform hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    title={usuario.status === 'ativo' ? 'Desativar usuário' : 'Ativar usuário'}
+                                                                >
+                                                                    {atualizandoStatus === usuario._id ? (
+                                                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                                                    ) : usuario.status === 'ativo' ? (
+                                                                        <ToggleRight className="text-green-600 w-5 h-5" />
+                                                                    ) : (
+                                                                        <ToggleLeft className="text-gray-400 w-5 h-5" />
+                                                                    )}
+                                                                </button>
+                                                                <button
+                                                                    className="transition-transform hover:scale-110 cursor-pointer"
+                                                                    title="Excluir usuário"
+                                                                    onClick={() => { setUsuarioDeletando(usuario); setModalAtivo('confirmacaoDeletar'); }}
+                                                                >
+                                                                    <Trash2 className="text-red-600 w-5 h-5" />
+                                                                </button>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
