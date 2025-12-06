@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button"; //
-import { MonitorPlay } from "lucide-react"; // Certifique-se de ter lucide-react instalado
+import { Button } from "@/components/ui/button";
+import { MonitorPlay } from "lucide-react";
 
 export default function AuthLayout({
   children,
