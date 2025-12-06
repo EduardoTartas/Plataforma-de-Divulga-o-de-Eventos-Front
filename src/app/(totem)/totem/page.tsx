@@ -271,6 +271,7 @@ export default function EventosPage() {
         <>
             {/* Wrapper para animação de entrada - usa key para resetar animação ao mudar imagem */}
             <div
+                data-test="fundo-animado"
                 key={`wrapper-${eventoAtualIndex}-${imagemAtualIndex}`}
                 className={`fixed inset-0 -z-10 overflow-hidden transition-opacity duration-300 ${obterAnimacao()}`}>
                 {/* Imagem de Fundo com loop de zoom+deslize */}
@@ -288,7 +289,7 @@ export default function EventosPage() {
 
                 {/* Indicadores de Imagem */}
                 <div className="flex flex-col gap-3 absolute bottom-4 left-20 transform -translate-x-1/2 sm:bottom-6 md:bottom-8 lg:bottom-10 xl:bottom-12 2xl:bottom-10">
-                    <div className="flex gap-1 lg:gap-0.5">
+                    <div className="flex gap-1 lg:gap-0.5" data-test="indicadores-imagens">
                         {Array.from({ length: eventoAtual.imagens.length || 3 }).map((_, index) => (
                             <div
                                 key={index}
@@ -301,9 +302,10 @@ export default function EventosPage() {
                     </div>
 
                     {/* Barra de Progresso de Loops */}
-                    <div className="w-20 sm:w-24 lg:w-20 h-1 sm:h-1.5 lg:h-1 bg-white/30 rounded-full overflow-hidden">
+                    <div className="w-20 sm:w-24 lg:w-20 h-1 sm:h-1.5 lg:h-1 bg-white/30 rounded-full overflow-hidden" data-test="loop-progress">
                         <div
                             className="h-full bg-white rounded-full transition-all duration-300"
+                            data-test="loop-progress-bar"
                             style={{
                                 width: `${(() => {
                                     // Usa o mesmo fallback do useEffect (padrão: 3)
@@ -316,7 +318,7 @@ export default function EventosPage() {
                 </div>
 
                 {/* Barra Lateral de Informações */}
-                <div className={`relative h-auto sm:h-full w-full sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:max-w-2xl
+                <div data-test="barra-lateral" className={`relative h-auto sm:h-full w-full sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:max-w-2xl
                     p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 2xl:p-10
                     flex flex-col gap-3 sm:gap-4 md:gap-5 lg:gap-6 2xl:gap-4
                     rounded-2xl sm:rounded-tl-2xl sm:rounded-bl-2xl sm:rounded-tr-none sm:rounded-br-none 2xl:rounded-tl-2xl 2xl:rounded-bl-2xl
@@ -347,33 +349,34 @@ export default function EventosPage() {
                                 )}
                             </h1>
                         </div>
-                        <h1 className="text-gray-100 text-2xl sm:text-3xl md:text-4xl lg:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-3 font-inter leading-tight">
+                        <h1 data-test="evento-titulo" className="text-gray-100 text-2xl sm:text-3xl md:text-4xl lg:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-3 font-inter leading-tight">
                             {eventoAtual.titulo}
                         </h1>
 
                         <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 lg:gap-1.5 text-gray-200 text-xs sm:text-sm md:text-base lg:text-sm">
                             <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
                                 <img src="/calendar.svg" alt="Calendário" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
-                                <p className="font-inter">{eventoAtual.dataInicio} - {eventoAtual.dataFim}</p>
+                                <p data-test="evento-data" className="font-inter">{eventoAtual.dataInicio} - {eventoAtual.dataFim}</p>
                             </div>
                             <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
                                 <img src="/watch.svg" alt="Relógio" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
-                                <p className="font-inter">{eventoAtual.horario}</p>
+                                <p data-test="evento-horario" className="font-inter">{eventoAtual.horario}</p>
                             </div>
                             <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
                                 <img src="/gps.svg" alt="Localização" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
-                                <p className="font-inter">{eventoAtual.local}</p>
+                                <p data-test="evento-local" className="font-inter">{eventoAtual.local}</p>
                             </div>
                             <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
                                 <img src="/category.svg" alt="Categoria" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
-                                <p className="font-inter">{eventoAtual.categoria.toUpperCase()}</p>
+                                <p data-test="evento-categoria" className="font-inter">{eventoAtual.categoria.toUpperCase()}</p>
                             </div>
                             <div className="flex flex-row gap-2 lg:gap-1.5 items-center">
                                 <img src="/tags.svg" alt="Tags" className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 shrink-0" />
-                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2" data-test="evento-tags">
                                     {eventoAtual.tags.map((tag: string, index: number) => (
                                         <span
                                             key={index}
+                                            data-test="evento-tag"
                                             className="font-inter bg-white/20 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-xs sm:text-sm md:text-base lg:text-sm"
                                         >
                                             {tag.toLowerCase()}
@@ -389,24 +392,24 @@ export default function EventosPage() {
                     <div className={`flex-1 max-h-[120px] sm:max-h-[150px] md:max-h-[180px] lg:max-h-[220px] xl:max-h-[250px] 2xl:max-h-[320px]
                             min-h-0 bg-white/10 rounded-lg 2xl:rounded-lg p-3 sm:p-4 md:p-5 2xl:p-4 overflow-hidden
                             ${eventoAtual.link ? 'mb-28 sm:mb-32 md:mb-36 lg:mb-44 xl:mb-48 2xl:mb-52' : ''}`}>
-                        <p className="text-gray-300 font-inter text-xs sm:text-sm md:text-base lg:text-lg 2xl:text-base leading-relaxed line-clamp-6 sm:line-clamp-7 md:line-clamp-8 lg:line-clamp-10 2xl:line-clamp-[15]">
+                        <p data-test="evento-descricao" className="text-gray-300 font-inter text-xs sm:text-sm md:text-base lg:text-lg 2xl:text-base leading-relaxed line-clamp-6 sm:line-clamp-7 md:line-clamp-8 lg:line-clamp-10 2xl:line-clamp-[15]">
                             {eventoAtual.descricao}
                         </p>
                     </div>
 
                     {/* QR Code - Absolute dentro da barra lateral */}
                     {eventoAtual.link && (
-                        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 lg:bottom-10 lg:right-10 xl:bottom-12 xl:right-12 2xl:bottom-10 2xl:right-10
+                        <div data-test="qr-container" className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 lg:bottom-10 lg:right-10 xl:bottom-12 xl:right-12 2xl:bottom-10 2xl:right-10
                             bg-white/10 rounded-lg 2xl:rounded-lg
                             w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48
                             p-3 sm:p-4 2xl:p-4 flex items-center justify-center 
                             shrink-0 z-10">
                             {carregandoQrCode ? (
-                                <div className="animate-spin rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 2xl:w-12 2xl:h-12 border-t-2 border-b-2 2xl:border-t-2 2xl:border-b-2 border-white"></div>
+                                <div data-test="qr-loader" className="animate-spin rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 2xl:w-12 2xl:h-12 border-t-2 border-b-2 2xl:border-t-2 2xl:border-b-2 border-white"></div>
                             ) : qrCodeAtual ? (
-                                <img src={qrCodeAtual} className="h-full w-full object-contain rounded-lg 2xl:rounded-lg" alt="QR-Code" />
+                                <img data-test="qr-image" src={qrCodeAtual} className="h-full w-full object-contain rounded-lg 2xl:rounded-lg" alt="QR-Code" />
                             ) : (
-                                <p className="text-white text-center font-inter text-xs sm:text-sm 2xl:text-sm">QR Code não disponível</p>
+                                <p data-test="qr-fallback" className="text-white text-center font-inter text-xs sm:text-sm 2xl:text-sm">QR Code não disponível</p>
                             )}
                         </div>
                     )}
