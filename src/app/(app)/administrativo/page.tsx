@@ -101,10 +101,12 @@ export default function AdministrativoPage() {
             console.log(JSON.stringify(resposta))
 
             if (!resposta || (resposta as any).code !== 200) {
-                throw new Error('Erro ao atualizar status');
+                const errorMessage = (resposta as any)?.customMessage || (resposta as any)?.message || 'Erro ao atualizar status';
+                throw new Error(errorMessage);
             }
-        } catch (error) {
+        } catch (error:any) {
             console.log(`Erro na requisição: ${JSON.stringify(error)}`)
+            alert(`Não foi possivel alterar o status de admin do Usuário: ${error.message || error}`);
             // Reverte a mudança em caso de erro
             setTodosUsuarios(todosUsuarios.map(usuario =>
                 usuario._id === id
@@ -117,7 +119,6 @@ export default function AdministrativoPage() {
                     ? { ...usuario, admin: admin as true | false }
                     : usuario
             ));
-            alert(`Não foi possivel alterar o status de admin do Usuário: ${error}`);
         } finally {
             setAtualizandoAdmin(null);
         }
