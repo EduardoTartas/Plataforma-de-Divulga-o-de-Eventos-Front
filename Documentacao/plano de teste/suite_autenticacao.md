@@ -74,7 +74,6 @@ Os testes serão executados em ambiente de desenvolvimento/homologação utiliza
 | Campo E-mail | ● Deve aceitar texto em formato de e-mail. <br> ● Deve ser obrigatório. | ● Validação de campo vazio <br> ● Validação de formato de e-mail | ● Campo validado corretamente. |
 | Envio sem E-mail | ● Ao tentar enviar sem preencher, deve exibir validação. | ● Mensagem de validação do navegador | ● Campo obrigatório validado. |
 | Envio com E-mail Inválido | ● Ao tentar enviar com formato inválido, deve exibir erro. | ● Validação de formato de e-mail | ● Formato de e-mail validado. |
-| Envio com E-mail Válido | ● Ao enviar e-mail válido, deve fazer requisição à API. <br> ● Deve exibir feedback de sucesso/erro. | ● Chamada à API de recuperação <br> ● Toast de feedback | ● Solicitação processada corretamente. |
 
 #### Navegação entre Telas
 
