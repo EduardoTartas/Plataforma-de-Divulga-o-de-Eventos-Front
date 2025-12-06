@@ -56,9 +56,10 @@ export default function AdministrativoPage() {
             const resposta = await fetchData(`/usuarios/${id}/status`, 'PATCH', undefined, { status: novoStatus });
 
             if (!resposta || (resposta as any).code !== 200) {
-                throw new Error('Erro ao atualizar status');
+                const errorMessage = (resposta as any)?.customMessage || (resposta as any)?.message || 'Erro ao atualizar status';
+                throw new Error(errorMessage);
             }
-        } catch (error:any) {
+        } catch (error: any) {
             // Reverte a mudança em caso de erro
             setTodosUsuarios(todosUsuarios.map(usuario =>
                 usuario._id === id
@@ -106,7 +107,7 @@ export default function AdministrativoPage() {
                 const errorMessage = (resposta as any)?.customMessage || (resposta as any)?.message || 'Erro ao atualizar status';
                 throw new Error(errorMessage);
             }
-        } catch (error:any) {
+        } catch (error: any) {
             console.log(`Erro na requisição: ${JSON.stringify(error)}`)
             alert(`Não foi possivel alterar o status de admin do Usuário: ${error.message || error}`);
             // Reverte a mudança em caso de erro
