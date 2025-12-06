@@ -56,7 +56,7 @@ export default function AdministrativoPage() {
             if (!resposta || (resposta as any).code !== 200) {
                 throw new Error('Erro ao atualizar status');
             }
-        } catch (error) {
+        } catch (error:any) {
             // Reverte a mudança em caso de erro
             setTodosUsuarios(todosUsuarios.map(usuario =>
                 usuario._id === id
@@ -69,7 +69,8 @@ export default function AdministrativoPage() {
                     ? { ...usuario, status: status as 'ativo' | 'inativo' }
                     : usuario
             ));
-            alert(`Não foi possivel alterar o status do Usuário: ${error}`);
+            console.log(`Erro na requisição: ${JSON.stringify(error)}`)
+            alert(`Não foi possivel alterar o status do Usuário: ${error.customMessage || error.message}`);
         } finally {
             setAtualizandoStatus(null);
         }
@@ -134,7 +135,8 @@ export default function AdministrativoPage() {
             const resposta = await fetchData(`/usuarios/${id}`, 'DELETE');
 
             if (!resposta || (resposta as any).code !== 200) {
-                throw new Error('Erro ao deletar usuário');
+                const errorMessage = (resposta as any)?.customMessage || (resposta as any)?.message || 'Erro ao deletar usuário';
+                throw new Error(errorMessage);
             }
 
             // Fecha o modal
@@ -143,8 +145,9 @@ export default function AdministrativoPage() {
 
             // Atualiza a lista de usuários
             await buscarUsuarios();
-        } catch (error) {
-            alert(`Não foi possivel deletar o Usuário: ${error}`);
+        } catch (error: any) {
+            console.log(`Erro na requisição: ${JSON.stringify(error)}`);
+            alert(`Não foi possivel deletar o Usuário: ${error.message}`);
 
             // Reverte a mudança em caso de erro
             await buscarUsuarios();
