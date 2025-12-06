@@ -22,13 +22,17 @@ A tela utiliza Next.js 15 com App Router e React 19. O gerenciamento de estado e
 | Requisito Funcional | Requisito Não Funcional |
 |---------------------|-------------------------|
 | RF001 – O sistema deve listar todos os usuários cadastrados na plataforma. | NF001 – O carregamento da lista deve ser rápido e exibir feedback de loading. |
-| RF002 – O sistema deve permitir cadastrar novos usuários informando nome e email. | NF002 – As ações de criação, exclusão e alteração devem ter feedback visual imediato (Toast). |
+| RF002 – O sistema deve permitir cadastrar novos usuários informando nome e email. | NF002 – As ações de criação, exclusão e alteração devem ter feedback visual imediato (Toast/Alert). |
 | RF003 – O sistema deve enviar email automático para o novo usuário definir senha. | NF003 – A interface deve ser responsiva para dispositivos móveis. |
 | RF004 – O sistema deve permitir alterar o status do usuário (Ativo/Inativo). | NF004 – Modais de confirmação devem ter boa usabilidade e clareza. |
 | RF005 – O sistema deve permitir conceder ou revogar permissões de administrador. | |
 | RF006 – O sistema deve permitir excluir usuários mediante confirmação. | |
 | RF007 – O sistema deve exibir informações resumidas do usuário: ID, Nome, Email, Data de Cadastro, Status e Permissão Admin. | |
 | RF008 – O sistema deve validar campos obrigatórios antes de criar usuário. | |
+| RF009 – O sistema NÃO deve permitir a exclusão do administrador padrão. | |
+| RF010 – O sistema NÃO deve permitir alterar a permissão de administrador do usuário padrão. | |
+| RF011 – O sistema NÃO deve exibir botões de ação (deletar, desativar, alterar admin) para o próprio usuário logado.  | |
+| RF012 – O sistema deve exibir badge "Você" na coluna Admin quando o usuário visualiza sua própria linha. | |
 
 ## 4 - Estratégia de Teste
 
@@ -139,14 +143,30 @@ Os testes serão executados em ambiente de desenvolvimento/homologação (QA) ut
 | Aria-label no Botão de Fechar Modal | ● Botão X do modal deve ter `aria-label="Fechar modal"`. | ● Atributo aria-label presente | ● Modal acessível. |
 | Labels Associados aos Inputs | ● Campos de formulário devem ter labels com atributo `for` associado ao `id` do input. | ● Label com for="nome" <br> ● Label com for="email" | ● Formulário acessível. |
 
+#### Proteção do Administrador Padrão
+
+| Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite |
+|-----------------|------------------------|--------------|---------------------|
+| Impedir Exclusão do Admin Padrão | ● Ao tentar deletar o administrador padrão (adminpadrao@ifro.edu.br), a API deve retornar erro 403. <br> ● Deve exibir alert: "Este usuário é o administrador padrão e não pode ser deletado." <br> ● Usuário deve permanecer na lista. | ● Resposta da API com statusCode 403 <br> ● Alert com mensagem de erro <br> ● Usuário não removido da tabela | ● Admin padrão protegido contra exclusão. |
+| Impedir Remoção de Permissão do Admin Padrão | ● Ao tentar remover permissão de admin do administrador padrão, a API deve retornar erro 403. <br> ● Deve exibir alert: "Não é permitido alterar o status de administrador do usuário padrão." <br> ● Permissão deve permanecer inalterada. | ● Resposta da API com statusCode 403 <br> ● Alert com mensagem de erro <br> ● Badge "Sim" permanece visível | ● Permissão do admin padrão protegida. |
+| Permitir Exclusão de Outros Admins | ● Usuários com permissão admin que não sejam o admin padrão devem poder ser deletados normalmente. <br> ● A exclusão deve ser bem-sucedida e o usuário removido da lista. | ● API retorna 200 <br> ● Usuário removido da tabela <br> ● Lista atualizada corretamente | ● Outros admins podem ser gerenciados normalmente. |
+
+#### Proteção Contra Auto-Modificação
+
+| Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite |
+|-----------------|------------------------|--------------|---------------------|
+| Ocultar Botões para Próprio Usuário | ● A linha correspondente ao usuário logado não deve exibir: <br> &nbsp;&nbsp;- Botão de toggle de admin <br> &nbsp;&nbsp;- Botão de desativar/ativar <br> &nbsp;&nbsp;- Botão de excluir <br> ● No lugar do toggle de admin, deve exibir badge amarelo "Você". | ● Badge "Você" visível na coluna Admin <br> ● Botões de ação ausentes na linha do usuário logado <br> ● Coluna Ações vazia para o usuário logado | ● Usuário não pode se auto-modificar. |
+| Exibir Botões para Outros Usuários | ● Linhas de outros usuários devem exibir todos os botões de ação normalmente. <br> ● Não deve exibir badge "Você" para outros usuários. | ● Botões de admin, status e excluir presentes <br> ● Badge "Você" ausente | ● Controle normal sobre outros usuários. |
+| Identificação Visual do Usuário Logado | ● O badge "Você" deve ser amarelo (bg-yellow-100 text-yellow-800). <br> ● Deve ser claramente visível e diferenciado dos badges de status admin. | ● Badge com classes CSS corretas <br> ● Texto "Você" legível | ● Identificação clara do próprio usuário. |
+
 ## 5 - Classificação de Bugs
 
 | ID | Nível de Severidade | Descrição |
 |----|---------------------|-----------|
-| 1 | Blocker | ● Lista não carrega (erro 500/400). <br> ● Não é possível criar usuários. <br> ● Exclusão não funciona ou exclui usuário errado. |
-| 2 | Grave | ● Alteração de status/admin não persiste. <br> ● Modal não abre ou não fecha. <br> ● Dados exibidos incorretamente (nome/email trocados). |
-| 3 | Moderada | ● Feedback visual (Toast) ausente. <br> ● Paginação com contagem errada. <br> ● Validação de campos não funciona. |
-| 4 | Pequena | ● Erros de alinhamento ou texto. <br> ● Labels ou tooltips incorretos. |
+| 1 | Blocker | ● Lista não carrega (erro 500/400). <br> ● Não é possível criar usuários. <br> ● Exclusão não funciona ou exclui usuário errado. <br> ● **Admin padrão pode ser deletado (violação de segurança).** <br> ● **Usuário consegue deletar a si próprio (violação de lógica).** |
+| 2 | Grave | ● Alteração de status/admin não persiste. <br> ● Modal não abre ou não fecha. <br> ● Dados exibidos incorretamente (nome/email trocados). <br> ● **Permissão de admin do usuário padrão pode ser removida.** <br> ● **Botões de ação aparecem para o próprio usuário logado.** |
+| 3 | Moderada | ● Feedback visual (Alert/Toast) ausente. <br> ● Paginação com contagem errada. <br> ● Validação de campos não funciona. <br> ● **Badge "Você" não aparece para o usuário logado.** |
+| 4 | Pequena | ● Erros de alinhamento ou texto. <br> ● Labels ou tooltips incorretos. <br> ● **Badge "Você" com cor incorreta ou pouco visível.** |
 
 ## 6 - Definição de Pronto
 
@@ -156,7 +176,7 @@ A funcionalidade "Administrativo - Gerenciamento de Usuários" estará pronta qu
 
 ## Anexo: Resumo dos Testes Automatizados (Cypress)
 
-**Total de Testes Implementados:** 48
+**Total de Testes Implementados:** 58
 
 ### Categorias Cobertas:
 
@@ -190,6 +210,28 @@ A funcionalidade "Administrativo - Gerenciamento de Usuários" estará pronta qu
 10. **Acessibilidade** (3 testes)
     - Atributos title, aria-label, labels associados.
 
+11. **Proteção do Admin Padrão** (3 testes)
+    - Impedir exclusão do admin padrão, impedir remoção de permissão, permitir exclusão de outros admins.
+
+12. **Proteção Contra Auto-Modificação** (7 testes)
+    - Ocultar botões para próprio usuário, exibir botões para outros, identificação visual com badge "Você", validação de estilo do badge, verificação de coluna de ações vazia.
+
 **Ambiente de Execução:** QA (https://ruan-silva-3000.code.fslab.dev)
 
-**Status:** ✅ Todos os 48 testes passando
+**Status:** ✅ Todos os 56 testes implementados
+
+### Novidades na Última Atualização:
+
+#### 🔒 Proteção do Administrador Padrão
+A aplicação agora impede que o administrador padrão seja deletado ou tenha suas permissões de administrador removidas. Os testes validam:
+- Tentativa de exclusão retorna erro 403 com mensagem clara
+- Tentativa de remoção de permissão retorna erro 403
+- Outros administradores podem ser gerenciados normalmente
+
+#### 👤 Proteção Contra Auto-Modificação
+Usuários não podem mais modificar seus próprios dados. A interface oculta automaticamente os botões de ação (deletar, desativar, alterar admin) para o usuário logado. Os testes validam:
+- Badge "Você" é exibido no lugar do toggle de admin
+- Botões de ação não aparecem na linha do usuário logado
+- Outros usuários têm botões normalmente visíveis
+
+**Arquivo de Fixture Adicional:** `usuarios_com_admin_padrao.json` (contém cenário com admin padrão para testes específicos)
