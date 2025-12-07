@@ -23,7 +23,7 @@ Requisito Funcional | Requisito Não Funcional
 -----------|--------
 RF001 – O sistema deve listar apenas os eventos criados pelo usuário logado (ou todos se for admin, dependendo da regra). | NF001 – O carregamento da lista deve ser rápido e exibir feedback de loading (skeleton).
 RF002 – O sistema deve permitir buscar eventos pelo título. | NF002 – As ações de exclusão e edição devem ter feedback visual imediato (Toast).
-RF003 – O sistema deve permitir filtrar eventos por status (Ativo, Inativo, Agendado). | NF003 – A interface deve ser responsiva para dispositivos móveis.
+RF003 – O sistema deve permitir filtrar eventos por status (Ativo, Inativo). | NF003 – A interface deve ser responsiva para dispositivos móveis.
 RF004 – O sistema deve permitir a exclusão de um evento, solicitando confirmação. | 
 RF005 – O sistema deve permitir o redirecionamento para a edição de um evento.
 RF006 – O sistema deve permitir o redirecionamento para a criação de um novo evento.
