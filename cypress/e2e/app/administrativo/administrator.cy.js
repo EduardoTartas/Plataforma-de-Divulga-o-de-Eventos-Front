@@ -7,6 +7,14 @@
  * - Interações do usuário (criar, deletar, alterar status)
  * - Estados de loading e erro
  * - Paginação
+ * - Proteção do administrador padrão
+ * - Proteção contra auto-modificação
+ * 
+ * ÚLTIMA ATUALIZAÇÃO (Dez 2024):
+ * - Adicionados 10 novos testes para proteção do admin padrão e auto-modificação
+ * - Total de testes: 58 (anteriormente 48)
+ * - Novo fixture: usuarios_com_admin_padrao.json
+ * - Adicionado mock da sessão para validar ID do usuário logado
  */
 
 describe('Página Administrativa - Gerenciamento de Usuários', () => {
@@ -585,6 +593,201 @@ describe('Página Administrativa - Gerenciamento de Usuários', () => {
       cy.getByData('btn-novo-usuario').click();
       cy.get('label[for="nome"]').should('exist');
       cy.get('label[for="email"]').should('exist');
+    });
+  });
+
+  // ============================================
+  // TESTES DE PROTEÇÃO DO ADMIN PADRÃO
+  // ============================================
+  describe('Proteção do Administrador Padrão', () => {
+    beforeEach(() => {
+      cy.login();
+      cy.intercept('GET', API_USUARIOS, {
+        statusCode: 200,
+        fixture: 'usuarios_com_admin_padrao.json'
+      }).as('getUsuarios');
+      cy.visit(`${BASE_URL}/administrativo`);
+      cy.wait('@getUsuarios');
+    });
+
+    it('Não deve permitir deletar o administrador padrão', () => {
+      cy.intercept('DELETE', '**/usuarios/670000000000000000000002', {
+        statusCode: 403,
+        body: {
+          error: true,
+          code: 403,
+          message: 'Este usuário é o administrador padrão e não pode ser deletado.',
+          data: null,
+          errors: []
+        }
+      }).as('deleteAdminPadrao');
+
+      // Tenta deletar o admin padrão (segundo usuário)
+      cy.get('tbody tr').eq(1).find('button[title="Excluir usuário"]').click();
+      cy.getByData('btn-confirmar-deletar').click();
+
+      cy.wait('@deleteAdminPadrao');
+      
+      // Verifica que o alert foi exibido com a mensagem
+      cy.on('window:alert', (text) => {
+        expect(text).to.contains('Este usuário é o administrador padrão e não pode ser deletado');
+      });
+    });
+
+    it('Não deve permitir remover permissão de admin do administrador padrão', () => {
+      cy.intercept('PATCH', '**/usuarios/670000000000000000000002/admin', {
+        statusCode: 403,
+        body: {
+          error: true,
+          code: 403,
+          message: 'Não é permitido alterar o status de administrador do usuário padrão.',
+          data: null,
+          errors: []
+        }
+      }).as('patchAdminPadrao');
+
+      // Tenta remover admin do admin padrão (segundo usuário)
+      cy.get('tbody tr').eq(1).find('button[title="Retirar Admin"]').click();
+
+      cy.wait('@patchAdminPadrao');
+      
+      // Verifica que o alert foi exibido com a mensagem
+      cy.on('window:alert', (text) => {
+        expect(text).to.contains('Não é permitido alterar o status de administrador do usuário padrão');
+      });
+    });
+
+    it('Deve permitir deletar outros usuários admin (não padrão)', () => {
+      cy.intercept('DELETE', '**/usuarios/670000000000000000000003', {
+        statusCode: 200,
+        body: { error: false, code: 200, message: 'OK', data: null, errors: [] }
+      }).as('deleteOutroAdmin');
+
+      cy.intercept('GET', API_USUARIOS, {
+        statusCode: 200,
+        body: {
+          error: false,
+          code: 200,
+          message: 'OK',
+          data: [
+            {
+              "_id": "670000000000000000000001",
+              "nome": "Usuario Teste 1",
+              "email": "teste1@email.com",
+              "status": "ativo",
+              "admin": false,
+              "createdAt": "2024-01-01T10:00:00.000Z",
+              "updatedAt": "2024-01-01T10:00:00.000Z"
+            },
+            {
+              "_id": "670000000000000000000002",
+              "nome": "Admin Padrão",
+              "email": "adminpadrao@ifro.edu.br",
+              "status": "ativo",
+              "admin": true,
+              "createdAt": "2024-01-02T10:00:00.000Z",
+              "updatedAt": "2024-01-02T10:00:00.000Z"
+            }
+          ],
+          errors: []
+        }
+      }).as('getUsuariosRefresh');
+
+      // Deleta o terceiro usuário (outro admin)
+      cy.get('tbody tr').eq(2).find('button[title="Excluir usuário"]').click();
+      cy.getByData('btn-confirmar-deletar').click();
+
+      cy.wait('@deleteOutroAdmin');
+      cy.wait('@getUsuariosRefresh');
+      
+      // Verifica que a lista foi atualizada
+      cy.get('tbody tr').should('have.length', 2);
+    });
+  });
+
+  // ============================================
+  // TESTES DE PROTEÇÃO DO PRÓPRIO USUÁRIO
+  // ============================================
+  describe('Proteção Contra Auto-Modificação', () => {
+    beforeEach(() => {
+      // Login padrão (usuário admin@email.com com ID 670000000000000000000002)
+      cy.login();
+      
+      // Mock da sessão retornando o usuário logado
+      cy.intercept('GET', '**/api/auth/session*', {
+        statusCode: 200,
+        body: {
+          user: {
+            _id: '670000000000000000000002',
+            id: '670000000000000000000002',
+            nome: 'Usuario Admin',
+            email: 'admin@email.com',
+            admin: true,
+            status: 'ativo'
+          }
+        }
+      }).as('getSession');
+
+      cy.intercept('GET', API_USUARIOS, {
+        statusCode: 200,
+        fixture: 'usuarios_mock.json'
+      }).as('getUsuarios');
+      
+      cy.visit(`${BASE_URL}/administrativo`);
+      cy.wait('@getUsuarios');
+    });
+
+    it('Não deve exibir botões de ação para o próprio usuário logado', () => {
+      // Verifica a linha do usuário logado (segundo usuário - admin@email.com ID: 670000000000000000000002)
+      cy.get('tbody tr').eq(1).within(() => {
+        // Deve exibir badge "Você" ao invés do toggle de admin
+        cy.contains('Você').should('be.visible');
+        
+        // Não deve ter botão de toggle admin
+        cy.get('button[title*="Admin"]').should('not.exist');
+        
+        // Não deve ter botão de desativar
+        cy.get('button[title*="tivar usuário"]').should('not.exist');
+        
+        // Não deve ter botão de excluir
+        cy.get('button[title="Excluir usuário"]').should('not.exist');
+      });
+    });
+
+    it('Deve exibir botões de ação para outros usuários', () => {
+      // Verifica a linha de outro usuário (primeiro usuário - teste1@email.com)
+      cy.get('tbody tr').first().within(() => {
+        // Deve ter botão de toggle admin
+        cy.get('button[title*="Admin"]').should('exist');
+        
+        // Deve ter botão de desativar/ativar
+        cy.get('button[title*="tivar usuário"]').should('exist');
+        
+        // Deve ter botão de excluir
+        cy.get('button[title="Excluir usuário"]').should('exist');
+      });
+    });
+
+    it('Não deve ter badge "Você" para outros usuários', () => {
+      // Verifica que outros usuários não têm o badge "Você"
+      cy.get('tbody tr').first().within(() => {
+        cy.contains('Você').should('not.exist');
+      });
+    });
+
+    it('Badge "Você" deve ter estilo amarelo correto', () => {
+      cy.get('tbody tr').eq(1).within(() => {
+        cy.contains('Você')
+          .should('have.class', 'bg-yellow-100')
+          .and('have.class', 'text-yellow-800');
+      });
+    });
+
+    it('Coluna de ações deve estar vazia para o próprio usuário', () => {
+      // Verifica que a célula de ações do usuário logado não tem botões
+      cy.get('tbody tr').eq(1).find('td').eq(5).within(() => {
+        cy.get('button').should('have.length', 0);
+      });
     });
   });
 });

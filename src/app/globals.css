@@ -225,6 +225,24 @@
   .scrollbar-minimal::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.4);
   }
+
+  @keyframes borderFlow {
+    0% {
+      border-color: #a78bfa;
+    }
+    50% {
+      border-color: #7c3aed;
+    }
+    100% {
+      border-color: #a78bfa;
+    }
+  }
+
+  .animated-border {
+    border: 2px solid;
+    border-radius: 9999px;
+    animation: borderFlow 2s ease-in-out infinite;
+  }
 }
 
 body {

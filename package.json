@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "NEXT_PUBLIC_AMBIENTE=production next start",
     "build:prod": "cross-env NEXT_PUBLIC_AMBIENTE=production next build --turbopack",
-    "start:prod": "cross-env NODE_ENV=production next start -p 3001",
+    "start:prod": "cross-env NODE_ENV=production next start",
     "lint": "eslint"
   },
   "dependencies": {
