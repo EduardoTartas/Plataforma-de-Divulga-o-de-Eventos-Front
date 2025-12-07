@@ -21,7 +21,7 @@ describe("Tela de Login", () => {
     cy.getByData('login-card').should("exist");
     cy.getByData('login-logo').should("exist");
     cy.getByData('login-title').should("contain", "Entrar");
-    cy.getByData('login-subtitle').should("contain", "Acesse sua conta");
+    cy.getByData('login-subtitle').should("contain", "Acesse sua conta para continuar");
     cy.getByData('login-form').should("exist");
 
     cy.getByData('input-email').should("exist");
@@ -29,13 +29,12 @@ describe("Tela de Login", () => {
     cy.getByData('checkbox-remember').should("exist");
 
     cy.getByData('btn-entrar').should("exist");
-    cy.getByData('link-cadastro').should("exist");
     cy.getByData('link-recuperar').should("exist");
   });
 
-  it("deve navegar para a página de cadastro", () => {
-    cy.getByData('link-cadastro').click();
-    cy.url({ timeout: 8000 }).should("include", "/cadastro");
+  it("deve navegar para a página de recuperação de senha", () => {
+    cy.getByData('link-recuperar').click();
+    cy.url({ timeout: 8000 }).should("include", "/recuperar_senha");
   });
 
   it("deve preencher email, senha e remember", () => {
@@ -62,8 +61,15 @@ describe("Tela de Login", () => {
 
     cy.url({ timeout: 10000 }).should("include", "/meus_eventos");
 
-    // verificar que o usuário está autenticado
-    cy.getCookie("next-auth.session-token").should("exist");
+    // verificar que o usuário está autenticado (cookie varia conforme ambiente HTTP/HTTPS)
+    cy.getCookie("next-auth.session-token").then((cookie) => {
+      if (!cookie) {
+        // Em HTTPS, o NextAuth usa prefixo __Secure-
+        cy.getCookie("__Secure-next-auth.session-token").should("exist");
+      } else {
+        expect(cookie).to.exist;
+      }
+    });
   });
 
 });
