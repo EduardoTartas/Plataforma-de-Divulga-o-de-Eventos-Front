@@ -18,7 +18,7 @@ export function useEventosTotem() {
       );
     },
     staleTime: 1000 * 60 * 5, // 5 minutos
-    refetchInterval: 1000 * 1800, // Atualiza automaticamente a cada 30 minutos
+    refetchInterval: 1000 * 60 * 5, // Atualiza automaticamente a cada 5 minutos
     refetchOnWindowFocus: false,
   });
 
